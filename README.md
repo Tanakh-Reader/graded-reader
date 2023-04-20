@@ -4,8 +4,8 @@
 <!--
 [![Contributors][contributors-shield]][contributors-url]
 [![Forks][forks-shield]][forks-url]
-[![Stargazers][stars-shield]][stars-url] -->
-[![Issues][issues-shield]][issues-url]
+[![Stargazers][stars-shield]][stars-url]
+[![Issues][issues-shield]][issues-url] -->
 [![MIT License][license-shield]][license-url]
 [![LinkedIn][linkedin-shield]][linkedin-url]
 
@@ -14,11 +14,11 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/Tanakh-Reader/graded-reader">
+  <a href="https://github.com/Tanakh-Reader/tanakh-reader">
     <img src="https://github.com/Tanakh-Reader/tanakh-reader/blob/revamped-onion-architecture/logo/logo.png" alt="Logo" width="160" height="160">
   </a>
 
-  <h3 align="center">Graded Hebrew Reader</h3>
+  <h3 align="center">Hebrew Graded Reader</h3>
 
   <p align="center">Assessing the readability of Hebrew pericopes</p>
 </div>
@@ -56,7 +56,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<a href="https://github.com/Tanakh-Reader/tanakh-reader">
+<a href="https://github.com/Tanakh-Reader/graded-reader">
     <img src="https://github.com/Tanakh-Reader/graded-reader/blob/main/graded-reader.png" alt="Logo" width="400">
 </a>
 
