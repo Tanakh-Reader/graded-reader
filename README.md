@@ -56,7 +56,7 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-<a href="https://github.com/Tanakh-Reader/graded-reader">
+<a href="https://raw.githubusercontent.com/Tanakh-Reader/graded-reader/main/graded-reader.png">
     <img src="https://github.com/Tanakh-Reader/graded-reader/blob/main/graded-reader.png" alt="Logo" width="400">
 </a>
 
