@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "vanilla-app"
+version = "0.1.0"
+description = ""
+authors = ["sethbam9 <54952081+sethbam9@users.noreply.github.com>"]
+readme = "README.md"
+packages = [{include = "vanilla_app"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+django = "4.1.4"
+text-fabric = "11.3.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
