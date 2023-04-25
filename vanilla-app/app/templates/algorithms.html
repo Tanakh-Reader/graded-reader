@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block title %}Algorithms Page{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-10">
+  <h1 class="text-4xl font-bold mb-8">Let's Build!</h1>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="dropdown-container">
+      <h2 class="text-lg font-bold mb-2">Frequency Heuristic</h2>
+      <select id="dropdown1" class="border border-gray-400 rounded px-2 py-1">
+        {% for obj in objects %}
+        <option value="{{ obj.id }}" data-definition="{{ obj.definition }}">{{ obj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="dropdown-container">
+      <h2 class="text-lg font-bold mb-2">Custom Heuristic</h2>
+      <select id="dropdown2" class="border border-gray-400 rounded px-2 py-1">
+        {% for obj in objects %}
+        <option value="{{ obj.id }}" data-definition="{{ obj.definition }}">{{ obj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="dropdown-container">
+      <h2 class="text-lg font-bold mb-2">Title</h2>
+      <select id="dropdown3" class="border border-gray-400 rounded px-2 py-1">
+        {% for obj in objects %}
+        <option value="{{ obj.id }}" data-definition="{{ obj.definition }}">{{ obj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+  <div id="definition" class="bg-gray-100 rounded-md p-4 mt-8"></div>
+  <button id="generateBtn" class="bg-blue-500 text-white py-2 px-4 rounded mt-8 hover:bg-blue-600 transition duration-200">Generate passages</button>
+</div>
+
+<script>
+  const dropdowns = document.querySelectorAll('select');
+  const definitionDiv = document.querySelector('#definition');
+
+  dropdowns.forEach((dropdown) => {
+    dropdown.addEventListener('change', (event) => {
+      const selectedOption = event.target.selectedOptions[0];
+      const definition = selectedOption.dataset.definition;
+      definitionDiv.textContent = definition;
+    });
+  });
+</script>
+{% endblock %}

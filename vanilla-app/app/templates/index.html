@@ -1,0 +1,72 @@
+{% extends 'layout.html' %}
+
+{% block title %}Index Page{% endblock %}
+
+{% block content %}
+<body>
+    <h1 class="text-2xl font-bold">Search for a Passage</h1>
+
+    <form method="post" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label class="block text-yellow-900 font-bold mb-2" for="book_number">
+                Book Number<span class="text-red-500">*</span>
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-yellow-900 leading-tight focus:outline-none focus:shadow-outline"
+                   id="book_number"
+                   name="bk"
+                   type="text"
+                   placeholder="Enter book number"
+                   required>
+        </div>
+        <div class="mb-4">
+            <label class="block text-yellow-900 font-bold mb-2" for="start_chapter">
+                Start Chapter<span class="text-red-500">*</span>
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-yellow-900 leading-tight focus:outline-none focus:shadow-outline"
+                   id="start_chapter"
+                   name="ch_s"
+                   type="text"
+                   placeholder="Enter start chapter"
+                   required>
+        </div>
+        <div class="mb-4">
+            <label class="block text-yellow-900 font-bold mb-2" for="start_verse">
+                Start Verse
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-yellow-900 leading-tight focus:outline-none focus:shadow-outline"
+                   id="start_verse"
+                   name="vs_s"
+                   type="text"
+                   placeholder="Enter start verse">
+        </div>
+        <div class="mb-4">
+            <label class="block text-yellow-900 font-bold mb-2" for="end_chapter">
+                End Chapter
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-yellow-900 leading-tight focus:outline-none focus:shadow-outline"
+                   id="end_chapter"
+                   name="ch_e"
+                   type="text"
+                   placeholder="Enter end chapter">
+        </div>
+        <div class="mb-4">
+            <label class="block text-yellow-900 font-bold mb-2" for="end_verse">
+                End Verse
+            </label>
+            <input class="shadow appearance-none border rounded w-full py-2 px-3 text-yellow-900 leading-tight focus:outline-none focus:shadow-outline"
+                   id="end_verse"
+                   name="vs_e"
+                   type="text"
+                   placeholder="Enter end verse">
+        </div>
+        <div class="flex items-center justify-between">
+            <button class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                    type="submit">
+                Submit
+            </button>
+        </div>
+    </form>
+
+</body>
+{% endblock %}

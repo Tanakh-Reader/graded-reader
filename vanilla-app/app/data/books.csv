@@ -1,0 +1,40 @@
+bookId,chapters,abbrOSIS,abbrLEB,bookName,bhsaName,nameHeb,tanakhSort,tanakh
+1,50,Gen,Ge,Genesis,Genesis,בראשית,1,Genesis
+2,40,Exod,Ex,Exodus,Exodus,שמות,2,Exodus
+3,27,Lev,Le,Leviticus,Leviticus,ויקרא,3,Leviticus
+4,36,Num,Nu,Numbers,Numbers,במדבר,4,Numbers
+5,34,Deut,Dt,Deuteronomy,Deuteronomy,דברים,5,Deuteronomy
+6,24,Josh,Jos,Joshua,Joshua,יהושע,6,Joshua
+7,21,Judg,Jdg,Judges,Judges,שופטים,7,Judges
+8,4,Ruth,Ru,Ruth,Ruth,רות,30,1 Samuel
+9,31,1Sam,1Sa,1 Samuel,1_Samuel,שמואל א,8,2 Samuel
+10,24,2Sam,2Sa,2 Samuel,2_Samuel,שמואל ב,9,1 Kings
+11,22,1Kgs,1Ki,1 Kings,1_Kings,מלכים א,10,2 Kings
+12,25,2Kgs,2Ki,2 Kings,2_Kings,מלכים ב,11,Isaiah
+13,29,1Chr,1Ch,1 Chronicles,1_Chronicles,דברי הימים א,38,Jeremiah
+14,36,2Chr,2Ch,2 Chronicles,2_Chronicles,דברי הימים ב,39,Ezekiel
+15,10,Ezra,Ezr,Ezra,Ezra,עזרא,36,Hosea
+16,13,Neh,Ne,Nehemiah,Nehemiah,ונחמיה,37,Joel
+17,10,Esth,Es,Esther,Esther,אסתר,34,Amos
+18,42,Job,Job,Job,Job,איוב,28,Obadiah
+19,150,Ps,Ps,Psalms,Psalms,תהלים,27,Jonah
+20,31,Prov,Pr,Proverbs,Proverbs,משלי,29,Micah
+21,12,Eccl,Ec,Ecclesiastes,Ecclesiastes,קהלת,32,Nahum
+22,8,Song,So,Song of Songs,Song_of_songs,שיר השירים,31,Habakkuk
+23,66,Isa,Is,Isaiah,Isaiah,ישעיהו,12,Zephaniah
+24,52,Jer,Je,Jeremiah,Jeremiah,ירמיהו,13,Haggai
+25,5,Lam,La,Lamentations,Lamentations,איכה,33,Zechariah
+26,48,Ezek,Eze,Ezekiel,Ezekiel,יחזקאל,14,Malachi
+27,12,Dan,Da,Daniel,Daniel,דניאל,35,Psalms
+28,14,Hos,Ho,Hosea,Hosea,הושע,15,Job
+29,3,Joel,Joe,Joel,Joel,יואל,16,Proverbs
+30,9,Amos,Am,Amos,Amos,עמוס,17,Ruth
+31,1,Obad,Ob,Obadiah,Obadiah,עובדיה,18,Song of Songs
+32,4,Jonah,Jon,Jonah,Jonah,יונה,19,Ecclesiastes
+33,7,Mic,Mic,Micah,Micah,מיכה,20,Lamentations
+34,3,Nah,Na,Nahum,Nahum,נחום,21,Esther
+35,3,Hab,Hab,Habakkuk,Habakkuk,חבקוק,22,Daniel
+36,3,Zeph,Zep,Zephaniah,Zephaniah,צפניה,23,Ezra
+37,2,Hag,Hag,Haggai,Haggai,חגי,24,Nehemiah
+38,14,Zech,Zec,Zechariah,Zechariah,זכריה,25,1 Chronicles
+39,3,Mal,Mal,Malachi,Malachi,מלאכי,26,2 Chronicles

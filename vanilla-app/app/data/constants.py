@@ -1,0 +1,3 @@
+
+# Current value in BHSA 2021 is 426590
+WORD_COUNT = 426500
