@@ -2,3 +2,4 @@
 .vscode/
 svelte-app/node_modules/
 vanilla-app/node_modules/
+vanilla-app/gradedhebrew/staticfiles/
