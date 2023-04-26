@@ -24,7 +24,7 @@ function createChapterDropdown(book) {
         chapterOption.textContent = i;
         chapterOption.classList.add('chapter-option');
         chapterOption.addEventListener('click', () => {
-            submitChapterSelection(book.number, i);
+            submitPassageSelection(book.number, i);
         });
         chapterDropdown.appendChild(chapterOption);
     }

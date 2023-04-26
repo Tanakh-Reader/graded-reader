@@ -1,5 +1,6 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load list_extras %}
 
 {% block title %}Passages Page{% endblock %}
 
@@ -7,70 +8,70 @@
 
 <div class="container mx-auto px-4">
   <h1 class="text-4xl font-bold my-8">Passages</h1>
-  <form method="get" class="mb-8">
-    <div class="flex items-center">
+  <form id="filterForm" method="get" class="mb-8">
+    <!-- Filter Passages -->
+    <div class="flex items-center mb-4">
       <label for="book" class="mr-4 font-bold">Book:</label>
       <select name="book" id="book" class="border border-gray-400 rounded px-2 py-1">
+        <option value="ALL">ALL</option>
         {% for book in books %}
-        <option value="{{ book.id }}">{{ book.name }}</option>
+        <option value="{{ book.number }}">{{ book.name }}</option>
         {% endfor %}
       </select>
-      <button type="submit" class="bg-blue-500 text-white ml-4 px-4 py-2 rounded hover:bg-blue-600 transition duration-200">Search</button>
+      <button type="button" class="bg-yellow-700 hover:bg-yellow-900 text-white ml-4 px-4 py-2 rounded"
+        onclick="filterPassages()">Search</button>
+    </div>
+    <!-- Sort Passages -->
+    <div class="flex items-center">
+      <label for="sort" class="mr-4 font-bold">Sort by:</label>
+      <select name="sort" id="sort" class="border border-gray-400 rounded px-2 py-1">
+        <option value="word_count">Word Count</option>
+        <option value="id">ID</option>
+        <option value="penalty">Penalty</option>
+      </select>
+      <label for="order" class="ml-4 mr-4 font-bold">Order:</label>
+      <select name="order" id="order" class="border border-gray-400 rounded px-2 py-1">
+        <option value="asc">Ascending</option>
+        <option value="desc">Descending</option>
+      </select>
+      <button type="button" class="bg-yellow-700 hover:bg-yellow-900 text-white ml-4 px-4 py-2 rounded"
+        onclick="sortPassages()">Sort</button>
     </div>
   </form>
-  {% if passages %}
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <!-- Passage Cards -->
+  {% if passages_loaded %}
+  <div id="passages-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     {% for passage in passages %}
-    <div class="bg-white rounded shadow-lg overflow-hidden" onclick="redirectToRead('{{ passage.reference }}')">
+    <div class="passage-card bg-white rounded shadow-lg overflow-hidden" onclick="submitPassage('{{ passage|escapejs }}')"
+      data-id="{{ passage.id }}"
+      data-book="{{ passage.book }}"
+      data-word-count="{{ passage.word_count }}" data-penalty="{{ passage.penalty }}">
       <div class="p-4">
         <h2 class="text-lg font-bold mb-2">{{ passage.reference }}</h2>
-        <p class="text-gray-700 mb-2">Weight: {{ passage.weight }}<br>Length: {{ passage.length }} words</p>
+        <p class="text-gray-700 mb-2">Weight: {{ passage.penalty }}<br>Length: {{ passage.word_count }} words</p>
       </div>
     </div>
     {% endfor %}
   </div>
+  <!-- Data not loaded content -->
   {% else %}
-  <p>No passages found.</p>
-  {% endif %}
-  {% if paginator %}
-  <nav class="mt-8">
-    <ul class="pagination flex justify-center">
-      {% if paginator.has_previous %}
-      <li class="mr-2">
-        <a class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition duration-200" href="?page={{ paginator.previous_page_number }}{% if book %}&book={{ book }}{% endif %}" aria-label="Previous">
-          <span aria-hidden="true">&laquo;</span>
-          <span class="sr-only">Previous</span>
-        </a>
-      </li>
-      {% endif %}
-      {% for page in paginator.page_range %}
-      {% if page == paginator.number %}
-      <li class="mr-2"><a class="px-4 py-2 bg-blue-500 text-white font-bold rounded transition duration-200" href="#">{{ page }}</a></li>
-      {% else %}
-      <li class="mr-2"><a class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition duration-200" href="?page={{ page }}{% if book %}&book={{ book }}{% endif %}">{{ page }}</a></li>
-      {% endif %}
-      {% endfor %}
-      {% if paginator.has_next %}
-      <li class="mr-2">
-        <a class="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition duration-200" href="?page={{ paginator.next_page_number }}{% if book %}&book={{ book }}{% endif %}" aria-label="Next">
-          <span aria-hidden="true">&raquo;</span>
-          <span class="sr-only">Next</span>
-        </a>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
-  {% endif %}
-</div>
 
-<script>
+  <h1 class="text-2xl font-bold">Data not yet initialized... loading passages into database</h1><br />
+  <p>This page should reload in <b>2–3</b> minutes ⏳</p>
+  <p>Otherwise, please reload yourself.</p>
+  <div class="w-full h-full flex items-center justify-center mt-12 my-4">
+    <img src="{% static 'loading.gif' %}" alt="Loading" class="w-14 h-14">
+  </div>
 
-  function redirectToRead(reference) {
-    const book = reference.split(':')[0];
-    const chapter = reference.split(':')[1];
-    const url = "{% url 'read' %}?reference=" + book + "," + 1;
-    window.location = url;
-  }
-  
+  <script>
+    checkDataReady('PASSAGES');
   </script>
-{% endblock %}
+
+  {% endif %}
+
+  <script>
+    const books = contextToJson('{{ books|escapejs }}');
+  </script>
+  <script src="{% static 'js/passages.js' %}"></script>
+
+  {% endblock %}

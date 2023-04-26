@@ -1,0 +1,45 @@
+ :root {
+     --main-color: #795548;
+     --secondary-color: #5D4037;
+     --bg-color: #E8D5B7;
+     --font-title: 'Cinzel', serif;
+     --font-body: 'Alef', serif;
+ }
+
+ body {
+     background-color: var(--bg-color);
+     font-family: var(--font-body);
+ }
+
+ h1,
+ h2 {
+     font-family: var(--font-title);
+ }
+
+ a {
+     color: var(--main-color);
+ }
+
+ a:hover {
+     color: var(--secondary-color);
+ }
+
+ i {
+     font-family: 'FontAwesome' !important;
+ }
+
+ /* body {
+    background-color: #f7ecd7;
+    font-family: 'Cardo', serif; */
+ /* font-family: 'Alef', sans-serif; */
+ /* font-family: 'Frank Ruhl Libre', serif; */
+ /* --font-title: 'Cinzel', serif;
+    --font-body: 'Cormorant Garamond', serif; */
+ /* } */
+
+ /* 
+header,
+footer {
+    background-color: #8b6c42;
+}
+ */

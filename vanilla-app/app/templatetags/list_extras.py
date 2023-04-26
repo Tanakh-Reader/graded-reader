@@ -4,6 +4,7 @@ register = template.Library()
 
 # https://stackoverflow.com/questions/32795907/how-to-access-the-next-and-the-previous-elements-in-a-django-template-forloop
 
+
 @register.filter
 def prev(some_list, current_index):
     """
@@ -11,9 +12,10 @@ def prev(some_list, current_index):
     Otherwise returns an empty string.
     """
     try:
-        return some_list[int(current_index) - 1] # access the previous element
+        return some_list[int(current_index) - 1]  # access the previous element
     except:
-        return '' # return empty string in case of exception
+        return ""  # return empty string in case of exception
+
 
 @register.filter
 def next(some_list, current_index):
@@ -22,6 +24,11 @@ def next(some_list, current_index):
     Otherwise returns an empty string.
     """
     try:
-        return some_list[int(current_index) + 1] # access the next element
+        return some_list[int(current_index) + 1]  # access the next element
     except:
-        return '' # return empty string in case of exception
+        return ""  # return empty string in case of exception
+
+
+@register.filter
+def custom_range(start, end):
+    return range(start, end)

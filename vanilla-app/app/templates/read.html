@@ -18,34 +18,33 @@
   <!-- Passage header content -->
   <!-- <div class="relative mb-8"> -->
   <div class="flex justify-center items-center mb-8">
-  <!-- h1 class="text-2xl font-bold inline"></h1> -->
-  <!-- <span class="mr-4">
+    <!-- h1 class="text-2xl font-bold inline"></h1> -->
+    <!-- <span class="mr-4">
     <button id="bookSelectionButton" class="bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">
       <i class="fa-regular fa-book"></i>
     </button>
   </span> -->
-  <button id="prevButton"
-  onclick="changeChapter(-1, '{{ reference }}')"
-    class="mr-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Prev</button>
-    <span><button id="bookSelectionButton" class="bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">{{ reference }}</button>
-    {% include 'widgets/chapter_selector.html' %}
-  </span>
-  <button id="nextButton"
-  onclick="changeChapter(1, '{{ reference }}')"
-    class="ml-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Next</button>
+    <button id="prevButton" onclick="changeChapter(-1, '{{ reference }}')"
+      class="mr-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Prev</button>
+    <span><button id="bookSelectionButton"
+        class="bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">{{ reference }}</button>
+      {% include 'widgets/chapter_selector.html' %}
+    </span>
+    <button id="nextButton" onclick="changeChapter(1, '{{ reference }}')"
+      class="ml-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Next</button>
     <button id="toggleVerseNumbers" onclick="toggleVerseNumbers()"
       class="ml-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Verses</button>
   </div>
 
   <!-- Passage text content -->
-  <div id="paragraph" dir="rtl" style="max-width: calc(100% - 210px);">
+  <div id="paragraph" dir="rtl" >
     {% for word in words %}
     {% with previous_word=words|prev:forloop.counter0 %}
     {% if forloop.first or word.verse != previous_word.verse %}
     <span class="verse-number" style="display:inline">{{ word.verse }}</span>
     {% endif %}
     {% endwith %}
-    <span id="{{ word.id }}" style="font-size:larger" class="word" data-penalty="{{ word.penalty }}"
+    <span id="{{ word.id }}" style="font-size:larger" class="word" data-penalty="{{ word.penalty }}" data-penalty="{{ word.penalty }}"
       onclick="showWordAttributes('{{ word|escapejs }}')">{{ word.text }}{{ word.trailer }}</span>
     {% endfor %}
   </div>
@@ -61,7 +60,7 @@
   </div>
 
   <script>
-    checkDataReady();
+    checkDataReady('WORDS');
   </script>
   {% endif %}
 </body>

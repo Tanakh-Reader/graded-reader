@@ -1,17 +1,16 @@
 from tf.fabric import Fabric
 from ..utils.timer import timer
 
-class BHSAProvider:
 
+class BHSAProvider:
     path = "../bhsa/tf/2021"
-    features = 'sp prs gn nu vt vs prs_ps prs_gn prs_nu gloss freq_lex freq_occ'
+    features = "sp prs gn nu vt vs prs_ps prs_gn prs_nu gloss freq_lex freq_occ"
     api = None
 
     def get_api(self):
-
         if self.api:
             return self.api
-    
+
         print("\nInitializing Text Fabric API")
         timer.start()
 
@@ -21,8 +20,8 @@ class BHSAProvider:
 
         timer.end()
         print(f"TF API LOADED\n")
-        
-        return  self.api 
+
+        return self.api
+
 
 bhsa_provider = BHSAProvider()
-
