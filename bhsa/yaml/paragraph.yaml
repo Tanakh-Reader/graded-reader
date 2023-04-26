@@ -1,7 +1,0 @@
-pargr:
-  desc: 🆗 hierarchical paragraph number
-  eg: "1; 1.2; 1.2.3.4; ..."
-instruction:
-  desc: ❓ change the set of actors
-  eg: ".e; d.; ..; .#; .q; ..."
-
