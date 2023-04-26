@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "copy-webpack-plugin": "^11.0.0",
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-postcss": "^4.0.2",
-    "svelte-loader": "^3.1.7"
-  }
-}
