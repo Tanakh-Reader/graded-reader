@@ -73,8 +73,9 @@ To get a local copy up and running, follow these steps:
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.9 or higher
 - pip
+- npm
 
 ### Installation
 
@@ -86,11 +87,19 @@ To get a local copy up and running, follow these steps:
    ```sh
    cd vanilla-app
    ```
-3. Install required Python packages
+3. Install required npm packages
+   ```sh
+   npm install
+   ```
+* Note: if you plan to make changes to app/static/css/tailwind.css, run:
+  ```sh
+  npm run watch
+  ```
+4. Install required Python packages
    ```sh
    poetry install --no-root
    ```
-4. Run the app with poetry 
+5. Run the app with poetry 
    ```sh
    poetry run python3 manage.py runserver
    ```

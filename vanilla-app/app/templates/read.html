@@ -20,20 +20,20 @@
   <div class="flex justify-center items-center mb-8">
     <!-- h1 class="text-2xl font-bold inline"></h1> -->
     <!-- <span class="mr-4">
-    <button id="bookSelectionButton" class="bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">
+    <button id="bookSelectionButton" class="btn">
       <i class="fa-regular fa-book"></i>
     </button>
   </span> -->
     <button id="prevButton" onclick="changeChapter(-1, '{{ reference }}')"
-      class="mr-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Prev</button>
+      class="mr-4 btn">Prev</button>
     <span><button id="bookSelectionButton"
-        class="bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">{{ reference }}</button>
+        class="btn">{{ reference }}</button>
       {% include 'widgets/chapter_selector.html' %}
     </span>
     <button id="nextButton" onclick="changeChapter(1, '{{ reference }}')"
-      class="ml-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Next</button>
+      class="ml-4 btn">Next</button>
     <button id="toggleVerseNumbers" onclick="toggleVerseNumbers()"
-      class="ml-4 bg-yellow-700 hover:bg-yellow-900 text-white font-bold py-2 px-4 rounded">Verses</button>
+      class="ml-4 btn">Verses</button>
   </div>
 
   <!-- Passage text content -->

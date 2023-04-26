@@ -18,7 +18,7 @@
         <option value="{{ book.number }}">{{ book.name }}</option>
         {% endfor %}
       </select>
-      <button type="button" class="bg-yellow-700 hover:bg-yellow-900 text-white ml-4 px-4 py-2 rounded"
+      <button type="button" class="btn ml-4"
         onclick="filterPassages()">Search</button>
     </div>
     <!-- Sort Passages -->
@@ -34,7 +34,7 @@
         <option value="asc">Ascending</option>
         <option value="desc">Descending</option>
       </select>
-      <button type="button" class="bg-yellow-700 hover:bg-yellow-900 text-white ml-4 px-4 py-2 rounded"
+      <button type="button" class="btn ml-4"
         onclick="sortPassages()">Sort</button>
     </div>
   </form>

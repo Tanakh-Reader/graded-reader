@@ -8,13 +8,13 @@
 <form class="mb-4" method="post" action="{% url 'delete_words' %}" id="deleteWordsForm">
     {% csrf_token %}
     <button
-        class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        class="btn"
         type="button" onclick="confirmDeleteWords()">Delete All Words</button>
 </form>
 <form method="post" action="{% url 'delete_passages' %}" id="deletePassagesForm">
     {% csrf_token %}
     <button
-        class="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+        class="btn"
         type="button" onclick="confirmDeletePassages()">Delete All Passages</button>
 </form>
 

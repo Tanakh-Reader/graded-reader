@@ -1,9 +1,27 @@
+/* :root {
+    --main-color: maroon;
+    --secondary-color: firebrick;
+    --bg-color: bisque;
+    --bg-secondary-color: peru;
+    --font-title: 'Cormorant Garamond', serif;
+    --font-body: 'Cardo', serif;
+} */
+
+/* :root {
+    --main-color: darkslategray;
+    --secondary-color: gray;
+    --bg-color: seashell;
+    --bg-secondary-color: lightgray;
+    --font-title: 'Cormorant Garamond', serif;
+    --font-body: 'Cardo', serif;
+} */
  :root {
-     --main-color: #795548;
-     --secondary-color: #5D4037;
-     --bg-color: #E8D5B7;
-     --font-title: 'Cinzel', serif;
-     --font-body: 'Alef', serif;
+     --main-color: saddlebrown;
+     --secondary-color: sienna;
+     --bg-color: antiquewhite;
+     --bg-secondary-color: burlywood;
+     --font-title: 'Cormorant Garamond', serif;
+     --font-body: 'Cardo', serif;
  }
 
  body {
@@ -28,18 +46,17 @@
      font-family: 'FontAwesome' !important;
  }
 
- /* body {
-    background-color: #f7ecd7;
-    font-family: 'Cardo', serif; */
- /* font-family: 'Alef', sans-serif; */
- /* font-family: 'Frank Ruhl Libre', serif; */
- /* --font-title: 'Cinzel', serif;
-    --font-body: 'Cormorant Garamond', serif; */
- /* } */
+ header,
+ footer {
+     background-color: var(--bg-secondary-color);
+ }
 
- /* 
-header,
-footer {
-    background-color: #8b6c42;
-}
- */
+/* 
+FONTS
+'Cardo', serif; 
+'Alef', sans-serif; 
+Frank Ruhl Libre', serif;
+'Cinzel', serif; 
+'Cormorant Garamond', serif;  
+*/
+
