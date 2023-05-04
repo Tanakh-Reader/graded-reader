@@ -1,6 +1,12 @@
 {% extends 'layout.html' %}
+{% load static %}
+
 
 {% block title %}Index Page{% endblock %}
+
+{% block styles %}
+<!-- <link rel="stylesheet" href="{% static 'css/index.css' %}"> -->
+{% endblock %}
 
 {% block content %}
 <body>
@@ -69,4 +75,7 @@
     </form>
 
 </body>
+
+<script src="{% static 'js/index.js' %}"></script>
+
 {% endblock %}

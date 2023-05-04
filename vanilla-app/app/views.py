@@ -1,9 +1,11 @@
 # https://dev.to/besil/my-django-svelte-setup-for-fullstack-development-3an8
 import json
 from django.core.paginator import Paginator
-from django.http import HttpResponseNotAllowed, JsonResponse, Http404
+from django.http import HttpResponseNotAllowed, JsonResponse, Http404, HttpRequest
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.cache import cache_page
+
 from django.views.decorators.csrf import csrf_exempt
 from django.template.loader import render_to_string
 
@@ -12,117 +14,54 @@ from django.shortcuts import render
 
 from django.shortcuts import redirect
 
-from .providers.books import book_provider
+from .providers.book_provider import book_provider
+from .providers.word_provider import word_provider
+from .providers.passage_provider import passage_provider
+
 from .models import Passage, Word
 from .data import ranks
-from .utils.init_data import word_loader, passage_loader
+from .utils import references
 
-
-def index(request):
+def index(request: HttpRequest):
     context = {}
-
-    if request.method == "POST":
-        reference = parse_reference(request.POST)
-        return read(request, reference)
-    else:
-        return render(request, "index.html", context)
+    return render(request, "index.html", context)
 
 
-# Takes a request.POST or .GET and returns a reference.
-def parse_reference(data_dict):
-    reference = []
-    params = "bk ch_s vs_s ch_e vs_e".split()
+# TODO SEE: https://docs.djangoproject.com/en/4.2/topics/cache/
+# AND https://docs.djangoproject.com/en/4.2/topics/http/sessions/
+@cache_page(60 * 15)
+def read(request: HttpRequest):
+    params = references.parse_reference(request.GET)
+    # Display Genesis 1 if the reference isn't specified.
+    reference = params if params[0] else [1]*2 + [None]*3
 
-    for param in params:
-        data = data_dict.get(param)
-        if data:
-            reference.append(int(data))
-        else:
-            reference.append(None)
-
-    return reference if len(reference) > 0 else None
-
-
-def read(request, reference=(1, 1, None, None, None)):
-    params = parse_reference(request.GET)
-    reference = params if params[0] else reference
-
-    words_loaded = word_loader.load_words_if_not_added()
-    words = get_words_from_reference(reference)
-    books = book_provider.get_book_instances()
-    reference_string = get_reference_string(words)
+    words_loaded = word_provider.load_words_if_not_added()
+    words = word_provider.get_words_from_reference(reference)
+    books = book_provider.get_all_book_instances(as_json=True)
+    reference_string = references.get_reference_string(words)
 
     context = {
-        "words": [word.to_dict() for word in words],
+        "words": word_provider.words_to_json(words),
         "reference": reference_string,
-        "books": [vars(book) for book in books],
+        "books": books,
         "words_loaded": words_loaded,
     }
     return render(request, "read.html", context)
 
-
-def get_reference_string(words):
-    if len(words) == 0:
-        return "Choose a passage"
-
-    book = book_provider.get_name(words[0].book)
-
-    ref_string = f"{book} {words[0].chapter}:{words[0].verse}"
-    if words[0].chapter != words[-1].chapter:
-        ref_string += f"–{words[-1].chapter}:{words[-1].verse}"
-    else:
-        ref_string += f"–{words[-1].verse}"
-
-    return ref_string
-
-
-def get_words_from_reference(reference):
-    book, start_chapter, start_verse, end_chapter, end_verse = reference
-
-    if not end_chapter:
-        end_chapter = start_chapter
-    if not start_verse:
-        start_verse = 1
-    if not end_verse:
-        end_verse = 176  # longest chapter in Scripture
-
-    # Load words from DB
-    all_words = Word.objects.filter(
-        book=book,
-        chapter__gte=start_chapter,
-        chapter__lte=end_chapter,
-    )
-
-    referenced_words = []
-
-    # GpT mAgIc
-    for word in all_words:
-        if (  # multi-chapter solution
-            (word.chapter == start_chapter and word.verse >= start_verse)
-            or (word.chapter == end_chapter and word.verse <= end_verse)
-            or (start_chapter < word.chapter < end_chapter)
-        ) and (end_chapter > start_chapter):
-            referenced_words.append(word)
-        elif start_verse <= word.verse <= end_verse:
-            referenced_words.append(word)
-
-    return referenced_words
-
-
-def passages(request):
+@cache_page(60 * 15)
+def passages(request: HttpRequest):
     book = request.GET.get("book")
     # book_index = BOOK_TO_INDEX.get(book)
 
-    passages_loaded = passage_loader.load_passages_if_not_added()
-    passages = Passage.objects.all()
-    passages = [passage.to_dict() for passage in passages]
-    books = book_provider.get_book_instances()
+    passages_loaded = passage_provider.load_passages_if_not_added()
+    passages = passage_provider.get_all_passages(as_json=True)
+    books = book_provider.get_all_book_instances(as_json=True)
     # paginator = Paginator(passages, 10)  # Show 10 objects per page
     # page_number = request.GET.get("page")
     # page_obj = paginator.get_page(page_number)
 
     context = {
-        "books": [vars(book) for book in books],
+        "books": books,
         "passages": passages,
         # "paginator": paginator,
         "book": book,
@@ -131,7 +70,7 @@ def passages(request):
     return render(request, "passages.html", context)
 
 
-def algorithms(request):
+def algorithms(request: HttpRequest):
     all_ranks = ranks.LexRanks.all_ranks
     for r in all_ranks:
         r.definition = r.get_rank_dict()
@@ -139,42 +78,41 @@ def algorithms(request):
     return render(request, "algorithms.html", context)
 
 
-def settings(request):
+def settings(request: HttpRequest):
     context = {}
 
     return render(request, "settings.html", context)
 
 
-def check_data_ready(request):
+
+
+def get_books(request: HttpRequest):
+    pass
+
+def check_data_ready(request: HttpRequest):
     data_source = request.GET.get("data_source")
     if data_source == "WORDS":
-        data_loaded = word_loader.load_words_if_not_added()
+        data_loaded = word_provider.load_words_if_not_added()
     elif data_source == "PASSAGES":
-        data_loaded = passage_loader.load_passages_if_not_added()
+        data_loaded = passage_provider.load_passages_if_not_added()
     return JsonResponse({"data_loaded": data_loaded})
 
 
-def get_books(request):
-    pass
-
-
 @require_POST
-def delete_words(request):
-    Word.objects.all().delete()
-    word_loader.reset()
+def delete_words(request: HttpRequest):
+    word_provider.delete_all()
     return redirect("settings")  # Redirect to the settings page
 
 
 @require_POST
-def delete_passages(request):
-    Passage.objects.all().delete()
-    passage_loader.reset()
+def delete_passages(request: HttpRequest):
+    passage_provider.delete_all_passages()
     return redirect("settings")  # Redirect to the settings page
 
 
 @csrf_exempt
 @require_POST
-def render_chapter(request):
+def render_chapter(request: HttpRequest):
     if request.method == "POST":
         data: dict = json.loads(request.body)
         book_number = data.get("book_number")

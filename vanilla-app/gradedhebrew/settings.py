@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-i!1fts)u1(6)aspydawx8udgg&&va6=d@77h#y1rpwoc1b6c&d"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 # DEBUG = "DJANGO_DEBUG" in os.environ and os.environ["DJANGO_DEBUG"] == "ON"
 
 
@@ -126,7 +126,9 @@ USE_TZ = True
 STATIC_ROOT = os.path.join(BASE_DIR, "gradedhebrew", "staticfiles")
 STATIC_URL = "/static/"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "app", "static"),)
+STATICFILES_DIRS = [
+    # os.path.join(BASE_DIR, "APP", "FOLDER"),
+]
 
 
 # Default primary key field type

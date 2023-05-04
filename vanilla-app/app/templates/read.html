@@ -1,10 +1,8 @@
 {% extends 'layout.html' %}
-{% include 'chapter_selector.html'}
-{% load list_extras %}
 {% load static %}
 
-
 {% block title %}Read Page{% endblock %}
+
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/read.css' %}">
 {% endblock %}
@@ -37,17 +35,7 @@
   </div>
 
   <!-- Passage text content -->
-  <div id="paragraph" dir="rtl" >
-    {% for word in words %}
-    {% with previous_word=words|prev:forloop.counter0 %}
-    {% if forloop.first or word.verse != previous_word.verse %}
-    <span class="verse-number" style="display:inline">{{ word.verse }}</span>
-    {% endif %}
-    {% endwith %}
-    <span id="{{ word.id }}" style="font-size:larger" class="word" data-penalty="{{ word.penalty }}" data-penalty="{{ word.penalty }}"
-      onclick="showWordAttributes('{{ word|escapejs }}')">{{ word.text }}{{ word.trailer }}</span>
-    {% endfor %}
-  </div>
+  {% include 'widgets/hebrew_text.html' %}
 
   <!-- Data not loaded content -->
   {% else %}

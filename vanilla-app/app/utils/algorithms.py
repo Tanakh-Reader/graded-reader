@@ -1,6 +1,6 @@
 import math
 
-from ..providers.tf_api import bhsa_provider
+from ..providers.bhsa_provider import bhsa_provider
 from ..data.ranks import Classify, Rank, LexRanks
 
 

@@ -1,22 +1,3 @@
-.word {
-    cursor: pointer;
-    font-family: 'Frank Ruhl Libre, serif', 
-    /* margin-left: -0.25em;  */
-  }
-
-  .selected {
-    font-weight: bold;
-  }
-
-  .verse-number {
-    font-weight: bold;
-    font-size: larger
-  }
-
-  .chapter-grid {
-    @apply -mr-1;
-  }
-
   .book-entry {
     overflow: visible !important;
   }
@@ -32,11 +13,6 @@
     background-color: white;
     border: 1px solid rgba(0, 0, 0, 0.1);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-
-  #paragraph span {
-    margin: 0;
-    padding: 0;
   }
 
   #attributes-div {

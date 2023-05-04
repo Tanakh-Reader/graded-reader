@@ -1,10 +1,11 @@
 import math
 
-from .timer import timer
-from ..providers.tf_api import bhsa_provider
-from ..providers.books import book_provider
+from ..utils.timer import timer
+from ..utils.algorithms import word_penalty
 from ..models import Word
-from .algorithms import word_penalty
+
+from .bhsa_provider import bhsa_provider
+from .book_provider import book_provider
 
 BATCH_SIZE = 2500  # uploading words to the database
 # BATCH 1000: 62 seconds

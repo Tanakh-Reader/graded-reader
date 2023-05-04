@@ -49,27 +49,6 @@ function selectBook(book) {
     createChapterDropdown(book);
 }
 
-// function submitChapterSelection(bookNumber, chapterNumber) {
-//     const data = {
-//         book_number: bookNumber,
-//         chapter_number: chapterNumber,
-//     };
-
-//     fetch('/api/render_chapter', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//         },
-//         body: JSON.stringify(data),
-//     }).then((response) => {
-//         if (response.ok) {
-//             console.log('Chapter selection submitted successfully');
-//         } else {
-//             console.error('Error submitting chapter selection');
-//         }
-//     });
-// }
-
 document.addEventListener('DOMContentLoaded', () => {
 
     createBookDropdown(books);

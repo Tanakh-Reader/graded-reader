@@ -1,3 +1,14 @@
+
+// Constant values
+const constants = {
+  READ_PAGE: '/read',
+  PASSAGES_PAGE: '/passages',
+  DATA_LOADED_API: 'api/check_data_ready/'
+}
+
+
+
+// Convert a context object JS json
 function contextToJson(context) {
   context = context.replace(/'/g, '"').replace(/None/g, null);
   return JSON.parse(context);
@@ -33,9 +44,9 @@ function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter
   setParamIfValid('ch_e', endChapter);
   setParamIfValid('vs_e', endVerse);
 
-  const newUrl = window.location.origin + '/read' + '?' + queryParams.toString();
+  const newUrl = `${window.location.origin}${constants.READ_PAGE}?${queryParams.toString()}`;
 
-  if (window.location.href.includes('passages')) {
+  if (window.location.href.includes(constants.PASSAGES_PAGE)) {
     window.open(newUrl)
   } else {
     window.location.href = newUrl;
@@ -48,9 +59,8 @@ function checkDataReady(dataSource) {
   const queryParams = new URLSearchParams();
 
   queryParams.set('data_source', dataSource);
-  const url = 'api/check_data_ready/'
   // Append query parameters to the URL
-  const requestUrl = `${url}?${queryParams.toString()}`;
+  const requestUrl = `${constants.DATA_LOADED_API}?${queryParams.toString()}`;
 
   // Send GET request
   fetch(requestUrl)

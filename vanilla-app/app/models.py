@@ -2,8 +2,8 @@ from django.db import models
 from django.dispatch import receiver
 from django.forms.models import model_to_dict
 from django.db.models.signals import post_init
-from .providers.books import book_provider
-from .providers.tf_api import bhsa_provider
+from .providers.book_provider import book_provider
+from .providers.bhsa_provider import bhsa_provider
 
 
 class Word(models.Model):

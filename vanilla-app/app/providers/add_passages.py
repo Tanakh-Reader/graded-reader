@@ -1,9 +1,10 @@
-from .timer import timer
-from .algorithms import get_passage_weight
+
+from ..utils.timer import timer
+from ..utils.algorithms import get_passage_weight
 from ..models import Passage
 from ..data.constants import PARAGRAPH_MARKERS
-from ..providers.tf_api import bhsa_provider
-from ..providers.books import book_provider
+from .bhsa_provider import bhsa_provider
+from .book_provider import book_provider
 
 """
 Used by get_passages()
