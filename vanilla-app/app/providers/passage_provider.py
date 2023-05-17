@@ -32,12 +32,20 @@ class PassageProvider:
         passages = Passage.objects.all()
         if as_json:
             return self.__passages_to_json(passages)
+        return passages
 
+    def get_passages_by_ids(self, ids, as_json=False):
+        ids = [int(id) for id in ids]
+        passages = Passage.objects.filter(id__in=ids)
+        if as_json:
+            return self.__passages_to_json(passages)
+        return passages
+        
     def delete_all_passages(self):
         Passage.objects.all().delete()
         self.passages_loaded = False
         self.loading_in_progress = False
-
+    
     def __passages_to_json(self, passages: list[Passage]):
         return [passage.to_dict() for passage in passages]
     

@@ -1,0 +1,20 @@
+{% load list_extras %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/hebrew_text.css' %}">
+
+{% spaceless %}
+<div id="paragraph" dir="rtl">
+    {% for word in words %}
+    {% with previous_word=words|prev:forloop.counter0 %}
+    {% if forloop.first or word.verse != previous_word.verse %}
+    <span class="verse-number"> {{ word.verse }} </span>
+    {% endif %}
+    {% endwith %}
+    <span id="{{ word.id }}" class="word" data-penalty="{{ word.penalty }}"
+        onclick="showWordAttributes('{{ word|escapejs }}')">{{ word.text }}{{ word.trailer }}</span>
+    {% endfor %}
+</div>
+{% endspaceless %}
+
+<script src="{% static 'js/hebrew_text.js' %}"></script>

@@ -48,7 +48,7 @@ def read(request: HttpRequest):
     }
     return render(request, "read.html", context)
 
-@cache_page(60 * 15)
+# @cache_page(60 * 15)
 def passages(request: HttpRequest):
     book = request.GET.get("book")
     # book_index = BOOK_TO_INDEX.get(book)
@@ -69,6 +69,21 @@ def passages(request: HttpRequest):
     }
     return render(request, "passages.html", context)
 
+def passages_compare(request: HttpRequest): 
+
+    passage1_id = request.GET.get('p1_id')
+    passage2_id = request.GET.get('p2_id')
+    ids = [passage1_id, passage2_id]
+    text_passages = passage_provider.get_passages_by_ids(ids, as_json=True)
+    all_passages = passage_provider.get_all_passages(as_json=True)
+
+    context = {
+        'text_passages': text_passages,
+        'passages': all_passages
+    }
+
+    return render(request, "passages_compare.html", context)
+
 
 def algorithms(request: HttpRequest):
     all_ranks = ranks.LexRanks.all_ranks
@@ -85,6 +100,20 @@ def settings(request: HttpRequest):
 
 
 
+
+
+
+# API ENDPOINTS --------------------------------
+# --------------------------------
+
+def get_hebrew_text(request: HttpRequest):
+
+    pId = request.GET.get('ref')
+    passage = passage_provider.get_passages_by_ids([pId])[0]
+    words = word_provider.get_words_from_passage(passage, as_json=True)
+    context = {'words': words}
+    text_html = render_to_string('widgets/hebrew_text.html', context)
+    return JsonResponse({'html': text_html})
 
 def get_books(request: HttpRequest):
     pass

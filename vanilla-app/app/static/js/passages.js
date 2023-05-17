@@ -1,3 +1,53 @@
+let selectedPassages = [];
+
+function selectPassage(event) {
+    const checkbox = event.target;
+    const passageCard = checkbox.closest(".passage-card");
+
+    if (checkbox.checked) {
+        if (selectedPassages.length < 2) {
+            selectedPassages.push(passageCard);
+        } else {
+            checkbox.checked = false;
+            alert("You can only select two passages.");
+        }
+    } else {
+        selectedPassages = selectedPassages.filter((card) => card !== passageCard);
+    }
+}
+
+function submitSelectedPassages() {
+    if (selectedPassages.length === 2) {
+        const passageIds = selectedPassages.map((card) => card.getAttribute("data-id"));
+        const queryParams = new URLSearchParams();
+        setParamIfValid(queryParams, 'p1_id', passageIds[0]);
+        setParamIfValid(queryParams, 'p2_id', passageIds[1]);
+        window.location.href = `${constants.COMPARE_PAGE}?${queryParams.toString()}`;
+    } else {
+        alert("Please select exactly two passages.");
+    }
+}
+
+// Search a passage via a reference.
+function searchPassages() {
+  const searchTerm = $("#searchInput").val();
+  const bookFilter = $("#book").val();
+  const passages = $(".passage-card");
+
+  passages.each(function () {
+    const ref = $(this).data("ref");
+    const passageBook = $(this).data("book");
+    const isBookMatch = bookFilter === "ALL" || bookFilter === passageBook;
+    const isRefMatch = isReferenceMatch(searchTerm, ref)
+
+    if (isBookMatch && isRefMatch) {
+      $(this).css("display", "block");
+    } else {
+      $(this).css("display", "none");
+    }
+  });
+}
+
 function submitPassage(passage) {
     passage = contextToJson(passage);
     submitPassageSelection(
@@ -38,7 +88,6 @@ function filterPassages() {
     let passages = document.querySelectorAll(".passage-card");
     passages.forEach(passage => {
         let passageBookNumber = passage.getAttribute("data-book");
-        console.log(passageBookNumber, bookNumber)
         if (bookNumber === "ALL" || passageBookNumber === bookNumber) {
             passage.style.display = "block";
         } else {

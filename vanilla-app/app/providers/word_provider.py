@@ -2,7 +2,7 @@ import threading
 
 from .add_words import add_words_to_database
 from ..data import constants
-from ..models import Word
+from ..models import Word, Passage
 
 # Class that interfaces with the Sqlite DB to get words.
 class WordProvider:
@@ -25,6 +25,28 @@ class WordProvider:
                 add_words_task.start()
             return False
 
+    def get_words_from_passage(self, passage: Passage, as_json=False):
+
+        words = self.get_words_by_ids(
+            passage.start_word,
+            passage.end_word,
+            as_json
+        )
+        
+        return words
+
+    def get_words_by_ids(self, start_id, end_id, as_json=False):
+        
+        words = Word.objects.filter(
+            id__gte=start_id,
+            id__lte=end_id,
+        )
+
+        if as_json:
+            return self.words_to_json(words)
+
+        return words
+
     def get_words_from_reference(self, reference, as_json=False):
         book, start_chapter, start_verse, end_chapter, end_verse = reference
 
@@ -36,7 +58,7 @@ class WordProvider:
             end_verse = constants.LONGEST_CHAPTER
 
         # Load words from DB
-        all_words = Word.objects.filter(
+        words = Word.objects.filter(
             book=book,
             chapter__gte=start_chapter,
             chapter__lte=end_chapter,
@@ -45,7 +67,7 @@ class WordProvider:
         referenced_words = []
 
         # GpT mAgIc
-        for word in all_words:
+        for word in words:
             if (  # multi-chapter solution
                 (word.chapter == start_chapter and word.verse >= start_verse)
                 or (word.chapter == end_chapter and word.verse <= end_verse)
