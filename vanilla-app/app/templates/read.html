@@ -53,10 +53,13 @@
   {% endif %}
 </body>
 
-<script>
-  const books = contextToJson('{{ books|escapejs }}');
+<!-- TEMP FIX TILL API IS MADE -->
+<script type="module">
+  import { init } from "{% static 'js/read.js' %}";
+  import utils from "{% static 'js/utils/utils.js' %}";
+  init ( utils.contextToJson('{{ books|escapejs }}') )
 </script>
 
-<script src="{% static 'js/read.js' %}"></script>
+<script type="module" src="{% static 'js/read.js' %}"></script>
 
 {% endblock %}

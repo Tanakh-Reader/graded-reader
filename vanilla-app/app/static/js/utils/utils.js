@@ -1,18 +1,5 @@
 
-// Constant values
-const constants = {
-  READ_PAGE: '/read',
-  PASSAGES_PAGE: '/passages',
-  COMPARE_PAGE: '/passages/compare',
-
-  // API ENDPOINTS
-  DATA_LOADED_API: '/api/check-data-ready',
-  HEBREW_TEXT_API: '/api/hebrew-text',
-
-  DELETE_WORDS_API: '/api/delete-words',
-  DELETE_PASSAGES_API: '/api/delete-passages',
-}
-
+import * as constants from './constants.js';
 
 // Make sure a query param is valid
 function setParamIfValid(queryParams, key, value) {
@@ -33,7 +20,6 @@ function contextToJson(context) {
   return JSON.parse(context);
 }
 
-
 function getBookByNumber(number) {
   number = parseInt(number);
   const bookIndex = books.findIndex((book) => book.number === number);
@@ -46,8 +32,6 @@ function getBookByName(name) {
   const book = books[bookIndex];
   return book;
 }
-
-
 
 // Submit a passage to render on the read screen.
 function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse) {
@@ -68,3 +52,11 @@ function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter
   }
 }
 
+export default {
+  setParamIfValid,
+  isReferenceMatch,
+  contextToJson,
+  getBookByName,
+  getBookByNumber,
+  submitPassageSelection
+}

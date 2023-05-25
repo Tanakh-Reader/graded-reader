@@ -1,4 +1,15 @@
+
+import utils from './utils/utils.js';
+import * as constants from './utils/constants.js';
+
+
 let selectedPassages = [];
+
+// TEMP CODE
+let books;
+export function init(booksData) {
+    books = booksData;
+}
 
 function selectPassage(event) {
     const checkbox = event.target;
@@ -20,8 +31,8 @@ function submitSelectedPassages() {
     if (selectedPassages.length === 2) {
         const passageIds = selectedPassages.map((card) => card.getAttribute("data-id"));
         const queryParams = new URLSearchParams();
-        setParamIfValid(queryParams, 'p1_id', passageIds[0]);
-        setParamIfValid(queryParams, 'p2_id', passageIds[1]);
+        utils.setParamIfValid(queryParams, 'p1_id', passageIds[0]);
+        utils.setParamIfValid(queryParams, 'p2_id', passageIds[1]);
         window.location.href = `${constants.COMPARE_PAGE}?${queryParams.toString()}`;
     } else {
         alert("Please select exactly two passages.");
@@ -49,7 +60,7 @@ function searchPassages() {
 }
 
 function submitPassage(passage) {
-    passage = contextToJson(passage);
+    passage = utils.contextToJson(passage);
     submitPassageSelection(
         passage.book,
         passage.start_chapter,
@@ -136,3 +147,10 @@ function sortPassages() {
 document.addEventListener("DOMContentLoaded", function () {
     applyBackgroundColorToPassages();
 });
+
+window.filterPassages = filterPassages
+window.sortPassages = sortPassages
+window.searchPassages = searchPassages
+window.submitSelectedPassages = submitSelectedPassages
+window.selectPassage = selectPassage
+window.submitPasage = submitPassage

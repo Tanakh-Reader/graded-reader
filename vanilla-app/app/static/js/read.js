@@ -1,3 +1,12 @@
+import utils from './utils/utils.js';
+import apis from './utils/apis.js';
+
+// TEMP CODE
+export var books;
+export function init(booksData) {
+  books = booksData;
+}
+
 function changeChapter(direction, reference) {
 
   // Parse reference
@@ -14,27 +23,15 @@ function changeChapter(direction, reference) {
 
   // Get the new chapter
   if (newChapter >= 1 && newChapter <= book.chapters) {
-    submitPassageSelection(book.number, newChapter,)
+    utils.submitPassageSelection(book.number, newChapter,)
   } else if (newChapter === 0 && book.number > 1) {
-    const newBook = getBookByNumber(book.number - 1);
-    submitPassageSelection(newBook.number, newBook.chapters)
+    const newBook = utils.getBookByNumber(book.number - 1);
+    utils.submitPassageSelection(newBook.number, newBook.chapters)
   } else if (newChapter > book.chapters && book.number < books.length) {
-    const newBook = getBookByNumber(book.number + 1);
-    submitPassageSelection(newBook.number, 1)
+    const newBook = utils.getBookByNumber(book.number + 1);
+    utils.submitPassageSelection(newBook.number, 1)
   }
 }
-
-
-
-
-// Add event listener to hide attributes panel when clicked outside
-// document.addEventListener('click', (event) => {
-//   const attributesDiv = document.getElementById('attributes-div');
-//   if (event.target !== attributesDiv && !attributesDiv.contains(event.target)) {
-//     attributesDiv.style.display = 'none';
-//     toggleSelectedWord();
-//   }
-// });
 
 function toggleVerseNumbers() {
   const verseNumbers = document.getElementsByClassName('verse-number');
@@ -46,3 +43,8 @@ function toggleVerseNumbers() {
     }
   }
 }
+
+window.toggleVerseNumbers = toggleVerseNumbers
+window.changeChapter = changeChapter
+// TODO change this.
+window.checkDataReady = apis.checkDataReady

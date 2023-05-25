@@ -17,42 +17,6 @@
 </div>
 {% endspaceless %}
 
-<script src="{% static 'js/hebrew_text.js' %}"></script>
-
-<script>
-
-    function buildHebrewText(words) {
-        const paragraph = document.getElementById('paragraph');
-        paragraph.innerHTML = ''; // Clear existing content
-
-        let previousWord = null;
-
-        words.forEach((word, index) => {
-            // Check if it's the first word or the verse number has changed
-            if (index === 0 || word.verse !== previousWord.verse) {
-                const verseNumber = document.createElement('span');
-                verseNumber.className = 'verse-number';
-                verseNumber.textContent = word.verse;
-
-                paragraph.appendChild(verseNumber);
-            }
-
-            const wordSpan = document.createElement('span');
-            wordSpan.id = word.id;
-            wordSpan.className = 'word';
-            wordSpan.dataset.penalty = word.penalty;
-            wordSpan.textContent = word.text + word.trailer;
-            wordSpan.onclick = () => showWordAttributes(word);
-
-            paragraph.appendChild(wordSpan);
-
-            previousWord = word;
-        });
-    }
-
-// Example usage
-// const words = [ ... ]; // Load words from context or API
-// buildHebrewText(words);
-
+<script type="module" src="{% static 'js/hebrew_text.js' %}"></script>
 
 </script>

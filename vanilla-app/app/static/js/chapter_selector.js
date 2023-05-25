@@ -1,3 +1,8 @@
+// TEMP
+import { books } from './read.js';
+import utils from './utils/utils.js';
+
+
 async function createBookDropdown(books) {
 
     const bookDropdown = document.getElementById('bookDropdown');
@@ -24,7 +29,7 @@ function createChapterDropdown(book) {
         chapterOption.textContent = i;
         chapterOption.classList.add('chapter-option');
         chapterOption.addEventListener('click', () => {
-            submitPassageSelection(book.number, i);
+            utils.submitPassageSelection(book.number, i);
         });
         chapterDropdown.appendChild(chapterOption);
     }

@@ -1,11 +1,16 @@
+import * as constants from './utils/constants.js';
+import utils from './utils/utils.js';
+import apis from './utils/apis.js';
+
+
 // Search a passage via a reference.
 function filterDropdown() {
     const searchTerm = $("#searchInput").val();
-    const dropdownItems = $("#dropdown > ul > li");
-
+    // const dropdownItems = $("#dropdown > ul > li");
+    const dropdownItems = $(".passage-item");
     dropdownItems.each(function () {
         const ref = $(this).data("ref");
-        const isRefMatch = isReferenceMatch(searchTerm, ref)
+        const isRefMatch = utils.isReferenceMatch(searchTerm, ref)
 
         if (isRefMatch) {
             $(this).css("display", "block");
@@ -20,17 +25,40 @@ function selectPassage(event) {
     const passageId = $(selectedPassage).data("id");
     const selectedReference = $(selectedPassage).data("ref");
     // Update the button text.
-    // const selectedButton = event.target.closest('div'); 
-    const selectedButton = $(this).closest('.test').find('button')
-    console.log(selectedButton)
-    console.log(event.target.closest('.test'));
-    selectedButton.textContent = selectedReference;
-    // document.getElementById("selectedPassage").textContent = selectedReference;
-    getHebrewText(passageId);
+    const selectedButton = $(selectedPassage).closest('.passage-container').find('button')
+    selectedButton.text(selectedReference);
+    // Update the Hebrew passage text.
+    const hebrewTextDiv = $(selectedPassage).closest('.passage-container').find('.passage-text');
+    getHebrewText(passageId, hebrewTextDiv);
 }
 
+function getHebrewText(passageId, div) {
+    apis.getHebrewText(passageId).then(response => {
+        $(div).html(response)
+    })
+        .catch(error => {
+            console.error(error);  // Or handle any errors
+        });
+}
+
+window.filterDropdown = filterDropdown;
+
+window.addEventListener("DOMContentLoaded", (event) => {
+    // document.querySelectorAll('.search-input').forEach(item => {
+    //     item.addEventListener("input", filterDropdown);
+    // });
+
+    document.querySelectorAll('.passage-item').forEach(item => {
+        item.addEventListener('click', event => selectPassage(event));
+    });
 
 
+    // Fetch the Hebrew text for each passage on initial page load
+    document.querySelectorAll('.passage-text').forEach(div => {
+        const id = div.getAttribute('data-id');
+        getHebrewText(id, div);
+    });
+});
 
 /*
 

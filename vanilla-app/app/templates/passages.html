@@ -22,8 +22,7 @@
         <option value="{{ book.number }}">{{ book.name }}</option>
         {% endfor %}
       </select>
-      <button type="button" class="btn ml-4"
-        onclick="filterPassages()">Search</button>
+      <button type="button" class="btn ml-4" onclick="filterPassages()">Search</button>
     </div>
     <!-- Sort Passages -->
     <div class="flex items-center">
@@ -38,8 +37,7 @@
         <option value="asc">Ascending</option>
         <option value="desc">Descending</option>
       </select>
-      <button type="button" class="btn ml-4"
-        onclick="sortPassages()">Sort</button>
+      <button type="button" class="btn ml-4" onclick="sortPassages()">Sort</button>
     </div>
   </form>
   <!-- Search bar -->
@@ -64,7 +62,8 @@
         <input type="checkbox" class="passage-select transform scale-150" onclick="selectPassage(event)">
       </div>
       <div class="p-4">
-        <h2 class="text-lg font-bold mb-2" onclick="submitPassage('{{ passage|escapejs }}')">{{ passage.reference }}</h2>
+        <h2 class="text-lg font-bold mb-2" onclick="submitPassage('{{ passage|escapejs }}')">{{ passage.reference }}
+        </h2>
         <p class="text-gray-700 mb-2">Weight: {{ passage.penalty }}<br>Length: {{ passage.word_count }} words</p>
       </div>
     </div>
@@ -86,9 +85,13 @@
 
   {% endif %}
 
-  <script>
-    const books = contextToJson('{{ books|escapejs }}');
+  <!-- !-- TEMP FIX TILL API IS MADE --> -->
+  <script type="module">
+    import { init } from "{% static 'js/passages.js' %}";
+    import utils from "{% static 'js/utils/utils.js' %}";
+    init(utils.contextToJson('{{ books|escapejs }}'))
   </script>
-  <script src="{% static 'js/passages.js' %}"></script>
+
+  <script type = "module" src="{% static 'js/passages.js' %}"></script>
 
   {% endblock %}

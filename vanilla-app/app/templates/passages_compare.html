@@ -12,36 +12,38 @@
 
 <div class="flex flex-row">
     {% for text_passage in text_passages %}
-    <div id="passage{{ forloop.counter}}" class="flex flex-col w-1/2 mx-4">
-        <div class="test justify-center items-center mb-8">
+    <div class="passage-container flex flex-col w-1/2 mx-4">
+
+
+        <div class="justify-center items-center mb-8">
             <div x-data="{ open: false }" @click.away="open = false">
                 <button @click="open = !open" class="border rounded p-2">{{ text_passage.reference }}</button>
                 <div style="width:200px" x-show="open" class="absolute z-10 mt-1 w-full bg-white shadow-md border rounded overflow-auto max-h-48">
                     <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()"
                         placeholder="Search...">
+
                     <ul class="list-none p-0">
                         {% for passage in passages %}
-                        <li class="p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}" data-id="{{ passage.id}}"
-                            onclick='selectPassage(event)'>{{ passage.reference }} {{ passage.penalty }}</li>
+                        <li @click="open = false" class="passage-item p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}" data-id="{{ passage.id}}">{{ passage.reference }} {{ passage.penalty }}</li>
                         {% endfor %}
                     </ul>
+
                 </div>
             </div>
 
-
-
             <h2>{{ text_passage.penalty }}</h2>
         </div>
+
         <!--  USED by the API CALL -->
-        <div id="passage-text{{ forloop.counter }}"></div>
-        <script>
-            getHebrewText("{{ text_passage.id }}", "{{ forloop.counter }}")
-        </script>
+        <div class="passage-text" 
+     data-id="{{ text_passage.id }}"></div>
+    
     </div>
     {% endfor %}
 </div>
-<script src="{% static 'js/hebrew_text.js' %}"></script>
-<script src="{% static 'js/passages_compare.js' %}"></script>
+
+<script type="module" src="{% static 'js/hebrew_text.js' %}"></script>
+<script type="module" src="{% static 'js/passages_compare.js' %}"></script>
 
 {% endblock %}
 

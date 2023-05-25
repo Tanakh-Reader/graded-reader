@@ -1,3 +1,5 @@
+import utils from './utils/utils.js';
+
 function getGradientColor(penalty) {
     const green = [0, 0, 0];
     const red = [255, 0, 0];
@@ -30,7 +32,7 @@ function toggleSelectedWord(wordJSON = null) {
 
 
 function showWordAttributes(word) {
-    wordJSON = contextToJson(word);
+    const wordJSON = utils.contextToJson(word);
     toggleSelectedWord(wordJSON);
     const attributes = Object.entries(wordJSON).map(
         ([key, value]) => {
@@ -56,6 +58,8 @@ function showWordAttributes(word) {
     // Show the attributes div element
     attributesDiv.style.display = 'block';
 }
+
+window.showWordAttributes = showWordAttributes
 
 document.addEventListener('hebrewTextLoaded', function (e) {
 
