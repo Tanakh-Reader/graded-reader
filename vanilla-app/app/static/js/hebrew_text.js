@@ -43,6 +43,7 @@ function showWordAttributes(word) {
     const attributes = Object.entries(wordJSON).map(
         ([key, value]) => {
             if (value !== null && value !== "" && value !== " ") {
+                value = value.toString().replace('<', '').replace('>', '');
                 return `<b>${key}:</b> ${value}`;
             }
             return null;

@@ -1,3 +1,5 @@
+import * as utils from './utils/utils.js';
+
 const form = document.querySelector('form');
 form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -8,5 +10,5 @@ form.addEventListener('submit', (event) => {
     const endChapter = document.querySelector('#end_chapter').value;
     const endVerse = document.querySelector('#end_verse').value;
 
-    submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse);
+    utils.submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse);
 });
