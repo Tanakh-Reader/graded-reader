@@ -127,7 +127,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, "gradedhebrew", "staticfiles")
 STATIC_URL = "/static/"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS = [
-    # os.path.join(BASE_DIR, "APP", "FOLDER"),
+    # os.path.join(BASE_DIR, "app", "static"),
 ]
 
 

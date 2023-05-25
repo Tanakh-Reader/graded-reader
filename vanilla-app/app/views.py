@@ -29,7 +29,7 @@ def index(request: HttpRequest):
 
 # TODO SEE: https://docs.djangoproject.com/en/4.2/topics/cache/
 # AND https://docs.djangoproject.com/en/4.2/topics/http/sessions/
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 def read(request: HttpRequest):
     params = references.parse_reference(request.GET)
     # Display Genesis 1 if the reference isn't specified.
@@ -48,7 +48,7 @@ def read(request: HttpRequest):
     }
     return render(request, "read.html", context)
 
-# @cache_page(60 * 15)
+@cache_page(60 * 15)
 def passages(request: HttpRequest):
     book = request.GET.get("book")
     # book_index = BOOK_TO_INDEX.get(book)
