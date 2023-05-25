@@ -1,5 +1,6 @@
 
 import * as constants from './constants.js';
+import * as utils from './utils.js';
 
 function getHebrewText(passageId) {
     return new Promise((resolve, reject) => {
@@ -9,12 +10,6 @@ function getHebrewText(passageId) {
                 'ref': passageId
             },
             success: function (response) {
-                // Dispatch a custom event after updating the HTML content
-                const event = new CustomEvent('hebrewTextLoaded', {
-                    detail: { passageId: passageId }
-                });
-                document.dispatchEvent(event);
-
                 resolve(response.html);  // Resolve the promise with the response
             },
             error: function (error) {

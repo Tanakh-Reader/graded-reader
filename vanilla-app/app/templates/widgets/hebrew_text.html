@@ -11,7 +11,7 @@
     <span class="verse-number"> {{ word.verse }} </span>
     {% endif %}
     {% endwith %}
-    <span id="{{ word.id }}" class="word" data-penalty="{{ word.penalty }}"
+    <span id="{{ word.id }}" class="word" data-penalty="{{ word.penalty }}" data-speech="{{ word.speech }}"
         onclick="showWordAttributes('{{ word|escapejs }}')">{{ word.text }}{{ word.trailer }}</span>
     {% endfor %}
 </div>

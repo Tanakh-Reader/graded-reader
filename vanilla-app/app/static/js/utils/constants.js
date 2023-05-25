@@ -7,3 +7,7 @@ export const DATA_LOADED_API = '/api/check-data-ready';
 export const HEBREW_TEXT_API = '/api/hebrew-text';
 export const DELETE_WORDS_API = '/api/delete-words';
 export const DELETE_PASSAGES_API = '/api/delete-passages';
+
+
+// PUB / SUB 
+export const TEXT_LOADED_EVENT = 'hebrewTextLoaded'

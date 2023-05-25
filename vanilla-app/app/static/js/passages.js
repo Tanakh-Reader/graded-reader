@@ -1,5 +1,5 @@
 
-import utils from './utils/utils.js';
+import * as utils from './utils/utils.js';
 import * as constants from './utils/constants.js';
 
 
@@ -49,7 +49,7 @@ function searchPassages() {
     const ref = $(this).data("ref");
     const passageBook = $(this).data("book");
     const isBookMatch = bookFilter === "ALL" || bookFilter === passageBook;
-    const isRefMatch = isReferenceMatch(searchTerm, ref)
+    const isRefMatch = utils.isReferenceMatch(searchTerm, ref)
 
     if (isBookMatch && isRefMatch) {
       $(this).css("display", "block");
@@ -61,7 +61,7 @@ function searchPassages() {
 
 function submitPassage(passage) {
     passage = utils.contextToJson(passage);
-    submitPassageSelection(
+    utils.submitPassageSelection(
         passage.book,
         passage.start_chapter,
         passage.start_verse,
@@ -144,13 +144,13 @@ function sortPassages() {
     sortedPassages.forEach(passage => container.appendChild(passage));
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+utils.subscribe('DOMContentLoaded', (event) => {
     applyBackgroundColorToPassages();
-});
+})
 
 window.filterPassages = filterPassages
 window.sortPassages = sortPassages
 window.searchPassages = searchPassages
 window.submitSelectedPassages = submitSelectedPassages
 window.selectPassage = selectPassage
-window.submitPasage = submitPassage
+window.submitPassage = submitPassage

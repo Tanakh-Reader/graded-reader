@@ -2,39 +2,39 @@
 import * as constants from './constants.js';
 
 // Make sure a query param is valid
-function setParamIfValid(queryParams, key, value) {
+export function setParamIfValid(queryParams, key, value) {
   if (value !== undefined && value !== '' && value !== null) {
     queryParams.set(key, value);
   }
 }
 
 // Used to search by reference.
-function isReferenceMatch(searchTerm, reference) {
+export function isReferenceMatch(searchTerm, reference) {
   const regex = new RegExp(searchTerm.split(" ").join(".*"), "i");
   return regex.test(reference);
 }
 
 // Convert a context object JS json
-function contextToJson(context) {
+export function contextToJson(context) {
   context = context.replace(/'/g, '"').replace(/None/g, null);
   return JSON.parse(context);
 }
 
-function getBookByNumber(number) {
+export function getBookByNumber(number) {
   number = parseInt(number);
   const bookIndex = books.findIndex((book) => book.number === number);
   const book = books[bookIndex];
   return book;
 }
 
-function getBookByName(name) {
+export function getBookByName(name) {
   const bookIndex = books.findIndex((book) => book.name === name);
   const book = books[bookIndex];
   return book;
 }
 
 // Submit a passage to render on the read screen.
-function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse) {
+export function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse) {
   const queryParams = new URLSearchParams();
 
   setParamIfValid(queryParams, 'bk', bookNumber);
@@ -52,11 +52,22 @@ function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter
   }
 }
 
-export default {
-  setParamIfValid,
-  isReferenceMatch,
-  contextToJson,
-  getBookByName,
-  getBookByNumber,
-  submitPassageSelection
+// Create and dispatch a custom event
+export function publish(eventName, detail) {
+  const event = new CustomEvent(eventName, { detail: detail });
+  document.dispatchEvent(event);
 }
+
+// Subscribe to a custom event
+export function subscribe(eventName, callback) {
+  document.addEventListener(eventName, callback);
+}
+
+// export default {
+//   setParamIfValid,
+//   isReferenceMatch,
+//   contextToJson,
+//   getBookByName,
+//   getBookByNumber,
+//   submitPassageSelection
+// }

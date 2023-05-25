@@ -1,12 +1,47 @@
 import * as constants from './utils/constants.js';
-import utils from './utils/utils.js';
+import * as utils from './utils/utils.js';
 import apis from './utils/apis.js';
 
+
+let currentButton = null;
+let dropdownMenu = document.getElementById("dropdown-menu");
+
+function showDropdown(button) {
+    // Get positioning.
+    let rect = button.getBoundingClientRect();
+    dropdownMenu.style.top = (rect.top + window.scrollY + button.offsetHeight) + "px";
+    dropdownMenu.style.left = (rect.left + window.scrollX) + "px";
+
+    if (currentButton === button) {
+        // Button was clicked while dropdown was open.
+        dropdownMenu.style.display = "none";
+        currentButton = null;
+    } else {
+        // Button was clicked while dropdown was closed.
+        dropdownMenu.style.display = "block";
+        currentButton = button;
+        scrollToSelectedPassage();
+    }
+}
+
+// Scroll to current passage.
+function scrollToSelectedPassage() {
+    let reference = currentButton.textContent.trim();
+    let dropdownList = dropdownMenu.querySelector("ul");
+    let passageItems = dropdownList.querySelectorAll(".passage-item");
+    for (let passageItem of passageItems) {
+        if (passageItem.getAttribute("data-ref").trim() === reference) {
+            passageItem.style.fontWeight = "bold";
+            dropdownList.scrollTop = passageItem.offsetTop - dropdownList.offsetTop;
+        } else {
+            passageItem.style.fontWeight = "";
+        }
+    }
+}
 
 // Search a passage via a reference.
 function filterDropdown() {
     const searchTerm = $("#searchInput").val();
-    // const dropdownItems = $("#dropdown > ul > li");
     const dropdownItems = $(".passage-item");
     dropdownItems.each(function () {
         const ref = $(this).data("ref");
@@ -20,36 +55,33 @@ function filterDropdown() {
     });
 }
 
-function selectPassage(event) {
-    const selectedPassage = event.target;
-    const passageId = $(selectedPassage).data("id");
-    const selectedReference = $(selectedPassage).data("ref");
+function selectPassage(passage) {
+    const passageId = $(passage).data("id");
+    const selectedReference = $(passage).data("ref");
     // Update the button text.
-    const selectedButton = $(selectedPassage).closest('.passage-container').find('button')
-    selectedButton.text(selectedReference);
+    $(currentButton).text(selectedReference);
     // Update the Hebrew passage text.
-    const hebrewTextDiv = $(selectedPassage).closest('.passage-container').find('.passage-text');
+    const hebrewTextDiv = $(currentButton).closest('.passage-container').find('.passage-text')[0];
     getHebrewText(passageId, hebrewTextDiv);
+    dropdownMenu.style.display = "none";
+    currentButton = null;
 }
 
 function getHebrewText(passageId, div) {
     apis.getHebrewText(passageId).then(response => {
         $(div).html(response)
+        // Dispatch a event for text updates.
+        utils.publish(constants.TEXT_LOADED_EVENT, div)
     })
         .catch(error => {
-            console.error(error);  // Or handle any errors
+            console.error(error);
         });
 }
 
-window.filterDropdown = filterDropdown;
 
 window.addEventListener("DOMContentLoaded", (event) => {
-    // document.querySelectorAll('.search-input').forEach(item => {
-    //     item.addEventListener("input", filterDropdown);
-    // });
-
     document.querySelectorAll('.passage-item').forEach(item => {
-        item.addEventListener('click', event => selectPassage(event));
+        item.addEventListener('click', event => selectPassage(event.target));
     });
 
 
@@ -59,6 +91,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
         getHebrewText(id, div);
     });
 });
+
+window.filterDropdown = filterDropdown;
+window.showDropdown = showDropdown;
+
 
 /*
 

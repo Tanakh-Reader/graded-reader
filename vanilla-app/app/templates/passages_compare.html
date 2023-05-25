@@ -13,24 +13,10 @@
 <div class="flex flex-row">
     {% for text_passage in text_passages %}
     <div class="passage-container flex flex-col w-1/2 mx-4">
-
-
         <div class="justify-center items-center mb-8">
-            <div x-data="{ open: false }" @click.away="open = false">
-                <button @click="open = !open" class="border rounded p-2">{{ text_passage.reference }}</button>
-                <div style="width:200px" x-show="open" class="absolute z-10 mt-1 w-full bg-white shadow-md border rounded overflow-auto max-h-48">
-                    <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()"
-                        placeholder="Search...">
-
-                    <ul class="list-none p-0">
-                        {% for passage in passages %}
-                        <li @click="open = false" class="passage-item p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}" data-id="{{ passage.id}}">{{ passage.reference }} {{ passage.penalty }}</li>
-                        {% endfor %}
-                    </ul>
-
-                </div>
-            </div>
-
+            <button class="border rounded p-2" onclick="showDropdown(this)">
+                {{ text_passage.reference }}
+            </button>
             <h2>{{ text_passage.penalty }}</h2>
         </div>
 
@@ -40,7 +26,24 @@
     
     </div>
     {% endfor %}
+
+    <!-- Dropdown menu for search passages -->
+    <div id="dropdown-menu" class="dropdown-menu mt-1">
+        <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()" placeholder="Search...">
+        <ul class="list-none p-0 overflow-auto max-h-72">
+            {% for passage in passages %}
+            <li class="passage-item p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}"
+                data-id="{{ passage.id}}">
+                {{ passage.reference }} {{ passage.penalty }}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
 </div>
+
+<!-- Selected word data -->
+{% include 'widgets/selected_word.html' %}
 
 <script type="module" src="{% static 'js/hebrew_text.js' %}"></script>
 <script type="module" src="{% static 'js/passages_compare.js' %}"></script>

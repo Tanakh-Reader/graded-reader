@@ -1,0 +1,30 @@
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'css/hebrew_text.css' %}">
+
+<style>
+    #selected-word-widget {
+        position: fixed; /* Fixes the div to the viewport */
+        bottom: 10px;
+        right: 10px; /* Adjust as per need */
+        z-index: 10;
+        display: none; /* Initially hidden */
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
+        padding: .75rem;
+        max-width: 300px; /* Adjust as per need */
+        font-size: .875rem;
+    }
+    #selected-word-widget > .dismiss-button {
+        color: red;
+        float: right;
+        border: none;
+        cursor: pointer;
+    }
+</style>
+
+<div id="selected-word-widget">
+    <button class="dismiss-button bg-white hover:bg-gray-100 font-semibold px-2 border border-gray-400 rounded shadow" onclick="dismissWordWidget()">x</button>
+    <div id="word-attributes"></div>
+</div>

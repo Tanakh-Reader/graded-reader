@@ -88,10 +88,10 @@
   <!-- !-- TEMP FIX TILL API IS MADE --> -->
   <script type="module">
     import { init } from "{% static 'js/passages.js' %}";
-    import utils from "{% static 'js/utils/utils.js' %}";
-    init(utils.contextToJson('{{ books|escapejs }}'))
+    import { contextToJson } from "{% static 'js/utils/utils.js' %}";
+    init(contextToJson('{{ books|escapejs }}'))
   </script>
 
-  <script type = "module" src="{% static 'js/passages.js' %}"></script>
+  <script type ="module" src="{% static 'js/passages.js' %}"></script>
 
   {% endblock %}

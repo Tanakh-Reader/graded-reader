@@ -1,6 +1,6 @@
 // TEMP
 import { books } from './read.js';
-import utils from './utils/utils.js';
+import * as utils from './utils/utils.js';
 
 
 async function createBookDropdown(books) {

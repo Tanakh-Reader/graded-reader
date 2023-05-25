@@ -1,4 +1,4 @@
-import utils from './utils/utils.js';
+import * as utils from './utils/utils.js';
 import apis from './utils/apis.js';
 
 // TEMP CODE

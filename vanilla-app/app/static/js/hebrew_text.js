@@ -1,4 +1,6 @@
-import utils from './utils/utils.js';
+import * as utils from './utils/utils.js';
+import * as constants from './utils/constants.js';
+
 
 function getGradientColor(penalty) {
     const green = [0, 0, 0];
@@ -12,28 +14,32 @@ function getGradientColor(penalty) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
-function toggleSelectedWord(wordJSON = null) {
-
-    const currentSelection = document.querySelector('.selected');
-    if (currentSelection !== null) {
-        if (String(currentSelection.id) === String(wordJSON.id)) { // check if the clicked word is already selected
-            currentSelection.classList.remove('selected'); // remove the 'selected' class
-            document.getElementById('attributes-div').style.display = 'none'; // hide the attributes panel
-            return; // exit the function
+function colorWords(div = null) {
+    // If more than one text widget, choose the div.
+    var textDiv = document;
+    if (div !== null) {
+        textDiv = div
+    }
+    // Color the words
+    const words = textDiv.querySelectorAll('.word');
+    words.forEach(word => {
+        const penalty = parseFloat(word.dataset.penalty);
+        // Proper nouns should be grey.
+        if (word.dataset.speech === 'nmpr') {
+            word.style.color = '#A9A9A9';
+        } else {
+            word.style.color = getGradientColor(penalty);
         }
-        currentSelection.classList.remove('selected'); // remove the 'selected' class from the previous selected word
-    }
-
-    if (wordJSON != null) {
-        const newSelection = document.getElementById(wordJSON.id);
-        newSelection.classList.add('selected'); // add the 'selected' class to the clicked word
-    }
+    });
 }
-
 
 function showWordAttributes(word) {
     const wordJSON = utils.contextToJson(word);
-    toggleSelectedWord(wordJSON);
+    const alreadySelected = toggleSelectedWord(wordJSON);
+    // Don't rebuild the div if we're unselecting the current word.
+    if (alreadySelected) {
+        return;
+    }
     const attributes = Object.entries(wordJSON).map(
         ([key, value]) => {
             if (value !== null && value !== "" && value !== " ") {
@@ -44,36 +50,47 @@ function showWordAttributes(word) {
     ).filter(attr => attr !== null).join('<br>');
 
     // Get the attributes div element and update its content
-    const attributesDiv = document.getElementById('attributes-div');
-    attributesDiv.innerHTML = attributes;
-    // Include dismiss button
-    const dismissButton = document.createElement('button');
-    dismissButton.textContent = 'x'
-    dismissButton.onclick = () => {
-        attributesDiv.style.display = 'none';
-        toggleSelectedWord();
-    }
-    attributesDiv.appendChild(dismissButton)
+    const wordAttributesDiv = document.getElementById('word-attributes');
+    wordAttributesDiv.innerHTML = attributes;
 
-    // Show the attributes div element
-    attributesDiv.style.display = 'block';
+    // Show the widget div element
+    const widgetDiv = document.getElementById('selected-word-widget');
+    widgetDiv.style.display = 'block';
 }
 
-window.showWordAttributes = showWordAttributes
+function dismissWordWidget() {
+    document.getElementById('selected-word-widget').style.display = 'none';
+    // Unselect the current word..
+    document.querySelector('.selected').classList.remove('selected');
+}
 
-document.addEventListener('hebrewTextLoaded', function (e) {
+function toggleSelectedWord(wordJSON) {
 
-    const words = document.querySelectorAll('.word');
-    words.forEach(word => {
-        const penalty = parseFloat(word.dataset.penalty);
-        word.style.color = getGradientColor(penalty);
-    });
+    const currentSelection = document.querySelector('.selected');
+    
+    if (currentSelection !== null) {
+        if (String(currentSelection.id) === String(wordJSON.id)) { // check if the clicked word is already selected
+            dismissWordWidget();
+            return true; // exit the function
+        }
+        // Remove the selected word when a new word is selected.
+        currentSelection.classList.remove('selected');
+    }
 
-    // Add a div element to hold the attributes
-    const attributesDiv = document.createElement('div');
-    attributesDiv.id = 'attributes-div'
+    // Select the currently clicked on word, if not already selected
+    const newSelection = document.getElementById(wordJSON.id);
+    newSelection.classList.add('selected');
+}
 
-    // Insert the attributes div element after the paragraph div element
-    const paragraphDiv = document.getElementById('paragraph');
-    paragraphDiv.parentNode.insertBefore(attributesDiv, paragraphDiv.nextSibling);
+// For Read page
+utils.subscribe('DOMContentLoaded', (event) => {
+    colorWords();
+})
+
+// For Words generated from API call
+utils.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
+    colorWords(event.detail);
 });
+
+window.showWordAttributes = showWordAttributes;
+window.dismissWordWidget = dismissWordWidget;

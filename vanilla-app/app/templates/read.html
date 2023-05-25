@@ -37,6 +37,9 @@
   <!-- Passage text content -->
   {% include 'widgets/hebrew_text.html' %}
 
+  <!-- Selected word data -->
+  {% include 'widgets/selected_word.html' %}
+
   <!-- Data not loaded content -->
   {% else %}
 
@@ -56,8 +59,8 @@
 <!-- TEMP FIX TILL API IS MADE -->
 <script type="module">
   import { init } from "{% static 'js/read.js' %}";
-  import utils from "{% static 'js/utils/utils.js' %}";
-  init ( utils.contextToJson('{{ books|escapejs }}') )
+  import { contextToJson } from "{% static 'js/utils/utils.js' %}";
+  init (contextToJson('{{ books|escapejs }}') )
 </script>
 
 <script type="module" src="{% static 'js/read.js' %}"></script>
