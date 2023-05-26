@@ -1,11 +1,5 @@
 import * as utils from './utils/utils.js';
-import apis from './utils/apis.js';
-
-// TEMP CODE
-export var books;
-export function init(booksData) {
-  books = booksData;
-}
+import apis from './utils/api.js';
 
 function changeChapter(direction, reference) {
 
@@ -16,8 +10,8 @@ function changeChapter(direction, reference) {
   const currentChapter = parseInt(chapterData[0]);
 
   // Get the current book object
-  const bookIndex = books.findIndex((book) => book.name === bookName);
-  const book = books[bookIndex];
+  const bookIndex = utils.books.findIndex((book) => book.name === bookName);
+  const book = utils.books[bookIndex];
 
   const newChapter = currentChapter + parseInt(direction);
 
@@ -27,7 +21,7 @@ function changeChapter(direction, reference) {
   } else if (newChapter === 0 && book.number > 1) {
     const newBook = utils.getBookByNumber(book.number - 1);
     utils.submitPassageSelection(newBook.number, newBook.chapters)
-  } else if (newChapter > book.chapters && book.number < books.length) {
+  } else if (newChapter > book.chapters && book.number < utils.books.length) {
     const newBook = utils.getBookByNumber(book.number + 1);
     utils.submitPassageSelection(newBook.number, 1)
   }

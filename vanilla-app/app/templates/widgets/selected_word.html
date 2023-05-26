@@ -22,9 +22,31 @@
         border: none;
         cursor: pointer;
     }
+    #hovered-word-widget {
+        position: fixed; /* Fixes the div to the viewport */
+        bottom: 10px;
+        left: 10px; /* Adjust as per need */
+        z-index: 10;
+        display: none; /* Initially hidden */
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: .25rem;
+        padding: .75rem;
+        max-width: 500px; /* Adjust as per need */
+        font-size: .875rem;
+    }
 </style>
 
 <div id="selected-word-widget">
     <button class="dismiss-button bg-white hover:bg-gray-100 font-semibold px-2 border border-gray-400 rounded shadow" onclick="dismissWordWidget()">x</button>
     <div id="word-attributes"></div>
+</div>
+
+<div id="hovered-word-widget">
+    <b><span id="english"></span> (<span id="text"></span>)</b>
+    <div id="speech"></div>
+    <div id="morph"></div>
+    <span id="ref"></span> - <span id="lex-freq"></span>
+    
+    
 </div>

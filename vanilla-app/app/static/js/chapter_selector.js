@@ -1,13 +1,11 @@
-// TEMP
-import { books } from './read.js';
 import * as utils from './utils/utils.js';
 
 
-async function createBookDropdown(books) {
+async function createBookDropdown() {
 
     const bookDropdown = document.getElementById('bookDropdown');
 
-    books.forEach((book) => {
+    utils.books.forEach((book) => {
         const bookOption = document.createElement('div');
         bookOption.textContent = book.name;
         bookOption.id = book.number;
@@ -56,7 +54,7 @@ function selectBook(book) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    createBookDropdown(books);
+    createBookDropdown();
    
     // Add event listener for the button
     const chapterSelectorBtn = document.getElementById('bookSelectionButton');

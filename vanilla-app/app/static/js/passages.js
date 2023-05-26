@@ -2,14 +2,7 @@
 import * as utils from './utils/utils.js';
 import * as constants from './utils/constants.js';
 
-
 let selectedPassages = [];
-
-// TEMP CODE
-let books;
-export function init(booksData) {
-    books = booksData;
-}
 
 function selectPassage(event) {
     const checkbox = event.target;

@@ -33,8 +33,20 @@ export const W_LEX_FREQUENCY = 'lex_frequency';
 export const W_OCC_FREQUENCY = 'occ_frequency';
 export const W_PENALTY = 'penalty';
 export const W_LEX_ID = 'lex_id';
-export const W_QERE = 'qere';
-export const W_LEX_SET = 'lex_set';
+
 export const W_LEX = 'lex';
-export const W_STATE = 'state';
 export const W_NAME_TYPE = 'name_type';
+export const W_LEX_SET = 'lex_set';
+export const W_STATE = 'state';
+export const W_LANGUAGE = 'language';
+
+export const W_QERE = 'qere';
+export const W_KETIV = 'ketiv';
+
+// Morphemes
+export const W_NOMINAL_ENDING = 'nominal_ending';
+export const W_PREFORMATIVE = 'preformative';
+export const W_PRONOMINAL_SUFFIX = 'pronominal_suffix';
+export const W_UNIVALENT_FINAL = 'univalent_final';
+export const W_VERBAL_ENDING = 'verbal_ending';
+export const W_ROOT_FORMATION = 'root_formation';

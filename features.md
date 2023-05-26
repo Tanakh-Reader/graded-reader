@@ -1,4 +1,4 @@
-https://etcbc.github.io/bhsa/features/0_home/
+Khttps://etcbc.github.io/bhsa/features/0_home/
 
 - nametype: grayscale proper nouns.
     - note that all of them showed up as nmpr in 2017.

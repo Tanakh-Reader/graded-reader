@@ -24,7 +24,6 @@ def replace(value):
 def add_words_to_database():
     api = bhsa_provider.get_api()
     T, L, F = api.T, api.L, api.F
-
     print("Collecting word data from BHSA")
     timer.start()
 
@@ -40,7 +39,7 @@ def add_words_to_database():
         word.text = F.g_word_utf8.v(node_id)
         word.trailer = F.trailer_utf8.v(node_id)
         word.speech = F.sp.v(node_id)
-        word.person = replace(F.prs.v(node_id))
+        word.person = replace(F.ps.v(node_id))
         word.gender = replace(F.gn.v(node_id))
         word.number = replace(F.nu.v(node_id))
         word.verb_tense = replace(F.vt.v(node_id))
@@ -53,6 +52,24 @@ def add_words_to_database():
         word.occ_frequency = F.freq_occ.v(node_id)
         word.lex_id = L.u(node_id, otype="lex")[0]
         word.penalty = word_penalty(word.lex_frequency)
+
+        word.lex = F.g_lex_utf8.v(node_id)
+        word.name_type = replace(F.nametype.v(node_id))
+        word.lex_set = replace(F.ls.v(node_id))
+        word.state = replace(F.st.v(node_id))
+        word.language = F.language.v(node_id)
+
+        word.qere = replace(F.qere_utf8.v(node_id))
+        word.ketiv = replace(F.kq_hybrid_utf8.v(node_id))
+
+        # MORPHEMES
+        word.nominal_ending = replace(F.g_nme_utf8.v(node_id))
+        word.preformative = replace(F.g_pfm_utf8.v(node_id))
+        word.pronominal_suffix = replace(F.g_prs_utf8.v(node_id))
+        word.univalent_final = replace(F.g_uvf_utf8.v(node_id))
+        word.verbal_ending = replace(F.g_vbe_utf8.v(node_id))
+        word.root_formation	= replace(F.g_vbs_utf8.v(node_id))
+
         words.append(word)
 
     timer.end()

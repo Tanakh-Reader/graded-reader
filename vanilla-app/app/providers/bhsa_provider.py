@@ -1,10 +1,10 @@
 from tf.fabric import Fabric
 from ..utils.timer import timer
+from ..data import constants
 
 
 class BHSAProvider:
     path = "../bhsa/tf/2021"
-    features = "sp prs gn nu vt vs prs_ps prs_gn prs_nu gloss freq_lex freq_occ"
     api = None
 
     def get_api(self):
@@ -15,7 +15,7 @@ class BHSAProvider:
         timer.start()
 
         tf = Fabric(locations=self.path)
-        self.api = tf.load(features=self.features)
+        self.api = tf.load(features=constants.BHSA_FEATURES)
         self.api.makeAvailableIn(locals())
 
         timer.end()

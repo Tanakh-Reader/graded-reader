@@ -76,10 +76,12 @@ def passages_compare(request: HttpRequest):
     ids = [passage1_id, passage2_id]
     text_passages = passage_provider.get_passages_by_ids(ids, as_json=True)
     all_passages = passage_provider.get_all_passages(as_json=True)
+    books = book_provider.get_all_book_instances(as_json=True)
 
     context = {
         'text_passages': text_passages,
-        'passages': all_passages
+        'passages': all_passages,
+        'books': books
     }
 
     return render(request, "passages_compare.html", context)

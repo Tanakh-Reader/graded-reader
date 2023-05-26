@@ -28,6 +28,23 @@ class Word(models.Model):
     penalty = models.DecimalField(decimal_places=4, max_digits=7)
     lex_id = models.IntegerField(db_index=True)
 
+    lex = models.CharField(max_length=30, blank=True, null=True)
+    name_type = models.CharField(max_length=10, blank=True, null=True)
+    lex_set = models.CharField(max_length=10, blank=True, null=True)
+    state = models.CharField(max_length=10, blank=True, null=True)
+    language = models.CharField(max_length=10, blank=True, null=True)
+
+    qere = models.CharField(max_length=30, blank=True, null=True)
+    ketiv = models.CharField(max_length=30, blank=True, null=True)
+
+    # Morphemes
+    nominal_ending = models.CharField(max_length=10, blank=True, null=True)
+    preformative = models.CharField(max_length=10, blank=True, null=True)
+    pronominal_suffix = models.CharField(max_length=10, blank=True, null=True)
+    univalent_final = models.CharField(max_length=10, blank=True, null=True)
+    verbal_ending = models.CharField(max_length=10, blank=True, null=True)
+    root_formation = models.CharField(max_length=10, blank=True, null=True)
+
     def to_dict(self):
         self.penalty = str(self.penalty)
         return model_to_dict(self)

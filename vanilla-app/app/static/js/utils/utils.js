@@ -1,6 +1,15 @@
 
 import * as constants from './constants.js';
 
+export var books = null;
+
+export function setBooks(bookData) {
+  bookData = contextToJson(bookData);
+  if (books === null) {
+    books = bookData
+  }
+}
+
 // Make sure a query param is valid
 export function setParamIfValid(queryParams, key, value) {
   if (value !== undefined && value !== '' && value !== null) {

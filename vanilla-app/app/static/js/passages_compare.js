@@ -1,6 +1,6 @@
 import * as constants from './utils/constants.js';
 import * as utils from './utils/utils.js';
-import apis from './utils/apis.js';
+import apis from './utils/api.js';
 import { getBackgroundColorByPenalty } from './passages.js';
 
 
