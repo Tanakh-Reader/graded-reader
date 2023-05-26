@@ -1,6 +1,7 @@
 import * as constants from './utils/constants.js';
 import * as utils from './utils/utils.js';
 import apis from './utils/apis.js';
+import { getBackgroundColorByPenalty } from './passages.js';
 
 
 let currentButton = null;
@@ -78,10 +79,20 @@ function getHebrewText(passageId, div) {
         });
 }
 
+function colorPassageItem(passage) {
+    const wordCount = passage.getAttribute("data-word-count");
+    const penalty = passage.getAttribute("data-penalty");
+    const color = getBackgroundColorByPenalty(penalty);
+
+    const gradientPercentage = Math.min(wordCount / 500, 1) * 100;
+
+    passage.style.background = `linear-gradient(90deg, ${color} ${gradientPercentage}%, white ${gradientPercentage}%)`;
+}
 
 window.addEventListener("DOMContentLoaded", (event) => {
     document.querySelectorAll('.passage-item').forEach(item => {
         item.addEventListener('click', event => selectPassage(event.target));
+        colorPassageItem(item);
     });
 
 

@@ -15,7 +15,9 @@
 
   <!-- Passage header content -->
   <!-- <div class="relative mb-8"> -->
-  <div class="flex justify-center items-center mb-8">
+          {% include 'widgets/word_highlights_dropdown.html' %}
+
+  <div class="flex justify-center items-center mb-8 mt-2">
     <!-- h1 class="text-2xl font-bold inline"></h1> -->
     <!-- <span class="mr-4">
     <button id="bookSelectionButton" class="btn">
@@ -32,6 +34,8 @@
       class="ml-4 btn">Next</button>
     <button id="toggleVerseNumbers" onclick="toggleVerseNumbers()"
       class="ml-4 btn">Verses</button>
+    <div class="ml-4">
+    </div>
   </div>
 
   <!-- Passage text content -->

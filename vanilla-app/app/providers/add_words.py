@@ -16,7 +16,7 @@ BATCH_SIZE = 2500  # uploading words to the database
 def replace(value):
     if value in {"NA", "n/a", "absent"}:
         return None
-
+    
     return value
 
 

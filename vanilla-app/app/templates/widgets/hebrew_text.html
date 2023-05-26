@@ -1,4 +1,6 @@
 {% load list_extras %}
+{% load json %}
+
 {% load static %}
 
 <link rel="stylesheet" href="{% static 'css/hebrew_text.css' %}">
@@ -11,12 +13,11 @@
     <span class="verse-number"> {{ word.verse }} </span>
     {% endif %}
     {% endwith %}
-    <span id="{{ word.id }}" class="word" data-penalty="{{ word.penalty }}" data-speech="{{ word.speech }}"
-        onclick="showWordAttributes('{{ word|escapejs }}')">{{ word.text }}{{ word.trailer }}</span>
+    <span id="{{ word.id }}" class="word" data-dict="{{ word|to_json }}"
+        onclick="showWordAttributes(this)">{{ word.text }}{{ word.trailer }}</span>
     {% endfor %}
 </div>
 {% endspaceless %}
 
 <script type="module" src="{% static 'js/hebrew_text.js' %}"></script>
 
-</script>

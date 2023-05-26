@@ -10,36 +10,44 @@
 
 {% block content %}
 
-<div class="flex flex-row">
-    {% for text_passage in text_passages %}
-    <div class="passage-container flex flex-col w-1/2 mx-4">
-        <div class="justify-center items-center mb-8">
-            <button class="border rounded p-2" onclick="showDropdown(this)">
-                {{ text_passage.reference }}
-            </button>
-            <h2>{{ text_passage.penalty }}</h2>
+<div class="container mx-auto px-4">
+    <div class="ml-4 mb-6">{% include 'widgets/word_highlights_dropdown.html' %}
+    </div>
+    <div class="flex flex-row">
+
+        {% for text_passage in text_passages %}
+        <div class="passage-container flex flex-col w-1/2 mx-1 py-3 px-4">
+            <div class="flex flex-row justify-center items-center my-4">
+                <button class="btn" onclick="showDropdown(this)">
+                    {{ text_passage.reference }}
+                </button>
+                <h2 class="ml-8">{{ text_passage.penalty }}</h2>
+            </div>
+
+            <!--  USED by the API CALL -->
+            <div class="passage-text" 
+        data-id="{{ text_passage.id }}"></div>
+        
+        </div>
+        {% endfor %}
+
+        <!-- Dropdown menu for search passages -->
+        <div id="dropdown-menu" class="dropdown-menu mt-1">
+            <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()" placeholder="Search...">
+            <ul class="list-none p-0 overflow-auto max-h-72">
+                {% for passage in passages %}
+                <li class="passage-item p-2 hover:bg-gray-200 cursor-pointer" 
+                    data-ref="{{ passage.reference}}"
+                    data-id="{{ passage.id}}"
+                    data-word-count="{{ passage.word_count }}"
+                    data-penalty="{{ passage.penalty }}">
+                    {{ passage.reference }}
+                </li>
+                {% endfor %}
+            </ul>
         </div>
 
-        <!--  USED by the API CALL -->
-        <div class="passage-text" 
-     data-id="{{ text_passage.id }}"></div>
-    
     </div>
-    {% endfor %}
-
-    <!-- Dropdown menu for search passages -->
-    <div id="dropdown-menu" class="dropdown-menu mt-1">
-        <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()" placeholder="Search...">
-        <ul class="list-none p-0 overflow-auto max-h-72">
-            {% for passage in passages %}
-            <li class="passage-item p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}"
-                data-id="{{ passage.id}}">
-                {{ passage.reference }} {{ passage.penalty }}
-            </li>
-            {% endfor %}
-        </ul>
-    </div>
-    
 </div>
 
 <!-- Selected word data -->

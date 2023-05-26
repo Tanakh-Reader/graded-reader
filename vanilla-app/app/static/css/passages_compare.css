@@ -7,3 +7,9 @@
     border-radius: 4px;
     display: none;
 }
+
+.passage-container {
+    background: whitesmoke; /* use theme color */
+    border-radius: 8px;
+}
+

@@ -70,7 +70,7 @@ function submitPassage(passage) {
     );
 } 
 
-function getBackgroundColorByPenalty(penalty) {
+export function getBackgroundColorByPenalty(penalty) {
     const minPenalty = 1;
     const maxPenalty = 10;
     const percentage = (penalty - minPenalty) / (maxPenalty - minPenalty);

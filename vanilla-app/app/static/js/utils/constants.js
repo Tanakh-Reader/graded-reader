@@ -9,5 +9,32 @@ export const DELETE_WORDS_API = '/api/delete-words';
 export const DELETE_PASSAGES_API = '/api/delete-passages';
 
 
-// PUB / SUB 
+// PUB / SUB EVENTS
 export const TEXT_LOADED_EVENT = 'hebrewTextLoaded'
+
+// WORD ATTRIBUTES
+export const W_ID = 'id';
+export const W_BOOK = 'book';
+export const W_CHAPTER = 'chapter';
+export const W_VERSE = 'verse';
+export const W_TEXT = 'text';
+export const W_TRAILER = 'trailer';
+export const W_SPEECH = 'speech';
+export const W_PERSON = 'person';
+export const W_GENDER = 'gender';
+export const W_NUMBER = 'number';
+export const W_VERB_TENSE = 'verb_tense';
+export const W_VERB_STEM = 'verb_stem';
+export const W_SUFFIX_PERSON = 'suffix_person';
+export const W_SUFFIX_GENDER = 'suffix_gender';
+export const W_SUFFIX_NUMBER = 'suffix_number';
+export const W_GLOSS = 'gloss';
+export const W_LEX_FREQUENCY = 'lex_frequency';
+export const W_OCC_FREQUENCY = 'occ_frequency';
+export const W_PENALTY = 'penalty';
+export const W_LEX_ID = 'lex_id';
+export const W_QERE = 'qere';
+export const W_LEX_SET = 'lex_set';
+export const W_LEX = 'lex';
+export const W_STATE = 'state';
+export const W_NAME_TYPE = 'name_type';

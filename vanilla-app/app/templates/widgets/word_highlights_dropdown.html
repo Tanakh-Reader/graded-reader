@@ -1,0 +1,16 @@
+{% load static %}
+
+<div id="word-highlights-dropdown" class="dropdown flex flex-row items-start inline-block">
+    <button class="btn bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded inline-flex items-center">
+        <span class="mr-1">Text Features</span>
+        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+            <path d="M10 12l-6-6 1.414-1.414L10 9.172l4.586-4.586L16 6z" />
+        </svg>
+    </button>
+    <ul id="word-highlights-dropdown-menu" class="grid grid-cols-3 gap-1 bg-gray-200  rounded hidden text-gray-700 p-1 ml-1">
+
+        <!-- Dropdown items will be populated by JavaScript -->
+    </ul>
+</div>
+
+<script type="module" src="{% static 'js/word_highlights.js' %}"></script>

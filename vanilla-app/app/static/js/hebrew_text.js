@@ -23,9 +23,10 @@ function colorWords(div = null) {
     // Color the words
     const words = textDiv.querySelectorAll('.word');
     words.forEach(word => {
-        const penalty = parseFloat(word.dataset.penalty);
+        const wordJSON = utils.contextToJson(word.dataset.dict)
+        const penalty = parseFloat(wordJSON[constants.W_PENALTY]);
         // Proper nouns should be grey.
-        if (word.dataset.speech === 'nmpr') {
+        if (wordJSON[constants.W_SPEECH] === 'nmpr') {
             word.style.color = '#A9A9A9';
         } else {
             word.style.color = getGradientColor(penalty);
@@ -33,8 +34,9 @@ function colorWords(div = null) {
     });
 }
 
-function showWordAttributes(word) {
-    const wordJSON = utils.contextToJson(word);
+function showWordAttributes(wordSpan) {
+    const wordJSON = utils.contextToJson(wordSpan.dataset.dict);
+    
     const alreadySelected = toggleSelectedWord(wordJSON);
     // Don't rebuild the div if we're unselecting the current word.
     if (alreadySelected) {
