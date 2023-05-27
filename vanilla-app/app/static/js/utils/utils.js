@@ -1,13 +1,30 @@
 
 import * as constants from './constants.js';
+import api from './api.js';
 
-export var books = null;
+let books = null;
 
-export function setBooks(bookData) {
-  bookData = contextToJson(bookData);
+export async function getBooks() {
   if (books === null) {
-    books = bookData
+    console.log("HITTING API")
+    books = await api.getAllBooks();
   }
+  return books;
+}
+
+export async function getBookByNumber(number) {
+  let _books = await getBooks();
+  number = parseInt(number);
+  const bookIndex = _books.findIndex((book) => book.number === number);
+  const book = _books[bookIndex];
+  return book;
+}
+
+export async function getBookByName(name) {
+  let _books = await getBooks();
+  const bookIndex = _books.findIndex((book) => book.name === name);
+  const book = _books[bookIndex];
+  return book;
 }
 
 // Make sure a query param is valid
@@ -25,21 +42,11 @@ export function isReferenceMatch(searchTerm, reference) {
 
 // Convert a context object JS json
 export function contextToJson(context) {
+  if ([null, undefined, ""].includes(context)) {
+    return context;
+  }
   context = context.replace(/'/g, '"').replace(/None/g, null);
   return JSON.parse(context);
-}
-
-export function getBookByNumber(number) {
-  number = parseInt(number);
-  const bookIndex = books.findIndex((book) => book.number === number);
-  const book = books[bookIndex];
-  return book;
-}
-
-export function getBookByName(name) {
-  const bookIndex = books.findIndex((book) => book.name === name);
-  const book = books[bookIndex];
-  return book;
 }
 
 // Submit a passage to render on the read screen.

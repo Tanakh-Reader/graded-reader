@@ -15,7 +15,7 @@ urlpatterns = [
     # GET
     path("api/hebrew-text", views.get_hebrew_text, name="hebrew_text"),
     path("api/render-chapter", views.render_chapter, name="render_chapter"),
-    # path('get_books', views.get_books, name='get_books'),
+    path('api/get-books', views.get_books, name='get_books'),
     path("api/check-data-ready", views.check_data_ready, name="check_data_ready"),
     
     # DELETE

@@ -63,8 +63,8 @@
 
 <!-- TEMP FIX TILL API IS MADE -->
 <script type="module">
-  import { setBooks } from "{% static 'js/utils/utils.js' %}";
-  setBooks('{{ books|escapejs }}')
+  import { createBookDropdown } from "{% static 'js/chapter_selector.js' %}";
+  createBookDropdown("{{ books|escapejs }}");
 </script>
 
 <script type="module" src="{% static 'js/read.js' %}"></script>

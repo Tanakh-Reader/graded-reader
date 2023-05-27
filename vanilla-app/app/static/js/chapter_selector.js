@@ -1,11 +1,14 @@
 import * as utils from './utils/utils.js';
 
+export async function createBookDropdown(booksData=null) {
 
-async function createBookDropdown() {
+    let books = utils.contextToJson(booksData);
+    if (books === null) {
+        books = await utils.getBooks();
+    }
 
     const bookDropdown = document.getElementById('bookDropdown');
-
-    utils.books.forEach((book) => {
+    books.forEach((book) => {
         const bookOption = document.createElement('div');
         bookOption.textContent = book.name;
         bookOption.id = book.number;
@@ -20,8 +23,6 @@ async function createBookDropdown() {
 function createChapterDropdown(book) {
     const chapterDropdown = document.getElementById('chapterDropdown');
     chapterDropdown.innerHTML = "";
-    console.log(book)
-    console.log("BOOK CHAPTERS" + book.chapters)
     for (let i = 1; i <= book.chapters; i++) {
         const chapterOption = document.createElement('div');
         chapterOption.textContent = i;
@@ -52,10 +53,7 @@ function selectBook(book) {
     createChapterDropdown(book);
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-
-    createBookDropdown();
-   
+document.addEventListener('DOMContentLoaded', () => {   
     // Add event listener for the button
     const chapterSelectorBtn = document.getElementById('bookSelectionButton');
     chapterSelectorBtn.addEventListener('click', () => {

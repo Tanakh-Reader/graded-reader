@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -r gradedhebrew/staticfiles
+# rm -r gradedhebrew/staticfiles
 
 poetry run python3 manage.py collectstatic --no-input --ignore 'css/build/*'
 

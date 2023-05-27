@@ -1,6 +1,6 @@
 
 import * as constants from './constants.js';
-import * as utils from './utils.js';
+// import * as utils from './utils.js';
 
 function getHebrewText(passageId) {
     return new Promise((resolve, reject) => {
@@ -18,6 +18,21 @@ function getHebrewText(passageId) {
         });
     });
 }
+
+function getAllBooks() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: constants.GET_BOOKS_API,
+            success: function (response) {
+                resolve(response.books);  // Resolve the promise with the response
+            },
+            error: function (error) {
+                reject(error);  // Reject the promise if there's an error
+            }
+        });
+    });
+}
+
 
 // Check on data that is being initialized
 function checkDataReady(dataSource) {
@@ -55,5 +70,6 @@ function checkDataReady(dataSource) {
 
 export default { 
     getHebrewText, 
+    getAllBooks, 
     checkDataReady
 }

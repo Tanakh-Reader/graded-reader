@@ -1,10 +1,8 @@
 import * as utils from './utils/utils.js';
 import * as constants from './utils/constants.js';
 
-
 const wordSummaryDiv = document.getElementById('hovered-word-widget');
 let timer = null;
-
 
 function getGradientColor(penalty) {
     const green = [0, 0, 0];
@@ -87,7 +85,7 @@ function showWordSummary(wordSpan) {
     clearTimeout(timer);
 
     // Set a new timer
-    timer = setTimeout(function () {
+    timer = setTimeout(async function () {
         const wordJSON = utils.contextToJson(wordSpan.dataset.dict);
 
         const textSpan = document.getElementById('text');
@@ -119,7 +117,7 @@ function showWordSummary(wordSpan) {
         morphSpan.innerText = morphText;
 
         // Reference
-        const book = utils.getBookByNumber(wordJSON[constants.W_BOOK])
+        const book = await utils.getBookByNumber(wordJSON[constants.W_BOOK])
         const ref = `${book.name} ${wordJSON[constants.W_BOOK]}:${wordJSON[constants.W_VERSE]}`;
         const refSpan = document.getElementById('ref');
         refSpan.innerText = ref;
@@ -128,7 +126,6 @@ function showWordSummary(wordSpan) {
         lexFreqSpan.innerText = wordJSON[constants.W_LEX_FREQUENCY] + ' occ'
 
         
-
         wordSummaryDiv.style.display = 'block';
     }, 400);  // 1000 milliseconds = 1 second
 }

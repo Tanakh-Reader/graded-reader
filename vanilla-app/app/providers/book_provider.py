@@ -16,7 +16,7 @@ class BookProvider:
 
     def __init__(self):
         self.df = pd.read_csv(BOOKS_CSV)
-        self.book_to_id = {name: number for name, number in zip(self.df[BHSA_NAME], self.df[BOOK_NUMBER])}
+        self.book_to_id = {name: int(number) for name, number in zip(self.df[BHSA_NAME], self.df[BOOK_NUMBER])}
         self.book_instances = []
         self.get_all_book_instances()
 
@@ -42,7 +42,7 @@ class BookProvider:
     def get_book_instance(self, number):
         name = self.get_name(number)
         name_bhsa = self.get_name_bhsa(number)
-        chapters = self.get_chapters(number)
+        chapters = int(self.get_chapters(number)) # replace pandas default int64
         return Book(number, name, name_bhsa, chapters)
     
     def get_all_book_instances(self, as_json=False):

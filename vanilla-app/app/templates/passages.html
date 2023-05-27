@@ -85,12 +85,6 @@
 
   {% endif %}
 
-  <!-- !-- TEMP FIX TILL API IS MADE --> -->
-  <script type="module">
-    import { setBooks } from "{% static 'js/utils/utils.js' %}";
-      setBooks('{{ books|escapejs }}')
-  </script>
-
   <script type ="module" src="{% static 'js/passages.js' %}"></script>
 
   {% endblock %}

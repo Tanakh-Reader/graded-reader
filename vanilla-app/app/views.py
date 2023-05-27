@@ -118,7 +118,9 @@ def get_hebrew_text(request: HttpRequest):
     return JsonResponse({'html': text_html})
 
 def get_books(request: HttpRequest):
-    pass
+    
+    books = book_provider.get_all_book_instances(as_json=True)
+    return JsonResponse({'books': books})
 
 def check_data_ready(request: HttpRequest):
     data_source = request.GET.get("data_source")

@@ -53,11 +53,6 @@
 <!-- Selected word data -->
 {% include 'widgets/selected_word.html' %}
 
-<script type="module">
-    import { setBooks } from "{% static 'js/utils/utils.js' %}";
-    setBooks('{{ books|escapejs }}')
-</script>
-
 <script type="module" src="{% static 'js/hebrew_text.js' %}"></script>
 <script type="module" src="{% static 'js/passages_compare.js' %}"></script>
 
