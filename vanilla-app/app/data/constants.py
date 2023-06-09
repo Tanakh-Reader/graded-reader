@@ -7,6 +7,14 @@ PARAGRAPH_MARKERS = {"פ": "open", "ס": "closed"}
 # Psalm 119 has 176 verses.
 LONGEST_CHAPTER = 176 
 
+# Percent proper nouns to count as genealogy.
+GENEALOGY_PERCENTAGE = 1 / 3
+
+class TAGS:
+    QERE = 'qere'
+    GENEALOGY = 'genealogy'
+
+
 BHSA_FEATURES = """
 sp
 ps

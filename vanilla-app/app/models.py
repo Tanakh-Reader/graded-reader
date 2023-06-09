@@ -61,6 +61,7 @@ class Passage(models.Model):
     end_verse = models.PositiveSmallIntegerField(blank=True, null=True)
     word_count = models.PositiveSmallIntegerField(db_index=True, blank=True, null=True)
     penalty = models.DecimalField(db_index=True, max_digits=7, decimal_places=4)
+    tags = models.TextField(blank=True, null=True)
 
     # fields used for getting passages from BHSA
     def __post_init__(self):
@@ -70,6 +71,7 @@ class Passage(models.Model):
 
     def to_dict(self):
         self.penalty = str(self.penalty)
+        self.tags = self.tags.split(',')
         passage_dict = model_to_dict(self)
         passage_dict["reference"] = self.get_reference()
         passage_dict['id'] = self.id

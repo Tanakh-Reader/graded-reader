@@ -1,8 +1,14 @@
 import threading
+import yaml
+import os
 
+from django.conf import settings
 from .add_words import add_words_to_database
 from ..data import constants
 from ..models import Word, Passage
+
+
+ATTRIBUTES_FILE = os.path.join(settings.BASE_DIR, "data/bhsa_data_mapping.yml")
 
 # Class that interfaces with the Sqlite DB to get words.
 class WordProvider:
@@ -89,6 +95,12 @@ class WordProvider:
         Word.objects.all().delete()
         self.words_loaded = False
         self.loading_in_progress = False
+
+    # GET WORD ATTRIBUTE MAPPINGS
+    def get_attribute_mappings(self):
+        with open(ATTRIBUTES_FILE, 'r') as file:
+            data = yaml.load(file, Loader=yaml.FullLoader)
+            return data
     
 
 word_provider = WordProvider()

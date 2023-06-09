@@ -2,10 +2,10 @@ import pandas as pd
 import os
 from pathlib import Path
 
+from django.conf import settings
 from ..data.book import Book
   
-parent_dir = Path(__file__).resolve().parent.parent
-BOOKS_CSV = os.path.join(parent_dir, "data/books.csv")
+BOOKS_CSV = os.path.join(settings.BASE_DIR, "data/books.csv")
 
 BOOK_NUMBER = 'bookId'
 BHSA_NAME = 'bhsaName'

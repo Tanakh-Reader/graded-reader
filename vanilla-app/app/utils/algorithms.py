@@ -1,9 +1,15 @@
 import math
 
 from ..providers.bhsa_provider import bhsa_provider
-from ..data.ranks import Classify, Rank, LexRanks
+from ..data.ranks import Classify, Rank, LexRanks, MorphRank
 
+lex_rank_default = LexRanks()._7_ranks.get_rank_dict()
 
+def is_proper_noun(word):
+    T, L, F = bhsa_provider.api_globals()
+    if F.ls.v(word) == 'gnt   l' or F.sp.v(word) == 'nmpr':
+        return True
+    
 # A class used to compare mismatches between differently sorted lists.
 class CompareData:
     def update_index(self, dict, key, i):
@@ -41,8 +47,7 @@ def word_penalty(word_freq):
 
 
 def get_passage_weight(passage):
-    api = bhsa_provider.get_api()
-    T, L, F = api.T, api.L, api.F
+    T, L, F = bhsa_provider.api_globals()
     total_weight = 0
     # Iterate over words in the passage.
     for word in passage.words():
@@ -53,7 +58,8 @@ def get_passage_weight(passage):
     return round(total_weight, 4)
 
 
-def get_passage_weight1(passage, rank_scale):
+def get_passage_weight1(passage, rank_scale=lex_rank_default):
+    T, L, F = bhsa_provider.api_globals()
     total_weight = 0
     # Iterate over words in the passage.
     for word in passage.words():
@@ -64,7 +70,7 @@ def get_passage_weight1(passage, rank_scale):
                 _range = rank_scale[rank]["range"]
                 if lex_freq >= _range[0] and lex_freq < _range[1]:
                     # Give a half penalty for proper nouns.
-                    if F.sp.v(word) == "nmpr":  # proper noun
+                    if is_proper_noun(word):  # proper noun
                         total_weight += (rank_scale[rank]["weight"]) / 2
                     # Give a full penalty for other word types.
                     else:
@@ -75,7 +81,8 @@ def get_passage_weight1(passage, rank_scale):
 
 
 # Only penalize once per lexical value.
-def get_passage_weight2(passage, rank_scale, div_all=True):
+def get_passage_weight2(passage, rank_scale=lex_rank_default, div_all=True):
+    T, L, F = bhsa_provider.api_globals()
     total_weight = 0
     unique_words = set()
     # Iterate over words in the passage.
@@ -88,7 +95,7 @@ def get_passage_weight2(passage, rank_scale, div_all=True):
                 _range = rank_scale[rank]["range"]
                 if lex_freq >= _range[0] and lex_freq < _range[1]:
                     # Give a half penalty for proper nouns.
-                    if F.sp.v(word) == "nmpr":  # proper noun
+                    if is_proper_noun(word):  # proper noun
                         total_weight += (rank_scale[rank]["weight"]) / 2
                     # Give a full penalty for other word types.
                     else:
@@ -104,7 +111,8 @@ def get_passage_weight2(passage, rank_scale, div_all=True):
 
 
 # Decrease penalty for each occurance.
-def get_passage_weight3(passage, rank_scale, div_all=True, morph=False):
+def get_passage_weight3(passage, rank_scale=lex_rank_default, div_all=True, morph=False):
+    T, L, F = bhsa_provider.api_globals()
     word_weights = {}
     verb_count = 0
     verb_weight = 0
@@ -140,7 +148,7 @@ def get_passage_weight3(passage, rank_scale, div_all=True, morph=False):
                         # Give a half penalty for proper nouns.
                         _penalty = rank_scale[rank]["weight"]
                         if (
-                            F.sp.v(word) == "nmpr" and _penalty > min_penalty
+                            is_proper_noun(word) and _penalty > min_penalty
                         ):  # proper noun
                             word_weights[lex]["penalty"] = int(math.ceil(_penalty / 2))
                         # Give a full penalty for other word types.

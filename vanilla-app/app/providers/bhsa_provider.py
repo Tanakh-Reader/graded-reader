@@ -22,6 +22,11 @@ class BHSAProvider:
         print(f"TF API LOADED\n")
 
         return self.api
+    
+    def api_globals(self):
+
+        api = self.get_api()
+        return api.T, api.L, api.F
 
 
 bhsa_provider = BHSAProvider()

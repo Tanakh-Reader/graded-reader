@@ -1,0 +1,596 @@
+ls:
+  name: lexical set
+  src: https://etcbc.github.io/bhsa/features/ls/
+  codes:
+    nmdi:
+      definition: distributive noun
+      custom: null
+    nmcp:
+      definition: copulative noun
+      custom: null
+    padv:
+      definition: potential adverb
+      custom: null
+    afad:
+      definition: anaphoric adverb
+      custom: null
+    ppre:
+      definition: potential preposition
+      custom: null
+    cjad:
+      definition: conjunctive adverb
+      custom: null
+    ordn:
+      definition: ordinal
+      custom: null
+    vbcp:
+      definition: copulative verb
+      custom: null
+    mult:
+      definition: noun of multitude
+      custom: null
+    focp:
+      definition: focus particle
+      custom: null
+    ques:
+      definition: interrogative particle
+      custom: null
+    gntl:
+      definition: gentilic
+      custom: null
+    quot:
+      definition: quotation verb
+      custom: null
+    card:
+      definition: cardinal
+      custom: null
+    none:
+      definition: none
+      custom: null
+
+sp:
+  name: part-of-speech
+  src: https://etcbc.github.io/bhsa/features/sp/
+  codes:
+    art:
+      definition: article
+      custom: null
+    verb:
+      definition: verb
+      custom: null
+    subs:
+      definition: noun
+      custom: null
+    nmpr:
+      definition: proper noun
+      custom: null
+    advb:
+      definition: adverb
+      custom: null
+    prep:
+      definition: preposition
+      custom: null
+    conj:
+      definition: conjunction
+      custom: null
+    prps:
+      definition: personal pronoun
+      custom: null
+    prde:
+      definition: demonstrative pronoun
+      custom: null
+    prin:
+      definition: interrogative pronoun
+      custom: null
+    intj:
+      definition: interjection
+      custom: null
+    nega:
+      definition: negative particle
+      custom: null
+    inrg:
+      definition: interrogative particle
+      custom: null
+    adjv:
+      definition: adjective
+      custom: null
+
+nametype:
+  name: name type
+  src: https://etcbc.github.io/bhsa/features/nametype/
+  codes:
+    pers:
+      definition: person
+      custom: null
+    mens:
+      definition: measurement unit
+      custom: null
+    gens:
+      definition: people
+      custom: null
+    topo:
+      definition: place
+      custom: null
+    ppde:
+      definition: demonstrative personal pronoun
+      custom: null
+
+
+gn:
+  name: gender
+  src: https://etcbc.github.io/bhsa/features/gn/
+  codes:
+    m:
+      definition: masculine
+      custom: null
+    f:
+      definition: feminine
+      custom: null
+    NA:
+      definition: not applicable
+      custom: null
+    unknown:
+      definition: unknown
+      custom: null
+
+nu:
+  name: number
+  src: https://etcbc.github.io/bhsa/features/nu/
+  codes:
+    sg:
+      definition: singular
+      custom: null
+    du:
+      definition: dual
+      custom: null
+    pl:
+      definition: plural
+      custom: null
+    NA:
+      definition: not applicable
+      custom: null
+    unknown:
+      definition: unknown
+      custom: null
+
+
+ps:
+  name: person
+  src: https://etcbc.github.io/bhsa/features/ps/
+  codes:
+    p1:
+      definition: first person
+      custom: null
+    p2:
+      definition: second person
+      custom: null
+    p3:
+      definition: third person
+      custom: null
+    NA:
+      definition: not applicable
+      custom: null
+    unknown:
+      definition: unknown
+      custom: null
+
+st:
+  name: state
+  src: https://etcbc.github.io/bhsa/features/st/
+  codes:
+    a:
+      definition: absolute
+      custom: null
+    c:
+      definition: construct
+      custom: null
+    e:
+      definition: emphatic
+      custom: null
+
+vs:
+  name: verbal stem
+  src: https://etcbc.github.io/bhsa/features/vs/
+  codes:
+    # Hebrew stems
+    hif:
+      definition: hif'il
+      custom: null
+    hit:
+      definition: hitpa‘el
+      custom: null
+    htpo:
+      definition: hitpo‘el
+      custom: null
+    hof:
+      definition: hof‘al
+      custom: null
+    nif:
+      definition: nif‘al
+      custom: null
+    piel:
+      definition: pi‘el
+      custom: null
+    poal:
+      definition: po‘al
+      custom: null
+    poel:
+      definition: po‘el
+      custom: null
+    pual:
+      definition: pu‘al
+      custom: null
+    qal:
+      definition: qal
+      custom: null
+    # Aramaic stems
+    afel:
+      definition: af‘el
+      custom: null
+    etpa:
+      definition: etpa‘al
+      custom: null
+    etpe:
+      definition: etpe‘el
+      custom: null
+    haf:
+      definition: haf‘el
+      custom: null
+    hotp:
+      definition: hotpa‘al
+      custom: null
+    hsht:
+      definition: hishtaf‘al
+      custom: null
+    htpa:
+      definition: hitpa‘al
+      custom: null
+    htpe:
+      definition: hitpe‘el
+      custom: null
+    nit:
+      definition: nitpa‘el
+      custom: null
+    pael:
+      definition: pa‘el
+      custom: null
+    peal:
+      definition: pe‘al
+      custom: null
+    peil:
+      definition: pe‘il
+      custom: null
+    shaf:
+      definition: shaf‘el
+      custom: null
+    tif:
+      definition: tif‘al
+      custom: null
+    pasq:
+      definition: passiveqal
+      custom: null
+
+vt:
+  name: verbal tense
+  src: https://etcbc.github.io/bhsa/features/vt/
+  codes:
+    perf:
+      definition: perfect
+      custom: null
+    impf:
+      definition: imperfect
+      custom: null
+    wayq:
+      definition: wayyiqtol
+      custom: null
+    impv:
+      definition: imperative
+      custom: null
+    infa:
+      definition: infinitive (absolute)
+      custom: null
+    infc:
+      definition: infinitive (construct)
+      custom: null
+    ptca:
+      definition: participle
+      custom: null
+    ptcp:
+      definition: participle (passive)
+      custom: null
+
+# For Clause Atoms and Phrase Atoms
+typ:
+  name: type
+  src: https://etcbc.github.io/bhsa/features/typ/
+  codes:
+    # Clauses
+    AjCl:
+      definition: Adjective clause
+      custom: null
+    CPen:
+      definition: Casus pendens
+      custom: null
+    Defc:
+      definition: Defective clause atom
+      custom: null
+    Ellp:
+      definition: Ellipsis
+      custom: null
+    InfA:
+      definition: Infinitive absolute clause
+      custom: null
+    InfC:
+      definition: Infinitive construct clause
+      custom: null
+    MSyn:
+      definition: Macrosyntactic sign
+      custom: null
+    NmCl:
+      definition: Nominal clause
+      custom: null
+    Ptcp:
+      definition: Participle clause
+      custom: null
+    Reop:
+      definition: Reopening
+      custom: null
+    Unkn:
+      definition: Unknown
+      custom: null
+    Voct:
+      definition: Vocative clause
+      custom: null
+    Way0:
+      definition: Wayyiqtol-null clause
+      custom: null
+    WayX:
+      definition: Wayyiqtol-X clause
+      custom: null
+    WIm0:
+      definition: We-imperative-null clause
+      custom: null
+    WImX:
+      definition: We-imperative-X clause
+      custom: null
+    WQt0:
+      definition: We-qatal-null clause
+      custom: null
+    WQtX:
+      definition: We-qatal-X clause
+      custom: null
+    WxI0:
+      definition: We-x-imperative-null clause
+      custom: null
+    WXIm:
+      definition: We-X-imperative clause
+      custom: null
+    WxIX:
+      definition: We-x-imperative-X clause
+      custom: null
+    WxQ0:
+      definition: We-x-qatal-null clause
+      custom: null
+    WXQt:
+      definition: We-X-qatal clause
+      custom: null
+    WxQX:
+      definition: We-x-qatal-X clause
+      custom: null
+    WxY0:
+      definition: We-x-yiqtol-null clause
+      custom: null
+    WXYq:
+      definition: We-X-yiqtol clause
+      custom: null
+    WxYX:
+      definition: We-x-yiqtol-X clause
+      custom: null
+    WYq0:
+      definition: We-yiqtol-null clause
+      custom: null
+    WYqX:
+      definition: We-yiqtol-X clause
+      custom: null
+    xIm0:
+      definition: x-imperative-null clause
+      custom: null
+    XImp:
+      definition: X-imperative clause
+      custom: null
+    xImX:
+      definition: x-imperative-X clause
+      custom: null
+    XPos:
+      definition: Extraposition
+      custom: null
+    xQt0:
+      definition: x-qatal-null clause
+      custom: null
+    XQtl:
+      definition: X-qatal clause
+      custom: null
+    xQtX:
+      definition: x-qatal-X clause
+      custom: null
+    xYq0:
+      definition: x-yiqtol-null clause
+      custom: null
+    XYqt:
+      definition: X-yiqtol clause
+      custom: null
+    xYqX:
+      definition: x-yiqtol-X clause
+      custom: null
+    ZIm0:
+      definition: Zero-imperative-null clause
+      custom: null
+    ZImX:
+      definition: Zero-imperative-X clause
+      custom: null
+    ZQt0:
+      definition: Zero-qatal-null clause
+      custom: null
+    ZQtX:
+      definition: Zero-qatal-X clause
+      custom: null
+    ZYq0:
+      definition: Zero-yiqtol-null clause
+      custom: null
+    ZYqX:
+      definition: Zero-yiqtol-X clause
+      custom: null
+    # Phrases
+    VP:
+      definition: Verbal phrase
+      custom: null
+    NP:
+      definition: Nominal phrase
+      custom: null
+    PrNP:
+      definition: Proper-noun phrase
+      custom: null
+    AdvP:
+      definition: Adverbial phrase
+      custom: null
+    PP:
+      definition: Prepositional phrase
+      custom: null
+    CP:
+      definition: Conjunctive phrase
+      custom: null
+    PPrP:
+      definition: Personal pronoun phrase
+      custom: null
+    DPrP:
+      definition: Demonstrative pronoun phrase
+      custom: null
+    IPrP:
+      definition: Interrogative pronoun phrase
+      custom: null
+    InjP:
+      definition: Interjectional phrase
+      custom: null
+    NegP:
+      definition: Negative phrase
+      custom: null
+    InrP:
+      definition: Interrogative phrase
+      custom: null
+    AdjP:
+      definition: Adjective phrase
+      custom: null
+
+# For Clause
+domain:
+  name: domain
+  src: https://etcbc.github.io/bhsa/features/domain/
+  codes:
+    \?:
+      definition: Unknown
+      custom: null
+    N:
+      definition: Narrative
+      custom: null
+    D:
+      definition: Discursive
+      custom: null
+    Q:
+      definition: Quotation
+      custom: null
+
+# For Phrase
+function:
+  name: phrase function
+  src: https://etcbc.github.io/bhsa/features/function/
+  codes:
+    Adju:
+      definition: Adjunct
+      custom: null
+    Cmpl:
+      definition: Complement
+      custom: null
+    Conj:
+      definition: Conjunction
+      custom: null
+    EPPr:
+      definition: Enclitic personal pronoun
+      custom: null
+    ExsS:
+      definition: Existence with subject suffix
+      custom: null
+    Exst:
+      definition: Existence
+      custom: null
+    Frnt:
+      definition: Fronted element
+      custom: null
+    Intj:
+      definition: Interjection
+      custom: null
+    IntS:
+      definition: Interjection with subject suffix
+      custom: null
+    Loca:
+      definition: Locative
+      custom: null
+    Modi:
+      definition: Modifier
+      custom: null
+    ModS:
+      definition: Modifier with subject suffix
+      custom: null
+    NCop:
+      definition: Negative copula
+      custom: null
+    NCoS:
+      definition: Negative copula with subject suffix
+      custom: null
+    Nega:
+      definition: Negation
+      custom: null
+    Objc:
+      definition: Object
+      custom: null
+    PrAd:
+      definition: Predicative adjunct
+      custom: null
+    PrcS:
+      definition: Predicate complement with subject suffix
+      custom: null
+    PreC:
+      definition: Predicate complement
+      custom: null
+    Pred:
+      definition: Predicate
+      custom: null
+    PreO:
+      definition: Predicate with object suffix
+      custom: null
+    PreS:
+      definition: Predicate with subject suffix
+      custom: null
+    PtcO:
+      definition: Participle with object suffix
+      custom: null
+    Ques:
+      definition: Question
+      custom: null
+    Rela:
+      definition: Relative
+      custom: null
+    Subj:
+      definition: Subject
+      custom: null
+    Supp:
+      definition: Supplementary constituent
+      custom: null
+    Time:
+      definition: Time reference
+      custom: null
+    Unkn:
+      definition: Unknown
+      custom: null
+    Voct:
+      definition: Vocative
+      custom: null

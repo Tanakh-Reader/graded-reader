@@ -78,6 +78,7 @@ function clearTimer() {
     }
     wordSummaryDiv.style.display = 'none';
 }
+
 // Show the basic word data when hovered over.
 function showWordSummary(wordSpan) {
 

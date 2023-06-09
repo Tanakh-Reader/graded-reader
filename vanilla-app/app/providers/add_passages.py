@@ -1,10 +1,11 @@
 
 from ..utils.timer import timer
-from ..utils.algorithms import get_passage_weight
+from ..utils.algorithms import *
 from ..models import Passage
-from ..data.constants import PARAGRAPH_MARKERS
+from ..data.constants import *
 from .bhsa_provider import bhsa_provider
 from .book_provider import book_provider
+from .add_words import replace
 
 """
 Used by get_passages()
@@ -19,8 +20,7 @@ passage, so we will set add_verse to False.
 
 
 def valid_passage(passage, verse, passage_size_min, passage_size_max):
-    api = bhsa_provider.get_api()
-    T, L, F = api.T, api.L, api.F
+    T, L, F = bhsa_provider.api_globals()
     is_valid = False
     add_verse = True
     # Get the string value at the end of the verse.
@@ -68,17 +68,41 @@ def valid_passage(passage, verse, passage_size_min, passage_size_max):
     return is_valid, add_verse
 
 
+def get_passage_tags(passage: Passage):
+    T, L, F = bhsa_provider.api_globals()
+
+    tags = ''
+    word_count = 0
+    proper_noun_count = 0
+    has_qere = False
+    
+    for word in passage.words():
+        # Only look an non-stop words.
+        if F.voc_lex_utf8.v(word) not in Classify().stop_words:
+            # Check for proper nouns
+            if is_proper_noun(word):
+                proper_noun_count += 1
+            # Check for qere
+            if not has_qere and replace(F.qere_utf8.v(word)) not in ["",None]:
+                has_qere = True
+                tags += f"{TAGS.QERE},"
+            word_count += 1
+    # Check proper noun ratio
+    if proper_noun_count / word_count >= GENEALOGY_PERCENTAGE:
+        tags += f"{TAGS.GENEALOGY},"
+
+    return tags.rstrip(',')
+
+
+
 """
 Used by get_passages
 
 Update all of the data of a passage instance once its end verse 
 has been reached. 
 """
-
-
 def update_passage_data(passage: Passage, rank_scale):
-    api = bhsa_provider.get_api()
-    T, L, F = api.T, api.L, api.F
+    T, L, F = bhsa_provider.api_globals()
 
     start_ref = T.sectionFromNode(passage.verses[0])
     end_ref = T.sectionFromNode(passage.verses[-1])
@@ -92,7 +116,8 @@ def update_passage_data(passage: Passage, rank_scale):
     passage.end_word = L.d(passage.verses[-1], otype="word")[-1]
     passage.word_count = len(passage.words())
 
-    passage.penalty = get_passage_weight(passage)
+    passage.tags = get_passage_tags(passage)
+    passage.penalty = get_passage_weight3(passage)
 
     # Update the passage's word frequency and verb data.
     for word in passage.words():
@@ -136,8 +161,7 @@ def get_passages(
     passage_size_min=100,
     passage_size_max=4000,
 ):
-    api = bhsa_provider.get_api()
-    T, L, F = api.T, api.L, api.F
+    T, L, F = bhsa_provider.api_globals()
     # A list of all passages.
     passages = []
     end_node = len(F.otype.s("verse"))
