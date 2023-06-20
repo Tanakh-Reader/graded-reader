@@ -92,6 +92,10 @@ class Passage(models.Model):
 
     def words(self):
         return list(range(self.start_word, self.end_word + 1))
+    
+    def words_2(self):
+        return Word.objects.filter(id__gte=self.start_word, id__lte=self.end_word)
+
 
     def get_reference(self):
         book = book_provider.get_name(self.book)

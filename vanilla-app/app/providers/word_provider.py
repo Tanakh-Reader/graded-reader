@@ -8,13 +8,14 @@ from ..data import constants
 from ..models import Word, Passage
 
 
-ATTRIBUTES_FILE = os.path.join(settings.BASE_DIR, "data/bhsa_data_mapping.yml")
+ATTRIBUTES_FILE = os.path.join(settings.BASE_DIR, "app/data/bhsa_data_mapping.yml")
 
 # Class that interfaces with the Sqlite DB to get words.
 class WordProvider:
 
     words_loaded = False
     loading_in_progress = False
+    attribute_mappings = None
 
     def load_words_if_not_added(self) -> bool:
         if self.words_loaded:
@@ -98,9 +99,35 @@ class WordProvider:
 
     # GET WORD ATTRIBUTE MAPPINGS
     def get_attribute_mappings(self):
-        with open(ATTRIBUTES_FILE, 'r') as file:
-            data = yaml.load(file, Loader=yaml.FullLoader)
-            return data
+        if not self.attribute_mappings:
+            with open(ATTRIBUTES_FILE, 'r') as file:
+                self.attribute_mappings = yaml.load(file, Loader=yaml.FullLoader)
+        return self.attribute_mappings
+    
+    def get_attribute_by_name(self, key):
+        mapping = self.get_attribute_mappings()
+    
+        if key in mapping:
+            return mapping[key]
+        
+        for attribute in mapping.values():
+            custom_name = attribute.get('python_var')
+            if (custom_name and custom_name == key) or attribute.get('name') == key:
+                return attribute
+                
+        return None
+
+    def get_value_definition(self, key, value):
+        attribute = self.get_attribute_by_name(key)
+        if attribute:
+            attr_value = attribute.get('codes').get(value)
+            if attr_value:
+                custom_value = attr_value.get('custom')
+                if custom_value:
+                    return custom_value
+                return attr_value.get('definition')
+        # print("Not Found", key, value)
+        return value
     
 
 word_provider = WordProvider()

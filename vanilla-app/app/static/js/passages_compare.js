@@ -3,7 +3,6 @@ import * as utils from './utils/utils.js';
 import apis from './utils/api.js';
 import { getBackgroundColorByPenalty } from './passages.js';
 
-
 let currentButton = null;
 let dropdownMenu = document.getElementById("dropdown-menu");
 
@@ -79,6 +78,21 @@ function getHebrewText(passageId, div) {
         });
 }
 
+function runAlgorithm(passageId) {
+    console.log('RUN ALG');
+    let config = {
+        // verbs: [], 
+        frequencies: [[1, 50, 10.0], [51, 150, 7.5], [151, 500, 4.5], [501, 50000, 1.0]],
+        // c_nouns: []
+    };
+    apis.postAlgorithm(passageId, config).then(response => {
+        $("#alg").html(response)
+    })
+        .catch(error => {
+            console.error(error);
+        });
+}
+
 function colorPassageItem(passage) {
     const wordCount = passage.getAttribute("data-word-count");
     const penalty = passage.getAttribute("data-penalty");
@@ -101,8 +115,10 @@ window.addEventListener("DOMContentLoaded", (event) => {
         const id = div.getAttribute('data-id');
         getHebrewText(id, div);
     });
+
 });
 
+window.runAlgorithm = runAlgorithm;
 window.filterDropdown = filterDropdown;
 window.showDropdown = showDropdown;
 

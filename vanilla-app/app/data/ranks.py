@@ -20,7 +20,7 @@ class Rank:
         self.weights: list[float] = weights 
 
     # Auxiliary function to create a single rank_scale dictionary.
-    def get_rank_dict(self) -> dict:
+    def get_rank_dict(self) -> dict[str, dict[str, Any]]:
         rank_dict = {}
         for i in range(len(self.ranks)):
             rank_dict[self.ranks[i]] = {

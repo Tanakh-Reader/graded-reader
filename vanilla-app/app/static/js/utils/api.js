@@ -5,7 +5,8 @@ import * as constants from './constants.js';
 function getHebrewText(passageId) {
     return new Promise((resolve, reject) => {
         $.ajax({
-            url: constants.HEBREW_TEXT_API,
+            url: constants.GET_HEBREW_TEXT_API,
+            method: "GET",
             data: {
                 'ref': passageId
             },
@@ -23,6 +24,7 @@ function getAllBooks() {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: constants.GET_BOOKS_API,
+            method: "GET",
             success: function (response) {
                 resolve(response.books);  // Resolve the promise with the response
             },
@@ -67,9 +69,31 @@ function checkDataReady(dataSource) {
         });
 }
 
+function postAlgorithm(passageId, configuration) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: constants.POST_ALGORITHM_API,
+            method: "POST",
+            contentType: "application/json", // for parsing in the backend
+            data: JSON.stringify({
+                'passages': passageId,
+                'configuration': configuration,
+            }),
+            success: function (response) {
+                resolve(response.score);  // Resolve the promise with the response
+            },
+            error: function (error) {
+                reject(error);  // Reject the promise if there's an error
+            }
+        });
+    });
+}
+
+
 
 export default { 
     getHebrewText, 
     getAllBooks, 
-    checkDataReady
+    checkDataReady,
+    postAlgorithm
 }

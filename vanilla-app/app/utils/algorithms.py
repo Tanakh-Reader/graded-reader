@@ -1,15 +1,24 @@
 import math
+from abc import ABC, abstractmethod
+from typing import Any, Union
+
+
 
 from ..providers.bhsa_provider import bhsa_provider
 from ..data.ranks import Classify, Rank, LexRanks, MorphRank
+from ..models import Word, Passage
+from ..data.constants import *
 
 lex_rank_default = LexRanks()._7_ranks.get_rank_dict()
 
-def is_proper_noun(word):
+
+def is_proper_noun(word: int) -> bool:
     T, L, F = bhsa_provider.api_globals()
-    if F.ls.v(word) == 'gnt   l' or F.sp.v(word) == 'nmpr':
+    if F.ls.v(word) == "gntl" or F.sp.v(word) == "nmpr":
         return True
-    
+    return False
+
+
 # A class used to compare mismatches between differently sorted lists.
 class CompareData:
     def update_index(self, dict, key, i):
@@ -40,15 +49,15 @@ class CompareData:
 
 # The goal is to penalize at scale, fading out around frequency = 450
 # penalty 10 - (√n * 4.5 - 5) / 10
-def word_penalty(word_freq):
+def word_penalty(word_freq: int) -> float:
     part_1 = max(0, (math.sqrt(word_freq) * 4.5) - 5)
     part_2 = 10 - (part_1 / 10)
     return max(1, part_2)
 
 
-def get_passage_weight(passage):
+def get_passage_weight(passage: Passage) -> float:
     T, L, F = bhsa_provider.api_globals()
-    total_weight = 0
+    total_weight: float = 0.0
     # Iterate over words in the passage.
     for word in passage.words():
         if F.voc_lex_utf8.v(word) not in Classify().stop_words:
@@ -58,9 +67,9 @@ def get_passage_weight(passage):
     return round(total_weight, 4)
 
 
-def get_passage_weight1(passage, rank_scale=lex_rank_default):
+def get_passage_weight1(passage: Passage, rank_scale=lex_rank_default) -> float:
     T, L, F = bhsa_provider.api_globals()
-    total_weight = 0
+    total_weight: float = 0.0
     # Iterate over words in the passage.
     for word in passage.words():
         if F.voc_lex_utf8.v(word) not in Classify().stop_words:
@@ -81,9 +90,9 @@ def get_passage_weight1(passage, rank_scale=lex_rank_default):
 
 
 # Only penalize once per lexical value.
-def get_passage_weight2(passage, rank_scale=lex_rank_default, div_all=True):
+def get_passage_weight2(passage: Passage, rank_scale=lex_rank_default, div_all=True) -> float:
     T, L, F = bhsa_provider.api_globals()
-    total_weight = 0
+    total_weight: float = 0.0
     unique_words = set()
     # Iterate over words in the passage.
     for word in passage.words():
@@ -111,9 +120,11 @@ def get_passage_weight2(passage, rank_scale=lex_rank_default, div_all=True):
 
 
 # Decrease penalty for each occurance.
-def get_passage_weight3(passage, rank_scale=lex_rank_default, div_all=True, morph=False):
+def get_passage_weight3(
+    passage: Passage, rank_scale=lex_rank_default, div_all=True, morph=False
+) -> float:
     T, L, F = bhsa_provider.api_globals()
-    word_weights = {}
+    word_weights: dict[str, dict[str, Any]] = {}
     verb_count = 0
     verb_weight = 0
     min_penalty = 1.7  # min penalty for rare words and proper nouns.
@@ -178,3 +189,132 @@ def get_passage_weight3(passage, rank_scale=lex_rank_default, div_all=True, morp
         total_weight /= len(word_weights)
 
     return round(total_weight, 4)
+
+
+# Decrease penalty for each occurance.
+def get_passage_weight_x(
+    configuration,
+    passage: Passage
+):
+    categories = init_categories(configuration)
+    print("CATEGORIES", categories)
+    for word in passage.words_2():
+        if word.lex not in Classify().stop_words:
+            for category in categories:
+                category.check_condition(word)
+    print("DONE")
+    total_penalty = sum([cat.total_penalty() for cat in categories])
+    total_weight = total_penalty / passage.word_count
+    return round(total_weight, 4)
+
+    # Compare using all words as denominator vs. unique words.
+    # TODO !! would the unique word route only be taken for frequencies, or other items as well?
+    # TODO !! should verbs be / len verbs, or total words?
+    # if div_all:
+    #     total_weight = total_weight / len(passage.words()) + (
+    #         verb_weight / len(passage.words())
+    #     )
+    # else:
+    #     total_weight /= len(word_weights)
+
+
+
+class Category(ABC):
+    def __init__(self, name="", args=[]):
+        self.name = name
+        self.args = args
+        self.instances = {}
+
+    def total_penalty(self):
+        total = 0
+        for k, v in self.instances.items():
+            total += v.get("penalty")
+        return total
+
+    @abstractmethod
+    def check_condition(self, word):
+        pass
+
+
+
+class Compare(Category):
+    def check_condition(self, word):
+        for arg in self.args:
+            conditions = arg[:-1]
+            penalty = arg[-1]
+            conditions_met = 0
+            for condition in conditions:
+                if word.condition == condition:
+                    conditions_met += 1
+            if conditions_met == len(conditions):
+                self.instances[word.id] = {"conditions": conditions, "penalty": penalty}
+
+
+class Frequency(Category):
+    def __init__(self, name, args, apply_taper=True, apply_proper_nouns=True, proper_noun_discount=2):
+        super().__init__(name, args)  # calling the parent's __init__ method
+        self.apply_taper = apply_taper
+        self.apply_proper_nouns = apply_proper_nouns
+        self.proper_noun_discount = proper_noun_discount
+        self.word_weights = {}
+        self.min_penalty = 1.7
+        
+
+    def check_condition(self, word: Word) -> None:
+        if self.apply_taper and word.lex_id in self.word_weights:
+            # Only gradually decrease penalty for rarer words.
+            # Decreases by 1 point per occurance.
+            self.word_weights[word.lex_id]["count"] += 1
+            if word.lex_frequency < UNCOMMON_WORD_FREQUENCY:
+                count = self.word_weights[word.lex_id]["count"]
+                penalty = self.word_weights[word.lex_id]["penalty"]
+                new_weight = penalty - count
+                added_weight = (
+                    new_weight if new_weight >= self.min_penalty else self.min_penalty
+                )
+                self.word_weights[word.lex_id]["weight"] += added_weight
+            else:
+                self.word_weights[word.lex_id]["weight"] += self.word_weights[word.lex_id][
+                    "penalty"
+                ]
+        # Add full penalty for the first occurance.
+        else:
+            # Add word to hash table
+            self.word_weights[word.lex_id] = {"count": 0, "weight": 0, "penalty": 0}
+            # Iterate over the ranks present in the rank scale.
+            for arg in self.args:
+                start, end, penalty = arg
+
+                if start <= word.lex_frequency <= end:
+                    # Give a custom penalty for proper nouns.
+                    if self.apply_proper_nouns and is_proper_noun(word) and penalty > self.min_penalty:
+                        self.word_weights[word.lex_id]["penalty"] = int(
+                            math.ceil(penalty / self.proper_noun_discount)
+                        )
+                    # Give a full penalty for other word types.
+                    else:
+                        self.word_weights[word.lex_id]["penalty"] = penalty
+            self.word_weights[word.lex_id]["weight"] += self.word_weights[word.lex_id]["penalty"]
+            self.word_weights[word.lex_id]["count"] += 1
+            self.instances[word.id] = {"range": [start, end], "penalty": penalty}
+
+
+class ConstructNoun(Category):
+    def check_condition(self, word: Word) -> None:
+        if word.state == "c":
+            pass
+
+
+def init_categories(configuration: dict[str, Any]) -> list[Category]:
+    categories: list[Category] = []
+    verb_conditions = configuration.get("verbs")
+    frequency_conditions = configuration.get("frequencies")
+    x_conditions = configuration.get("x")
+
+    if verb_conditions:
+        categories.append(Compare("verbs", verb_conditions))
+
+    if frequency_conditions:
+        categories.append(Frequency("frequency", frequency_conditions))
+
+    return categories

@@ -50,6 +50,7 @@ ls:
 
 sp:
   name: part-of-speech
+  python_var: speech
   src: https://etcbc.github.io/bhsa/features/sp/
   codes:
     art:
@@ -97,6 +98,7 @@ sp:
 
 nametype:
   name: name type
+  python_var: null
   src: https://etcbc.github.io/bhsa/features/nametype/
   codes:
     pers:
@@ -190,6 +192,7 @@ st:
 
 vs:
   name: verbal stem
+  python_var: verb_stem
   src: https://etcbc.github.io/bhsa/features/vs/
   codes:
     # Hebrew stems
@@ -272,6 +275,7 @@ vs:
 
 vt:
   name: verbal tense
+  python_var: verb_tense
   src: https://etcbc.github.io/bhsa/features/vt/
   codes:
     perf:

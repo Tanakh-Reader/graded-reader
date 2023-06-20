@@ -5,7 +5,7 @@ from pathlib import Path
 from django.conf import settings
 from ..data.book import Book
   
-BOOKS_CSV = os.path.join(settings.BASE_DIR, "data/books.csv")
+BOOKS_CSV = os.path.join(settings.BASE_DIR, "app/data/books.csv")
 
 BOOK_NUMBER = 'bookId'
 BHSA_NAME = 'bhsaName'

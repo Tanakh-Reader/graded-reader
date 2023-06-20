@@ -11,6 +11,7 @@
 {% block content %}
 
 <div class="container mx-auto px-4">
+    <div id="alg">TEST</div>
     <div class="ml-4 mb-6">{% include 'widgets/word_highlights_dropdown.html' %}
     </div>
     <div class="flex flex-row">
@@ -22,6 +23,7 @@
                     {{ text_passage.reference }}
                 </button>
                 <h2 class="ml-8">{{ text_passage.penalty }}</h2>
+                <button class="btn" onclick="runAlgorithm('{{ text_passage.id }}')">A</button>
             </div>
 
             <!--  USED by the API CALL -->

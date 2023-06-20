@@ -2,6 +2,9 @@
 WORD_COUNT = 426500
 PASSAGE_COUNT = 200  # 1900
 
+# Used in the algorithm
+UNCOMMON_WORD_FREQUENCY = 100
+
 PARAGRAPH_MARKERS = {"פ": "open", "ס": "closed"}
 
 # Psalm 119 has 176 verses.

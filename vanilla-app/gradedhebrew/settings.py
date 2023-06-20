@@ -24,9 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-i!1fts)u1(6)aspydawx8udgg&&va6=d@77h#y1rpwoc1b6c&d"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-# DEBUG = "DJANGO_DEBUG" in os.environ and os.environ["DJANGO_DEBUG"] == "ON"
-
+DEBUG = True 
 
 ALLOWED_HOSTS = ['sethbam9.pythonanywhere.com', '127.0.0.1']
 
@@ -48,7 +46,6 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    'whitenoise.middleware.WhiteNoiseMiddleware',
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -125,10 +122,18 @@ USE_TZ = True
 
 STATIC_ROOT = os.path.join(BASE_DIR, "gradedhebrew", "staticfiles")
 STATIC_URL = "/static/"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS = [
     # os.path.join(BASE_DIR, "app", "static"),
 ]
+
+# Check if we're in production or not
+PRODUCTION = os.getenv('DJANGO_PRODUCTION') == "ON"
+
+# Only use whitenoise in production
+if PRODUCTION:
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+    MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']
+    DEBUG = False
 
 
 # Default primary key field type
