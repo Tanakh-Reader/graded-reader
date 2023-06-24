@@ -1,5 +1,5 @@
-import * as utils from './utils/utils.js';
-import * as constants from './utils/constants.js';
+import * as utils from '../utils/utils.js';
+import * as constants from '../utils/constants.js';
 
 const wordSummaryDiv = document.getElementById('hovered-word-widget');
 let timer = null;

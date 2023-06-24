@@ -19,9 +19,12 @@
         {% for text_passage in text_passages %}
         <div class="passage-container flex flex-col w-1/2 mx-1 py-3 px-4">
             <div class="flex flex-row justify-center items-center my-4">
+                <!-- Passage selection dropdown -->
                 <button class="btn" onclick="showDropdown(this)">
                     {{ text_passage.reference }}
                 </button>
+                {% include 'widgets/passage_selector.html' %}
+                
                 <h2 class="ml-8">{{ text_passage.penalty }}</h2>
                 <button class="btn" onclick="runAlgorithm('{{ text_passage.id }}')">A</button>
             </div>
@@ -33,30 +36,17 @@
         </div>
         {% endfor %}
 
-        <!-- Dropdown menu for search passages -->
-        <div id="dropdown-menu" class="dropdown-menu mt-1">
-            <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()" placeholder="Search...">
-            <ul class="list-none p-0 overflow-auto max-h-72">
-                {% for passage in passages %}
-                <li class="passage-item p-2 hover:bg-gray-200 cursor-pointer" 
-                    data-ref="{{ passage.reference}}"
-                    data-id="{{ passage.id}}"
-                    data-word-count="{{ passage.word_count }}"
-                    data-penalty="{{ passage.penalty }}">
-                    {{ passage.reference }}
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
     </div>
 </div>
 
 <!-- Selected word data -->
 {% include 'widgets/selected_word.html' %}
 
-<script type="module" src="{% static 'js/hebrew_text.js' %}"></script>
+<script type="module" src="{% static 'js/widgets/hebrew_text.js' %}"></script>
+<!-- For some reason the color goes away on the left without the above import. Why?? -->
 <script type="module" src="{% static 'js/passages_compare.js' %}"></script>
+<script type="module" src="{% static 'js/widgets/passage_selector.js' %}"></script>
+
 
 {% endblock %}
 

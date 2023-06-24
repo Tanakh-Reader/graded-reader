@@ -1,6 +1,6 @@
-import * as utils from './utils/utils.js';
-import * as constants from './utils/constants.js';
-import { COLORS } from './utils/theme.js';
+import * as utils from '../utils/utils.js';
+import * as constants from '../utils/constants.js';
+import { COLORS } from '../utils/theme.js';
 
 
 // Get a reference to the dropdown menu

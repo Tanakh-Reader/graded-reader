@@ -1,0 +1,78 @@
+{% load widget_tweaks %}
+{% load static %}
+
+<!-- 
+<div class="verb-form row">
+    <div class="col">
+        {{ form.verb_type.label }}<br>
+        {{ form.verb_type|add_class:"form-control" }}
+    </div>
+    <div class="col">
+        {{ form.verb_stem.label }}<br>
+        {{ form.verb_stem|add_class:"form-control" }}
+    </div>
+    <div class="col">
+        {{ form.suffix.label }}<br>
+        {{ form.suffix|add_class:"form-control" }}
+    </div>
+    <div class="col">
+        {{ form.penalty.label }}<br>
+        {{ form.penalty|add_class:"form-control" }}
+    </div>
+    <div class="col">
+        <button type="button" class="remove-verb-button">-</button>
+    </div>
+     -->
+
+<div id="data" data-verb-count="{{ verb_formset.total_form_count }}"
+    data-freq-count="{{ frequency_formset.total_form_count }}"></div>
+
+<form class="algorithm-form flex flex-col items-start" method="post">
+    {% csrf_token %}
+
+    <!-- Verb forms -->
+    <h2>Verbs</h2>
+    {{ verb_formset.management_form }}
+    {% for form in verb_formset %}
+    <div class="verb-form inline-grid grid-cols-5 gap-2 items-start">
+        {% for field in form %}
+        <div>
+            {{ field.label_tag }}<br>
+            {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+        </div>
+        {% endfor %}
+        <div class="flex items-center"> <!-- vertically centers the button -->
+            <button type="button" class="remove-button">-</button>
+        </div>
+    </div>
+    {% endfor %}
+    <button type="button" id="add-verb-button" class="block my-4">+</button>
+
+    <!-- Frequency forms -->
+    <h2>Frequencies</h2>
+    {{ frequency_formset.management_form }}
+    {% for form in frequency_formset %}
+    <div class="freq-form inline-grid grid-cols-5 gap-2 items-start">
+        {% for field in form %}
+        <div>
+            {{ field.label_tag }}<br>
+            {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+        </div>
+        {% endfor %}
+        <div class="flex items-center"> <!-- vertically centers the button -->
+            <button type="button" class="remove-button">-</button>
+        </div>
+    </div>
+    {% endfor %}
+    <button type="button" id="add-freq-button" class="block my-4">+</button>
+
+    <!-- Passage selection dropdown -->
+    <div><button class="psg p-1 border border-black" type="button" onclick="showDropdown(this)">passage</button></div>
+
+    {% include 'widgets/passage_selector.html' %}
+    <input type="submit" value="Submit" class="mt-4">
+</form>
+
+
+<!-- JavaScript code goes here -->
+<script type="module" src="{% static 'js/widgets/algorithm_form.js' %}"></script>

@@ -52,3 +52,10 @@ export const W_PRONOMINAL_SUFFIX = 'pronominal_suffix';
 export const W_UNIVALENT_FINAL = 'univalent_final';
 export const W_VERBAL_ENDING = 'verbal_ending';
 export const W_ROOT_FORMATION = 'root_formation';
+
+// Feature matching rules
+export const EQUALS = "EQUALS";
+export const EXISTS = "EXISTS";
+
+// Form values
+export const FIELD_NULL = "na";

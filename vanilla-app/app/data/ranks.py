@@ -27,7 +27,16 @@ class Rank:
                 'range': self.ranges[i],
                 'weight': self.weights[i]
             }
-        return rank_dict 
+        return rank_dict
+    
+    def get_rank_array(self):
+        ranks = []
+        for i in range(len(self.ranks)):
+            _range = self.ranges[i]
+            penalty = self.weights[i]
+            ranks.append(_range + [penalty])
+        return ranks
+
 
 
 """ 

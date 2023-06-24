@@ -33,6 +33,10 @@
  h2 {
      font-family: var(--font-title);
  }
+ h2 {
+    font-size:large;
+    font-weight: 700;
+ }
 
  a {
      color: var(--main-color);

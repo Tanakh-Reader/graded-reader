@@ -80,7 +80,7 @@ function postAlgorithm(passageId, configuration) {
                 'configuration': configuration,
             }),
             success: function (response) {
-                resolve(response.score);  // Resolve the promise with the response
+                resolve(response);  // Resolve the promise with the response
             },
             error: function (error) {
                 reject(error);  // Reject the promise if there's an error

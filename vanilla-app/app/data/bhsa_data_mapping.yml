@@ -227,51 +227,51 @@ vs:
       definition: qal
       custom: null
     # Aramaic stems
-    afel:
-      definition: af‘el
-      custom: null
-    etpa:
-      definition: etpa‘al
-      custom: null
-    etpe:
-      definition: etpe‘el
-      custom: null
-    haf:
-      definition: haf‘el
-      custom: null
-    hotp:
-      definition: hotpa‘al
-      custom: null
-    hsht:
-      definition: hishtaf‘al
-      custom: null
-    htpa:
-      definition: hitpa‘al
-      custom: null
-    htpe:
-      definition: hitpe‘el
-      custom: null
-    nit:
-      definition: nitpa‘el
-      custom: null
-    pael:
-      definition: pa‘el
-      custom: null
-    peal:
-      definition: pe‘al
-      custom: null
-    peil:
-      definition: pe‘il
-      custom: null
-    shaf:
-      definition: shaf‘el
-      custom: null
-    tif:
-      definition: tif‘al
-      custom: null
-    pasq:
-      definition: passiveqal
-      custom: null
+    # afel:
+    #   definition: af‘el
+    #   custom: null
+    # etpa:
+    #   definition: etpa‘al
+    #   custom: null
+    # etpe:
+    #   definition: etpe‘el
+    #   custom: null
+    # haf:
+    #   definition: haf‘el
+    #   custom: null
+    # hotp:
+    #   definition: hotpa‘al
+    #   custom: null
+    # hsht:
+    #   definition: hishtaf‘al
+    #   custom: null
+    # htpa:
+    #   definition: hitpa‘al
+    #   custom: null
+    # htpe:
+    #   definition: hitpe‘el
+    #   custom: null
+    # nit:
+    #   definition: nitpa‘el
+    #   custom: null
+    # pael:
+    #   definition: pa‘el
+    #   custom: null
+    # peal:
+    #   definition: pe‘al
+    #   custom: null
+    # peil:
+    #   definition: pe‘il
+    #   custom: null
+    # shaf:
+    #   definition: shaf‘el
+    #   custom: null
+    # tif:
+    #   definition: tif‘al
+    #   custom: null
+    # pasq:
+    #   definition: passiveqal
+    #   custom: null
 
 vt:
   name: verbal tense

@@ -17,9 +17,10 @@ from django.shortcuts import redirect
 from .providers.book_provider import book_provider
 from .providers.word_provider import word_provider
 from .providers.passage_provider import passage_provider
+from .providers.algorithm_provider import algorithm_provider
 
 from .models import Passage, Word
-from .data import ranks
+from .forms import *
 from .utils import references, algorithms as alg
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -47,6 +48,33 @@ def read(request: HttpRequest) -> HttpResponse:
         "words_loaded": words_loaded,
     }
     return render(request, "read.html", context)
+
+from django.forms import formset_factory
+from .forms import VerbForm, FrequencyForm
+
+def algorithm_form(request: HttpRequest):
+    VerbFormSet = formset_factory(VerbForm, extra=1)  # extra=1 means 1 form will be displayed initially
+    FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
+
+    if request.method == 'POST':
+        verb_formset = VerbFormSet(request.POST, prefix='verbs')
+        frequency_formset = FrequencyFormSet(request.POST, prefix='freqs')
+
+        if verb_formset.is_valid() and frequency_formset.is_valid():
+            # Process the data and generate your configuration.json
+            # ...
+            print("Yah Baby")
+    else:
+        verb_formset = VerbFormSet(prefix='verbs')
+        frequency_formset = FrequencyFormSet(prefix='freqs')
+
+    return render(request, 'algorithm_form.html', {
+        'verb_formset': verb_formset,
+        'frequency_formset': frequency_formset
+    })
+
+
+
 
 # @cache_page(60 * 15)
 def passages(request: HttpRequest) -> HttpResponse:
@@ -88,10 +116,27 @@ def passages_compare(request: HttpRequest) -> HttpResponse:
 
 
 def algorithms(request: HttpRequest) -> HttpResponse:
-    all_ranks = ranks.LexRanks.all_ranks
-    for r in all_ranks:
-        r.definition = r.get_rank_dict()
-    context = {"objects": all_ranks}
+    
+
+    VerbFormSet = formset_factory(VerbForm, extra=1)
+    FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
+
+    # ... handle POST data if required, otherwise instantiate the formsets
+
+    passages = passage_provider.get_all_passages(as_json=True)
+
+    verb_formset = VerbFormSet(prefix='verbs')
+    frequency_formset = FrequencyFormSet(prefix='freqs')
+    algorithm_templates = algorithm_provider.get_default_configurations()
+    saved_algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
+    print(saved_algorithms)
+    context = {
+        "algorithm_templates": algorithm_templates,
+        'saved_algorithms': saved_algorithms,
+        'verb_formset': verb_formset,
+        'frequency_formset': frequency_formset,
+        'passages': passages,
+        }
     return render(request, "algorithms.html", context)
 
 
@@ -147,8 +192,10 @@ def run_algorithm(request: HttpRequest) -> JsonResponse:
     configuration = data.get("configuration")
     passage: Passage = passage_provider.get_passages_by_ids([passage_id])[0]
     score = {
-        'score': [passage.get_reference(), alg.get_passage_weight_x(configuration, passage)]
+        'passage': passage.get_reference(),
+        'score': alg.get_passage_weight_x(configuration, passage)
     }
+    algorithm_provider.save_algorithm(configuration)
 
     return JsonResponse(score)
 

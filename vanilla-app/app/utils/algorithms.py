@@ -197,14 +197,17 @@ def get_passage_weight_x(
     passage: Passage
 ):
     categories = init_categories(configuration)
-    print("CATEGORIES", categories)
+    print("CONFIG", configuration)
     for word in passage.words_2():
         if word.lex not in Classify().stop_words:
             for category in categories:
                 category.check_condition(word)
     print("DONE")
+    for category in categories:
+        print(category.name, category.instances)
     total_penalty = sum([cat.total_penalty() for cat in categories])
     total_weight = total_penalty / passage.word_count
+    
     return round(total_weight, 4)
 
     # Compare using all words as denominator vs. unique words.
@@ -238,16 +241,27 @@ class Category(ABC):
 
 
 class Compare(Category):
-    def check_condition(self, word):
+    def check_condition(self, word: Word):
         for arg in self.args:
             conditions = arg[:-1]
             penalty = arg[-1]
             conditions_met = 0
             for condition in conditions:
-                if word.condition == condition:
-                    conditions_met += 1
+                # Get the actual feature value from the word using the 'feature' key from the condition
+                feature_value = getattr(word, condition['feature'])
+                # Check the rule
+                if condition['rule'] == 'EQUALS':
+                    # if rule is "EQUALS" then check if feature value is equal to condition value
+                    if feature_value == condition['value']:
+                        conditions_met += 1
+                elif condition['rule'] == 'EXISTS':
+                    # if rule is "EXISTS" then check if feature value is not None
+                    if feature_value is not None:
+                        conditions_met += 1
+            # if all conditions are met, add to instances
             if conditions_met == len(conditions):
                 self.instances[word.id] = {"conditions": conditions, "penalty": penalty}
+
 
 
 class Frequency(Category):
@@ -307,9 +321,10 @@ class ConstructNoun(Category):
 
 def init_categories(configuration: dict[str, Any]) -> list[Category]:
     categories: list[Category] = []
-    verb_conditions = configuration.get("verbs")
-    frequency_conditions = configuration.get("frequencies")
-    x_conditions = configuration.get("x")
+    config_data = configuration.get('data')
+    verb_conditions = config_data.get("verbs")
+    frequency_conditions = config_data.get("frequencies")
+    x_conditions = config_data.get("x")
 
     if verb_conditions:
         categories.append(Compare("verbs", verb_conditions))

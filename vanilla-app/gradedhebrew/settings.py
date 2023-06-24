@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['sethbam9.pythonanywhere.com', '127.0.0.1']
 
 INSTALLED_APPS = [
     "app",
+    'widget_tweaks',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

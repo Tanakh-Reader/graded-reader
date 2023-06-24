@@ -1,4 +1,5 @@
 {% extends 'layout.html' %}
+{% load static %}
 
 {% block title %}Algorithms Page{% endblock %}
 
@@ -7,44 +8,40 @@
   <h1 class="text-4xl font-bold mb-8">Let's Build!</h1>
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
     <div class="dropdown-container">
-      <h2 class="text-lg font-bold mb-2">Frequency Heuristic</h2>
+      <h2 class="text-lg font-bold mb-2">Templates</h2>
       <select id="dropdown1" class="border border-gray-400 rounded px-2 py-1">
-        {% for obj in objects %}
-        <option value="{{ obj.id }}" data-definition="{{ obj.definition }}">{{ obj.name }}</option>
+        {% for obj in algorithm_templates %}
+        <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="dropdown-container">
-      <h2 class="text-lg font-bold mb-2">Custom Heuristic</h2>
+      <h2 class="text-lg font-bold mb-2">Saved Algorithms</h2>
       <select id="dropdown2" class="border border-gray-400 rounded px-2 py-1">
-        {% for obj in objects %}
-        <option value="{{ obj.id }}" data-definition="{{ obj.definition }}">{{ obj.name }}</option>
+        {% for obj in saved_algorithms %}
+        <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="dropdown-container">
-      <h2 class="text-lg font-bold mb-2">Title</h2>
+      <h2 class="text-lg font-bold mb-2">PlaceHolder</h2>
       <select id="dropdown3" class="border border-gray-400 rounded px-2 py-1">
-        {% for obj in objects %}
-        <option value="{{ obj.id }}" data-definition="{{ obj.definition }}">{{ obj.name }}</option>
+        {% for obj in algorithm_templates %}
+        <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
         {% endfor %}
       </select>
     </div>
   </div>
-  <div id="definition" class="bg-gray-100 rounded-md p-4 mt-8"></div>
+  <pre id="definition" class="bg-gray-100 rounded-md p-4 mt-8"></pre>
   <button id="generateBtn" class="mt-6 btn">Generate passages</button>
 </div>
 
-<script>
-  const dropdowns = document.querySelectorAll('select');
-  const definitionDiv = document.querySelector('#definition');
+<!-- Algorithm form -->
+<div id="alg">TEST</div>
+{% include "widgets/algorithm_form.html" with verb_formset=verb_formset frequency_formset=frequency_formset %}
 
-  dropdowns.forEach((dropdown) => {
-    dropdown.addEventListener('change', (event) => {
-      const selectedOption = event.target.selectedOptions[0];
-      const definition = selectedOption.dataset.definition;
-      definitionDiv.textContent = definition;
-    });
-  });
-</script>
+<script type="module" src="{% static 'js/algorithms.js' %}"></script>
+
+<script type="module" src="{% static 'js/widgets/passage_selector.js' %}"></script>
+
 {% endblock %}
