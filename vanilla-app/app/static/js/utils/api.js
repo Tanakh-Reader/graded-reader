@@ -1,6 +1,6 @@
 
 import * as constants from './constants.js';
-// import * as utils from './utils.js';
+import * as events from './events.js';
 
 function getHebrewText(passageId) {
     return new Promise((resolve, reject) => {
@@ -19,6 +19,59 @@ function getHebrewText(passageId) {
         });
     });
 }
+
+// api.js
+function getAlgorithmForm() {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: constants.GET_ALGORITHM_FORM_API,
+            method: "GET",
+            data: {
+                // 'ref': passageId
+            },
+            success: function (response) {
+                $('.algorithm-form').html(response.html);
+
+                // Ensure that the DOM has finished updating
+                setTimeout(() => {
+                    events.publish(constants.ALG_FORM_LOADED_EVENT);
+                }, 0);
+
+                resolve();
+            },
+            error: function (error) {
+                reject(error);  // Reject the promise if there's an error
+            }
+        });
+    });
+}
+
+
+
+function submitForm(formData, formUrl) {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            url: formUrl,
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+        })
+            .done(function (data) {
+                if (data.status === 'success') {
+                    // The form was processed successfully
+                    console.log(data.message);
+                } else {
+                    // Something went wrong
+                    console.error('Error:', data.message);
+                }
+            })
+            .fail(function (error) {
+                console.error('Error:', error);
+            });
+    });
+}
+
 
 function getAllBooks() {
     return new Promise((resolve, reject) => {
@@ -69,15 +122,16 @@ function checkDataReady(dataSource) {
         });
 }
 
-function postAlgorithm(passageId, configuration) {
+function postAlgorithm(configuration, task, text=null) {
     return new Promise((resolve, reject) => {
         $.ajax({
             url: constants.POST_ALGORITHM_API,
             method: "POST",
             contentType: "application/json", // for parsing in the backend
             data: JSON.stringify({
-                'passages': passageId,
                 'configuration': configuration,
+                'task': task,
+                'text': text,
             }),
             success: function (response) {
                 resolve(response);  // Resolve the promise with the response
@@ -95,5 +149,7 @@ export default {
     getHebrewText, 
     getAllBooks, 
     checkDataReady,
+    getAlgorithmForm,
+    submitForm,
     postAlgorithm
 }

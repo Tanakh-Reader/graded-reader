@@ -64,3 +64,18 @@ Frank Ruhl Libre', serif;
 'Cormorant Garamond', serif;  
 */
 
+.toast {
+    position: fixed;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #323232;
+    color: white;
+    padding: 10px;
+    border-radius: 25px;
+    max-width: 80%;
+    text-align: center;
+    z-index: 1000;
+    font-size: 1rem;
+}
+

@@ -137,8 +137,7 @@ function sortPassages() {
     sortedPassages.forEach(passage => container.appendChild(passage));
 }
 
-utils.subscribe('DOMContentLoaded', (event) => {
-    applyBackgroundColorToPassages();
+window.addEventListener("DOMContentLoaded", (event) => {    applyBackgroundColorToPassages();
 })
 
 window.filterPassages = filterPassages

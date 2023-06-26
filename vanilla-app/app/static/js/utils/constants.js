@@ -5,6 +5,7 @@ export const COMPARE_PAGE = '/passages/compare';
 // API ENDPOINTS
 export const DATA_LOADED_API = '/api/check-data-ready';
 export const GET_HEBREW_TEXT_API = '/api/hebrew-text';
+export const GET_ALGORITHM_FORM_API = '/api/algorithm-form';
 export const GET_BOOKS_API = '/api/get-books';
 export const POST_ALGORITHM_API = '/api/algorithm';
 export const DELETE_WORDS_API = '/api/delete-words';
@@ -12,7 +13,8 @@ export const DELETE_PASSAGES_API = '/api/delete-passages';
 
 
 // PUB / SUB EVENTS
-export const TEXT_LOADED_EVENT = 'hebrewTextLoaded'
+export const TEXT_LOADED_EVENT = 'hebrewTextLoaded';
+export const ALG_FORM_LOADED_EVENT = 'algorithmFormLoaded';
 
 // WORD ATTRIBUTES
 export const W_ID = 'id';
@@ -57,5 +59,12 @@ export const W_ROOT_FORMATION = 'root_formation';
 export const EQUALS = "EQUALS";
 export const EXISTS = "EXISTS";
 
+// API Tasks
+export const TASKS = {
+    RUN_ALGORITHM: "RUN_ALGORITHM",
+    SAVE: "SAVE",
+}
+
 // Form values
-export const FIELD_NULL = "na";
+export const FIELD_NULL_VALUE = "na";
+export const FIELD_NULL_NAME = "N/A";

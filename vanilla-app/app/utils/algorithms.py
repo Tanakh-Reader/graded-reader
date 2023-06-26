@@ -18,6 +18,13 @@ def is_proper_noun(word: int) -> bool:
         return True
     return False
 
+# The goal is to penalize at scale, fading out around frequency = 450
+# penalty 10 - (√n * 4.5 - 5) / 10
+def word_penalty(word_freq: int) -> float:
+    part_1 = max(0, (math.sqrt(word_freq) * 4.5) - 5)
+    part_2 = 10 - (part_1 / 10)
+    return max(1, part_2)
+
 
 # A class used to compare mismatches between differently sorted lists.
 class CompareData:
@@ -45,14 +52,6 @@ class CompareData:
 
     def max_mismatch(self, mism):
         return sorted(mism.items(), key=lambda item: item[1])[-1]
-
-
-# The goal is to penalize at scale, fading out around frequency = 450
-# penalty 10 - (√n * 4.5 - 5) / 10
-def word_penalty(word_freq: int) -> float:
-    part_1 = max(0, (math.sqrt(word_freq) * 4.5) - 5)
-    part_2 = 10 - (part_1 / 10)
-    return max(1, part_2)
 
 
 def get_passage_weight(passage: Passage) -> float:
@@ -204,11 +203,14 @@ def get_passage_weight_x(
                 category.check_condition(word)
     print("DONE")
     for category in categories:
-        print(category.name, category.instances)
+        for k, v in category.penalties.items():
+            print(k, v, "\n")
+        # print(category.name, category.penalties)
     total_penalty = sum([cat.total_penalty() for cat in categories])
     total_weight = total_penalty / passage.word_count
-    
-    return round(total_weight, 4)
+    score = round(total_weight, 4)
+    penalties = None
+    return score, penalties
 
     # Compare using all words as denominator vs. unique words.
     # TODO !! would the unique word route only be taken for frequencies, or other items as well?
@@ -226,13 +228,24 @@ class Category(ABC):
     def __init__(self, name="", args=[]):
         self.name = name
         self.args = args
+        # Maps each word_id to a condition and penalty.
         self.instances = {}
+        # Maps each condition to a list of tuples [word_id, penalty].
+        self.penalties = {}
 
     def total_penalty(self):
         total = 0
         for k, v in self.instances.items():
             total += v.get("penalty")
         return total
+
+    def add_penalty(self, condition, word_id, penalty):
+        condition = str(condition)
+        if condition not in self.penalties:
+            self.penalties[condition] = [(word_id, penalty)]
+        else:
+            self.penalties[condition].append((word_id, penalty))
+
 
     @abstractmethod
     def check_condition(self, word):
@@ -261,6 +274,7 @@ class Compare(Category):
             # if all conditions are met, add to instances
             if conditions_met == len(conditions):
                 self.instances[word.id] = {"conditions": conditions, "penalty": penalty}
+                self.add_penalty(arg, word.id, penalty)
 
 
 
@@ -300,7 +314,9 @@ class Frequency(Category):
                 start, end, penalty = arg
 
                 if start <= word.lex_frequency <= end:
+                    self.add_penalty(arg, word.id, penalty)
                     # Give a custom penalty for proper nouns.
+                    # TODO: update proper_noun fxn.
                     if self.apply_proper_nouns and is_proper_noun(word) and penalty > self.min_penalty:
                         self.word_weights[word.lex_id]["penalty"] = int(
                             math.ceil(penalty / self.proper_noun_discount)
@@ -310,7 +326,7 @@ class Frequency(Category):
                         self.word_weights[word.lex_id]["penalty"] = penalty
             self.word_weights[word.lex_id]["weight"] += self.word_weights[word.lex_id]["penalty"]
             self.word_weights[word.lex_id]["count"] += 1
-            self.instances[word.id] = {"range": [start, end], "penalty": penalty}
+            self.instances[word.id] = {"range": [start, end], "penalty": penalty}            
 
 
 class ConstructNoun(Category):
@@ -326,10 +342,12 @@ def init_categories(configuration: dict[str, Any]) -> list[Category]:
     frequency_conditions = config_data.get("frequencies")
     x_conditions = config_data.get("x")
 
-    if verb_conditions:
+    print("DATA", verb_conditions, frequency_conditions)
+
+    if verb_conditions and len(verb_conditions) > 0:
         categories.append(Compare("verbs", verb_conditions))
 
-    if frequency_conditions:
+    if frequency_conditions and len(frequency_conditions) > 0:
         categories.append(Frequency("frequency", frequency_conditions))
 
     return categories

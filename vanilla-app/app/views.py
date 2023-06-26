@@ -1,7 +1,14 @@
 # https://dev.to/besil/my-django-svelte-setup-for-fullstack-development-3an8
 import json
 from django.core.paginator import Paginator
-from django.http import HttpResponse, HttpResponseNotAllowed, HttpResponseRedirect, JsonResponse, Http404, HttpRequest
+from django.http import (
+    HttpResponse,
+    HttpResponseNotAllowed,
+    HttpResponseRedirect,
+    JsonResponse,
+    Http404,
+    HttpRequest,
+)
 from django.urls import reverse
 from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.cache import cache_page
@@ -17,11 +24,12 @@ from django.shortcuts import redirect
 from .providers.book_provider import book_provider
 from .providers.word_provider import word_provider
 from .providers.passage_provider import passage_provider
-from .providers.algorithm_provider import algorithm_provider
+from .providers.algorithm_provider import Algorithm, algorithm_provider
 
 from .models import Passage, Word
 from .forms import *
 from .utils import references, algorithms as alg
+
 
 def index(request: HttpRequest) -> HttpResponse:
     context = {}
@@ -34,7 +42,7 @@ def index(request: HttpRequest) -> HttpResponse:
 def read(request: HttpRequest) -> HttpResponse:
     params = references.parse_reference(request.GET)
     # Display Genesis 1 if the reference isn't specified.
-    reference = params if params[0] else [1]*2 + [None]*3
+    reference = params if params[0] else [1] * 2 + [None] * 3
 
     words_loaded = word_provider.load_words_if_not_added()
     words = word_provider.get_words_from_reference(reference)
@@ -49,31 +57,9 @@ def read(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "read.html", context)
 
+
 from django.forms import formset_factory
 from .forms import VerbForm, FrequencyForm
-
-def algorithm_form(request: HttpRequest):
-    VerbFormSet = formset_factory(VerbForm, extra=1)  # extra=1 means 1 form will be displayed initially
-    FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
-
-    if request.method == 'POST':
-        verb_formset = VerbFormSet(request.POST, prefix='verbs')
-        frequency_formset = FrequencyFormSet(request.POST, prefix='freqs')
-
-        if verb_formset.is_valid() and frequency_formset.is_valid():
-            # Process the data and generate your configuration.json
-            # ...
-            print("Yah Baby")
-    else:
-        verb_formset = VerbFormSet(prefix='verbs')
-        frequency_formset = FrequencyFormSet(prefix='freqs')
-
-    return render(request, 'algorithm_form.html', {
-        'verb_formset': verb_formset,
-        'frequency_formset': frequency_formset
-    })
-
-
 
 
 # @cache_page(60 * 15)
@@ -97,46 +83,36 @@ def passages(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "passages.html", context)
 
-def passages_compare(request: HttpRequest) -> HttpResponse: 
 
-    passage1_id = request.GET.get('p1_id')
-    passage2_id = request.GET.get('p2_id')
+def passages_compare(request: HttpRequest) -> HttpResponse:
+    passage1_id = request.GET.get("p1_id")
+    passage2_id = request.GET.get("p2_id")
     ids = [passage1_id, passage2_id]
     text_passages = passage_provider.get_passages_by_ids(ids, as_json=True)
     all_passages = passage_provider.get_all_passages(as_json=True)
     books = book_provider.get_all_book_instances(as_json=True)
 
-    context = {
-        'text_passages': text_passages,
-        'passages': all_passages,
-        'books': books
-    }
+    context = {"text_passages": text_passages, "passages": all_passages, "books": books}
 
     return render(request, "passages_compare.html", context)
 
-
+@csrf_exempt  # TEMPORARY TODO
 def algorithms(request: HttpRequest) -> HttpResponse:
-    
-
     VerbFormSet = formset_factory(VerbForm, extra=1)
     FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
-
-    # ... handle POST data if required, otherwise instantiate the formsets
-
+    verb_formset = VerbFormSet(prefix="verbs")
+    frequency_formset = FrequencyFormSet(prefix="freqs")
+    
     passages = passage_provider.get_all_passages(as_json=True)
-
-    verb_formset = VerbFormSet(prefix='verbs')
-    frequency_formset = FrequencyFormSet(prefix='freqs')
     algorithm_templates = algorithm_provider.get_default_configurations()
     saved_algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
-    print(saved_algorithms)
     context = {
         "algorithm_templates": algorithm_templates,
-        'saved_algorithms': saved_algorithms,
-        'verb_formset': verb_formset,
-        'frequency_formset': frequency_formset,
-        'passages': passages,
-        }
+        "saved_algorithms": saved_algorithms,
+        "verb_formset": verb_formset,
+        "frequency_formset": frequency_formset,
+        "passages": passages,
+    }
     return render(request, "algorithms.html", context)
 
 
@@ -146,16 +122,12 @@ def settings(request: HttpRequest) -> HttpResponse:
     return render(request, "settings.html", context)
 
 
-
-
-
-
 # API ENDPOINTS --------------------------------
 # --------------------------------
 
-def get_hebrew_text(request: HttpRequest) -> JsonResponse:
 
-    pId = request.GET.get('ref')
+def get_hebrew_text(request: HttpRequest) -> JsonResponse:
+    pId = request.GET.get("ref")
     passage = passage_provider.get_passages_by_ids([pId])[0]
     words = word_provider.get_words_from_passage(passage, as_json=True)
     # temp = []
@@ -167,14 +139,64 @@ def get_hebrew_text(request: HttpRequest) -> JsonResponse:
     #     temp.append(word)
     # print(f"\n\n{pId} {temp}\n\n")
 
-    context = {'words': words}
-    text_html = render_to_string('widgets/hebrew_text.html', context)
-    return JsonResponse({'html': text_html})
+    context = {"words": words}
+    text_html = render_to_string("widgets/hebrew_text.html", context)
+    return JsonResponse({"html": text_html})
+
+@csrf_exempt  # TEMPORARY TODO
+def get_algorithm_form(request: HttpRequest) -> JsonResponse:
+    VerbFormSet = formset_factory(VerbForm, extra=1)
+    FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
+
+    verb_formset = VerbFormSet(request.POST or None, prefix="verbs")
+    frequency_formset = FrequencyFormSet(request.POST or None, prefix="freqs")
+
+    passages = passage_provider.get_all_passages(as_json=True)
+
+    context = {
+        "verb_formset": verb_formset,
+        "frequency_formset": frequency_formset,
+        "passages": passages,
+    }
+
+    if request.method == "POST":
+        if verb_formset.is_valid() and frequency_formset.is_valid():
+            # Process the data and generate your configuration.json
+            verb_data = [form.cleaned_data for form in verb_formset]
+            freq_data = [form.cleaned_data for form in frequency_formset]
+            algorithm_name = request.POST.get('name')
+
+            configuration = {
+                "verbs": verb_data,
+                "frequencies": freq_data,
+                "algorithm_name": algorithm_name,
+                # process further as needed...
+            }
+
+            # TODO: Do something with the configuration
+
+            return JsonResponse({'status': 'success', 'message': 'Yah Baby'})
+
+        else:
+            # Form validation failed, return errors
+            verb_errors = verb_formset.errors
+            freq_errors = frequency_formset.errors
+            return JsonResponse({
+                'status': 'error', 
+                'message': 'Validation failed',
+                'verb_errors': verb_errors,
+                'freq_errors': freq_errors,
+            })
+
+    form_html = render_to_string("widgets/algorithm_form.html", context)
+    return JsonResponse({"html": form_html})
+
+
 
 def get_books(request: HttpRequest) -> JsonResponse:
-    
     books = book_provider.get_all_book_instances(as_json=True)
-    return JsonResponse({'books': books})
+    return JsonResponse({"books": books})
+
 
 def check_data_ready(request: HttpRequest) -> JsonResponse:
     data_source = request.GET.get("data_source")
@@ -184,20 +206,32 @@ def check_data_ready(request: HttpRequest) -> JsonResponse:
         data_loaded = passage_provider.load_passages_if_not_added()
     return JsonResponse({"data_loaded": data_loaded})
 
-@require_POST
-@csrf_exempt # TEMPORARY TODO
-def run_algorithm(request: HttpRequest) -> JsonResponse:
-    data: dict = json.loads(request.body)
-    passage_id = data.get("passages")
-    configuration = data.get("configuration")
-    passage: Passage = passage_provider.get_passages_by_ids([passage_id])[0]
-    score = {
-        'passage': passage.get_reference(),
-        'score': alg.get_passage_weight_x(configuration, passage)
-    }
-    algorithm_provider.save_algorithm(configuration)
 
-    return JsonResponse(score)
+@require_POST
+@csrf_exempt  # TEMPORARY TODO
+def post_algorithm(request: HttpRequest) -> JsonResponse:
+    data: dict = json.loads(request.body)
+    configuration = data.get("configuration")
+    response = {
+        "configuration": None,
+        "score": None,
+        "penalties": None
+    }
+    task = data.get("task")
+    if task == "SAVE":
+        algorithm: Algorithm = algorithm_provider.save_algorithm(configuration)
+        print(configuration)
+        response["configuration"] = algorithm.configuration
+    elif task == "RUN_ALGORITHM":
+        text = data.get("text")
+        passage_id = text.get("passage_id")
+        if passage_id:
+            passage: Passage = passage_provider.get_passages_by_ids([passage_id])[0]
+            score, penalties = alg.get_passage_weight_x(configuration, passage)
+            response["score"] = score
+            response["penalties"] = penalties
+    return JsonResponse(response)
+
 
 @require_POST
 def delete_words(request: HttpRequest) -> HttpResponseRedirect:

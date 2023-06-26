@@ -1,6 +1,6 @@
 
 import os
-import time
+import datetime
 from ..utils.io import *
 from ..data import ranks
 from django.conf import settings
@@ -13,24 +13,34 @@ class Algorithm:
     def __init__(self, id, config):
         self.id = id
         self.configuration = config
-        self.created_timestamp = time.time()
-        self.updated_timestamp = time.time()
+        self.created_timestamp = datetime.datetime.now().replace(microsecond=0)
+        self.updated_timestamp = datetime.datetime.now()
         self.__update_configuration(init=True)
     
     def __update_configuration(self, init=False):
         self.name = self.configuration.get('name')
-        self.configuration['updated'] = self.updated_timestamp
+        self.configuration['updated'] = self.updated_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
         if init:
             self.configuration['id'] = self.id
-            self.configuration['created'] = self.created_timestamp
+            self.configuration['created'] = self.created_timestamp.strftime("%Y-%m-%dT%H:%M:%S")
+        self.__sort_frequencies()
+
+     # For better display on front end.
+    def __sort_frequencies(self):
+        frequencies = self.configuration.get('data').get('frequencies')
+        frequencies = sorted(frequencies, key=lambda frequency: frequency[0])
+        self.configuration['data']['frequencies'] = frequencies
             
     def update(self, config=None):
-        self.updated_timestamp = time.time()
+        self.configuration = config
+        self.updated_timestamp = datetime.datetime.now().replace(microsecond=0)
         self.__update_configuration()
     
+    # Save and return the instance.
     def save(self):
         path = os.path.join(DATA_PATH, str(self.id))
         write_pickle_data(path, self)
+        return self
 
 
 
@@ -49,24 +59,25 @@ class AlgorithmProvider:
             return id
     
     def get_algorithm_by_id(self, id):
-        path = os.path.join(DATA_PATH, id)
+        path = os.path.join(DATA_PATH, str(id))
         algorithm: Algorithm = load_pickle_data(path)
         return algorithm
 
+    # Save an algorithm and return the <Algorithm> instance.
     def save_algorithm(self, config):
         id = config.get('id')
         # Update existing algorithm
         if id:
             algorithm = self.get_algorithm_by_id(id)
             algorithm.update(config=config)
-            algorithm.save()
+            print(config, algorithm.configuration)
+            return algorithm.save()
         # Save new algorithm
         else:
             algorithm = Algorithm(self.get_id(), config)
-            algorithm.save()
+            return algorithm.save()
 
     def get_all_algorithms(self, configs_only=False):
-        files = os.listdir(DATA_PATH)
         algorithms: list[Algorithm] = []
         # Use id file to get all algorithms
         max_id = self.get_id(increment=False)
@@ -81,7 +92,7 @@ class AlgorithmProvider:
         return algorithms
     
     def get_default_configurations(self):
-        configurations = []
+        algorithms: list[Algorithm] = []
         all_ranks = ranks.LexRanks.all_ranks
         for rank in all_ranks:
             config = {
@@ -90,9 +101,9 @@ class AlgorithmProvider:
                     'frequencies': rank.get_rank_array()
                 }
             }
-            configurations.append(config)
-        return configurations
-    
+            algorithm = Algorithm(None, config)
+            algorithms.append(algorithm)
+        return [alg.configuration for alg in algorithms]
 
     
 algorithm_provider = AlgorithmProvider()

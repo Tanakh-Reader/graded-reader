@@ -1,5 +1,7 @@
 import * as utils from '../utils/utils.js';
 import * as constants from '../utils/constants.js';
+import * as events from '../utils/events.js';
+
 
 const wordSummaryDiv = document.getElementById('hovered-word-widget');
 let timer = null;
@@ -150,12 +152,12 @@ function toggleSelectedWord(wordJSON) {
 }
 
 // For Read page
-utils.subscribe('DOMContentLoaded', (event) => {
+events.subscribe('DOMContentLoaded', (event) => {
     colorWords();
 })
 
 // For Words generated from API call
-utils.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
+events.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
     colorWords(event.detail);
 });
 

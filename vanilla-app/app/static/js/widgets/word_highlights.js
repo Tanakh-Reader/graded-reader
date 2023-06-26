@@ -1,5 +1,7 @@
 import * as utils from '../utils/utils.js';
 import * as constants from '../utils/constants.js';
+import * as events from '../utils/events.js';
+
 import { COLORS } from '../utils/theme.js';
 
 
@@ -157,7 +159,7 @@ document.getElementById('word-highlights-dropdown').addEventListener('click', fu
 
 refreshDropdown();
 
-utils.subscribe(constants.TEXT_LOADED_EVENT, () => {
+events.subscribe(constants.TEXT_LOADED_EVENT, () => {
     refreshDropdown();
     conditions.forEach(condition => condition.fire());
 });

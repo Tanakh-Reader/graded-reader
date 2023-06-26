@@ -68,15 +68,14 @@ export function submitPassageSelection(bookNumber, startChapter, startVerse, end
   }
 }
 
-// Create and dispatch a custom event
-export function publish(eventName, detail) {
-  const event = new CustomEvent(eventName, { detail: detail });
-  document.dispatchEvent(event);
-}
-
-// Subscribe to a custom event
-export function subscribe(eventName, callback) {
-  document.addEventListener(eventName, callback);
+export function showToast(message, duration) {
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.classList.add('toast');
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    document.body.removeChild(toast);
+  }, duration);
 }
 
 // export default {

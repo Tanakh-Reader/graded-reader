@@ -1,5 +1,6 @@
 import * as constants from './utils/constants.js';
 import * as utils from './utils/utils.js';
+import * as events from './utils/events.js';
 import apis from './utils/api.js';
 
 function submitPassage(passage) {
@@ -13,7 +14,7 @@ function getHebrewText(passageId, div) {
     apis.getHebrewText(passageId).then(response => {
         $(div).html(response)
         // Dispatch a event for text updates.
-        utils.publish(constants.TEXT_LOADED_EVENT, div)
+        events.publish(constants.TEXT_LOADED_EVENT, div)
     })
         .catch(error => {
             console.error(error);
