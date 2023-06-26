@@ -5,7 +5,7 @@
     font-family: 'Times New Roman', Times, serif;
 }
 
-.selected {
+.word.selected {
     font-weight: bold;
 }
 

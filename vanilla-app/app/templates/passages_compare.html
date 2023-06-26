@@ -6,47 +6,58 @@
 
 {% block styles %}
 <link rel="stylesheet" href="{% static 'css/passages_compare.css' %}">
+
 {% endblock %}
 
 {% block content %}
 
 <div class="container mx-auto px-4">
-    <div id="alg">TEST</div>
-    <div class="ml-4 mb-6">{% include 'widgets/word_highlights_dropdown.html' %}
+    <div class="comparisons-header ml-4 mb-6 space-y-3">
+        <div id="alg">TEST</div>
+        {% include 'widgets/word_highlights_dropdown.html' %}
+        <button class="toggle-form-button btn">Algorithm</button>
+        <button class="add-widget add-btn float-right">+</button>
+
     </div>
-    <div class="flex flex-row">
+
+    <div class="comparison-container gap-4 ">
 
         {% for text_passage in text_passages %}
-        <div class="passage-container flex flex-col w-1/2 mx-1 py-3 px-4">
-            <div class="flex flex-row justify-center items-center my-4">
+        <div class="passage-container flex flex-col mx-1 py-3 px-4">
+            <!-- Header section -->
+            <div class="passage-header flex flex-row justify-center items-center my-4 space-x-4">
+                <!-- Remove button -->
+                <button class="remove-widget del-btn">-</button>
+
                 <!-- Passage selection dropdown -->
-                <button class="btn" onclick="showDropdown(this)">
-                    {{ text_passage.reference }}
-                </button>
-                {% include 'widgets/passage_selector.html' %}
+                <div class="w-2/3 flex justify-center">
+                    <button class="btn reference-button" onclick="showDropdown(this)" data-id="{{ text_passage.id }}">
+                    {{ text_passage.reference_abbr }}
+                    </button>
+                </div>
                 
-                <h2 class="ml-8">{{ text_passage.penalty }}</h2>
-                <button class="btn" onclick="runAlgorithm('{{ text_passage.id }}')">A</button>
+                {% include 'widgets/passage_selector.html' %}
+
+                <h2 class="">{{ text_passage.penalty }}</h2>
             </div>
 
-            <!--  USED by the API CALL -->
-            <div class="passage-text" 
-        data-id="{{ text_passage.id }}"></div>
-        
+            <!-- Text section -- USED by the API CALL -->
+            <div class="passage-text" data-id="{{ text_passage.id }}"></div>
         </div>
         {% endfor %}
-
     </div>
 </div>
-
 <!-- Selected word data -->
 {% include 'widgets/selected_word.html' %}
 
+<!--  USED by the API CALL -->
+<div class="algorithm-form-container"></div>
+
 <script type="module" src="{% static 'js/widgets/hebrew_text.js' %}"></script>
 <!-- For some reason the color goes away on the left without the above import. Why?? -->
+<script type="module" src="{% static 'js/widgets/algorithm_form.js' %}"></script>
 <script type="module" src="{% static 'js/passages_compare.js' %}"></script>
 <script type="module" src="{% static 'js/widgets/passage_selector.js' %}"></script>
 
 
 {% endblock %}
-

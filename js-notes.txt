@@ -1,0 +1,9 @@
+ELEMENT DATA
+jQuery's .data() caches the initial values of data attributes for better performance, and does not automatically update when the data- attribute value changes. 
+you can use the .attr() method instead.
+
+RACE CONDITIONS
+By using setTimeout(func, 0), you're telling JavaScript, "I know I've asked you to do something else already, but when you're ready, execute this function." This gives JavaScript time to process any pending tasks, including updating the DOM, before your event is fired and your custom function is executed.
+This situation is common in JavaScript programming, and it's often referred to as "yielding to the event loop" or "releasing the thread."
+
+For async API calls that update the UI, use a publish and subscribe pattern to respond to events.

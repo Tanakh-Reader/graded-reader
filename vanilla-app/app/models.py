@@ -74,6 +74,7 @@ class Passage(models.Model):
         self.tags = self.tags.split(',')
         passage_dict = model_to_dict(self)
         passage_dict["reference"] = self.get_reference()
+        passage_dict["reference_abbr"] = self.get_reference(abbreviation=True)
         passage_dict['id'] = self.id
         return passage_dict
 
@@ -97,9 +98,11 @@ class Passage(models.Model):
         return Word.objects.filter(id__gte=self.start_word, id__lte=self.end_word)
 
 
-    def get_reference(self):
-        book = book_provider.get_name(self.book)
-
+    def get_reference(self, abbreviation=False):
+        if abbreviation:
+            book = book_provider.get_name_osis(self.book)
+        else:
+            book = book_provider.get_name(self.book)
         ref_string = f"{book} {self.start_chapter}:{self.start_verse}"
         if self.start_chapter != self.end_chapter:
             ref_string += f"–{self.end_chapter}:{self.end_verse}"

@@ -9,3 +9,8 @@ export function subscribe(eventName, callback) {
     document.addEventListener(eventName, callback);
 }
 
+export function addListeners(eventNames, callback) {
+    eventNames.forEach(eventName => {
+        subscribe(eventName, callback);
+    });
+}

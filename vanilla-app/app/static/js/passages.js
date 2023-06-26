@@ -9,11 +9,11 @@ function selectPassage(event) {
     const passageCard = checkbox.closest(".passage-card");
 
     if (checkbox.checked) {
-        if (selectedPassages.length < 2) {
+        if (selectedPassages.length < 4) {
             selectedPassages.push(passageCard);
         } else {
             checkbox.checked = false;
-            alert("You can only select two passages.");
+            alert("You can only select up to 4 passages.");
         }
     } else {
         selectedPassages = selectedPassages.filter((card) => card !== passageCard);
@@ -21,14 +21,13 @@ function selectPassage(event) {
 }
 
 function submitSelectedPassages() {
-    if (selectedPassages.length === 2) {
+    if (selectedPassages.length >= 2 && selectedPassages.length <= 4) {
         const passageIds = selectedPassages.map((card) => card.getAttribute("data-id"));
         const queryParams = new URLSearchParams();
-        utils.setParamIfValid(queryParams, 'p1_id', passageIds[0]);
-        utils.setParamIfValid(queryParams, 'p2_id', passageIds[1]);
+        passageIds.forEach((id) => utils.setParamIfValid(queryParams, 'id', id));
         window.location.href = `${constants.COMPARE_PAGE}?${queryParams.toString()}`;
     } else {
-        alert("Please select exactly two passages.");
+        alert("Please select between 2 to 4 passages.");
     }
 }
 

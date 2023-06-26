@@ -2,6 +2,33 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+/* 
+BUTTONS
+*/
 .btn {
     @apply bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded;
+}
+
+.add-btn {
+    @apply bg-green-500 hover:bg-green-700;
+}
+
+.del-btn {
+    @apply bg-red-500 hover:bg-red-700;
+}
+
+.add-btn, .del-btn {
+    @apply text-white font-bold px-2 rounded z-10;
+}
+
+.dismiss-btn {
+    @apply text-red-600 cursor-pointer bg-white hover:bg-gray-100 font-semibold px-2 border border-gray-400 rounded shadow float-right;
+}
+
+/* 
+WIDGETS
+*/
+.passage-dropdown {
+    @apply absolute w-48 border border-gray-400 rounded-sm hidden mt-1 z-30;
+    margin-left: 0px !important;
 }

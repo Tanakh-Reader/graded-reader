@@ -10,14 +10,6 @@ dropdowns.forEach((dropdown) => {
         const selectedOption = event.target.selectedOptions[0];
         const definition = utils.contextToJson(selectedOption.dataset.definition);
         definitionDiv.textContent = JSON.stringify(definition, undefined, 2);
-    });
-});
-// Select your dropdowns
-
-dropdowns.forEach((dropdown) => {
-    dropdown.addEventListener('change', (event) => {
-        // Parse the selected option's data-definition attribute into JSON
-        const selectedOption = event.target.selectedOptions[0];
         const algorithmConfig = utils.contextToJson(selectedOption.dataset.definition);
 
         // Populate the forms with this data

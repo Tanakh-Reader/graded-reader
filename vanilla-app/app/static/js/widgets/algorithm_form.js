@@ -14,6 +14,13 @@ const formsetNames = [
     frequencyClassName,
 ];
 
+var currentConfiguration = {};
+// Lets you still add when all the entries have been deleted.
+const formsToClone = {
+    verb: document.querySelector(`.${verbClassName}-form`),
+    freq: document.querySelector(`.${frequencyClassName}-form`)
+};
+
 const dataDiv = document.querySelector(`#data`).dataset;
 var verbCount = dataDiv.verbCount;
 var freqCount = dataDiv.freqCount;
@@ -24,7 +31,8 @@ var formCount = {
     'freq': freqCount
 };
 
-var currentConfiguration = {};
+var savedAlgorithms = $(document).find('.dropdown-container select').toArray();
+
 
 function updateRemoveButtons(type) {
     // If there's only one form of this type, hide the 'remove' button
@@ -50,7 +58,7 @@ function updateRemoveButtons(type) {
 
 function addForm(type) {
     // Select the first form of this type to clone
-    var formToClone = document.querySelector(`.${type}-form`);
+    var formToClone = formsToClone[type];
 
     // Create a new form div and replace __prefix__ in its HTML
     var newForm = formToClone.cloneNode(true);
@@ -99,8 +107,12 @@ function populateFormset(formType, data, populateForm) {
 
     const formset = document.querySelector(`.${formType}-formset`);
     let forms = formset.querySelectorAll(`.${formType}-form`);
-
-    let firstForm = forms[0];
+    console.log(formType, forms);
+    if (forms.length === 0) {
+        var firstForm = addForm(formType);
+    } else {
+        firstForm = forms[0];
+    }
     populateForm(firstForm, data[0]);
 
     for (let i = 1; i < data.length; i++) {
@@ -204,13 +216,13 @@ function getConfiguration() {
     return config;
 }
 
-function runAlgorithm(config, passageId) {
+function runAlgorithm(config, text) {
     console.log('RUN ALG');
-    const text = {passage_id: passageId}
     apis.postAlgorithm(config, constants.TASKS.RUN_ALGORITHM, text).then(response => {
+        const textResponse = response.text
         const score = response.score;
         const penalties = response.penalties;
-        $("#alg").text(JSON.stringify(response, undefined, 2))
+        $("#alg").text(JSON.stringify(textResponse, undefined, 2))
         console.log(response);
     })
         .catch(error => {
@@ -224,7 +236,7 @@ function saveAlgorithm(config) {
         // TODO Also add to the dropdown if applicable.
         const savedConfig = response.configuration;
         currentConfiguration = savedConfig;
-        utils.showToast(`Algorithm ${savedConfig.name} saved successfully.`, 2000);
+        utils.showToast(`Algorithm ${savedConfig.name} saved successfully.`, 3000);
         console.log(response);
     })
         .catch(error => {
@@ -235,40 +247,101 @@ function saveAlgorithm(config) {
 function setupFormSubmission() {
     // TODO Will need a forAll here if multiple.
     document.querySelector('.algorithm-form').addEventListener('submit', function (event) {
-        console.log("SUBMITTED");
         event.preventDefault();  // prevent the form from submitting
 
         var formData = new FormData(event.target);
 
 
-        apis.submitForm(formData, constants.GET_ALGORITHM_FORM_API);
+        // apis.submitForm(formData, constants.GET_ALGORITHM_FORM_API);
 
-        // let isValidForm = true;
-        // document.querySelectorAll('input[type="number"]').forEach(function (input) {
-        //     if (input.value.trim() === '') {
-        //         console.log(input);
-        //         isValidForm = false;
-        //     }
-        // });
-        // if (!isValidForm) {
-        //     alert('Please fill all the fields.');
-        // } else {
-        //     const config = getConfiguration();
-        //     if (event.submitter.id === "save") {
-        //         saveAlgorithm(config);
-        //     } else {
-        //         const passageId = document.querySelector('.psg').dataset.id;
-        //         if (!passageId) {
-        //             alert('Please select a passage.');
-        //         }
-        //         runAlgorithm(config, passageId);
-        //     }
-        //     currentConfiguration = {};
-        // }
+        let isValidForm = true;
+        document.querySelectorAll('input[type="number"]').forEach(function (input) {
+            if (input.value.trim() === '') {
+                console.log(input);
+                isValidForm = false;
+            }
+        });
+        if (!isValidForm) {
+            alert('Please fill all the fields.');
+        } else {
+            const config = getConfiguration();
+            if (event.submitter.id === "save") {
+                saveAlgorithm(config);
+            // Handle text data
+            } else {
+                // If a page with rendered text, set those texts to be the passages.
+                var passageIds = null;
+                if (window.location.href.includes(constants.COMPARE_PAGE)) {
+                    const referenceButtons = document.querySelectorAll('.reference-button');
+                    passageIds = Array.from(referenceButtons).map(button => {
+                        return $(button).data('id');
+                    }).filter(id => id != null);
+                } else {
+                    let passageId = $('.psg').attr('data-id');
+                    console.log(passageId);
+                    console.log($('.psg'));
+                    if (passageId) {
+                        passageIds = [passageId];
+                    }
+                }
+                if (!passageIds || passageIds.length === 0) {
+                    alert('Please select a passage.');
+                }
+                const text = {
+                    "passage_ids": passageIds
+                }
+                runAlgorithm(config, text);
+            }
+            currentConfiguration = {};
+        }
     });
 }
 
+// ****************************************************************
+// FUNCTIONS TO TOGGLE THE FORM'S DISPLAY
+// ****************************************************************
+
+// Assuming you have more than one button, we add the event listener to each button
+function setupToggleFormButtons() {
+    let form = document.querySelector('.algorithm-form');
+    let buttons = document.querySelectorAll('.toggle-form-button');
+    // E.g., on the Algorithms screen.
+    if (buttons.length === 0) {
+        form.style.display = "inline-flex";
+        form.classList.remove("absolute");
+        form.querySelector('.dismiss-btn').style.display = "none";
+    }
+    else {
+        buttons.forEach(button => {
+            button.addEventListener('click', function (e) {
+                // To compensate for tailwind classes not affecting inline style.
+                let display = window.getComputedStyle(form).display;
+                if (display === "none") {
+                    let rect = e.target.getBoundingClientRect();
+                    form.style.top = (rect.top + window.scrollY + button.offsetHeight) + "px";
+                    form.style.left = (rect.left + window.scrollX) + "px";
+                    form.style.display = "inline-flex";
+                } else {
+                    form.style.display = "none";
+                }
+            });
+        });
+    }
+}
+
+
+function dismissAlgorithmForm() {
+    document.querySelector('.algorithm-form').style.display = "none";
+}
+
+
+// ****************************************************************
+// INITIALIZE FUNCTIONS
+// ****************************************************************
+
 events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
+
+    setupToggleFormButtons();
 
     formsetNames.forEach(function (type) {
         document.querySelector(`#add-${type}-button`).addEventListener('click', function () {
@@ -279,7 +352,16 @@ events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
         updateRemoveButtons(type);
     });
 
+    savedAlgorithms.forEach((dropdown) => {
+        dropdown.addEventListener('change', (event) => {
+            const selectedOption = event.target.selectedOptions[0];
+            const algorithmConfig = utils.contextToJson(selectedOption.dataset.definition);
+            populateAlgorithmForm(algorithmConfig)
+        });
+    });
+
     setupFormSubmission();
 });
 
-window.populateAlgorithmForm = populateAlgorithmForm
+window.populateAlgorithmForm = populateAlgorithmForm;
+window.dismissAlgorithmForm = dismissAlgorithmForm;

@@ -4,36 +4,35 @@ from pathlib import Path
 
 from django.conf import settings
 from ..data.book import Book
+from ..data.constants import *
   
 BOOKS_CSV = os.path.join(settings.BASE_DIR, "app/data/books.csv")
-
-BOOK_NUMBER = 'bookId'
-BHSA_NAME = 'bhsaName'
-BOOK_NAME = 'bookName'
-CHAPTERS = 'chapters'
 
 class BookProvider:
 
     def __init__(self):
         self.df = pd.read_csv(BOOKS_CSV)
-        self.book_to_id = {name: int(number) for name, number in zip(self.df[BHSA_NAME], self.df[BOOK_NUMBER])}
+        self.book_to_id = {name: int(number) for name, number in zip(self.df[BOOK_NAME_BHSA], self.df[BOOK_NUMBER])}
         self.book_instances = []
         self.get_all_book_instances()
 
     def get_name(self, number):
         return self.df.loc[self.df[BOOK_NUMBER] == number, BOOK_NAME].values[0]
     
+    def get_name_osis(self, number):
+        return self.df.loc[self.df[BOOK_NUMBER] == number, BOOK_NAME_OSIS].values[0]
+    
     def get_name_bhsa(self, number):
-        return self.df.loc[self.df[BOOK_NUMBER] == number, BHSA_NAME].values[0]
+        return self.df.loc[self.df[BOOK_NUMBER] == number, BOOK_NAME_BHSA].values[0]
     
     def get_number_from_name(self, name):
         return self.df.loc[self.df[BOOK_NAME] == name, BOOK_NUMBER].values[0]
     
     def get_number_from_name_bhsa(self, name_bhsa):
-        return self.df.loc[self.df[BHSA_NAME] == name_bhsa, BOOK_NUMBER].values[0]
+        return self.df.loc[self.df[BOOK_NAME_BHSA] == name_bhsa, BOOK_NUMBER].values[0]
     
     def get_chapters(self, number):
-        return self.df.loc[self.df[BOOK_NUMBER] == number, CHAPTERS].values[0]
+        return self.df.loc[self.df[BOOK_NUMBER] == number, BOOK_CHAPTERS].values[0]
     
     # Faster function when loading words straight from BHSA.
     def bhsa_to_id(self, name_bhsa):

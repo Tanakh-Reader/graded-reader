@@ -10,12 +10,15 @@ document.querySelectorAll('.passage-item').forEach(item => {
 
 import * as utils from '../utils/utils.js';
 import * as constants from '../utils/constants.js';
+import * as events from '../utils/events.js';
 import { getBackgroundColorByPenalty } from '../passages.js';
+
+window.currentButton = null;
 
 // Scroll to current passage.
 function scrollToSelectedPassage() {
     let reference = currentButton.textContent.trim();
-    let dropdownList = dropdownMenu.querySelector("ul");
+    let dropdownList = passagesDropdownMenu.querySelector("ul");
     let passageItems = dropdownList.querySelectorAll(".passage-item");
     for (let passageItem of passageItems) {
         if (passageItem.getAttribute("data-ref").trim() === reference) {
@@ -30,16 +33,17 @@ function scrollToSelectedPassage() {
 function showDropdown(button) {
     // Get positioning.
     let rect = button.getBoundingClientRect();
-    dropdownMenu.style.top = (rect.top + window.scrollY + button.offsetHeight) + "px";
-    dropdownMenu.style.left = (rect.left + window.scrollX) + "px";
+    passagesDropdownMenu.style.top = (rect.top + window.scrollY + button.offsetHeight) + "px";
+    passagesDropdownMenu.style.left = (rect.left + window.scrollX) + "px";
 
-    if (currentButton === button) {
+    if (button.classList.contains('selected')) {
         // Button was clicked while dropdown was open.
-        dropdownMenu.style.display = "none";
-        currentButton = null;
+        passagesDropdownMenu.style.display = "none";
+        button.classList.remove('selected');
     } else {
         // Button was clicked while dropdown was closed.
-        dropdownMenu.style.display = "block";
+        passagesDropdownMenu.style.display = "block";
+        button.classList.add("selected");
         currentButton = button;
         scrollToSelectedPassage();
     }
@@ -72,25 +76,26 @@ function colorPassageItem(passage) {
 }
 
 function selectPassage(passage) {
-    const selectedReference = $(passage).data("ref");
+    let selectedReference = $(passage).data("ref-abbr");
     // Update the button text.
     $(currentButton).text(selectedReference);
     $(currentButton).attr("data-id", $(passage).data("id"));
-    console.log($(currentButton));
+    currentButton.classList.remove('selected');
     // Dismiss the dropdown.
-    dropdownMenu.style.display = "none";
-    currentButton = null;
+    passagesDropdownMenu.style.display = "none";
 }
 
-window.addEventListener("DOMContentLoaded", (event) => {
+events.addListeners(["DOMContentLoaded", constants.ALG_FORM_LOADED_EVENT], (event) => {
+
     document.querySelectorAll('.passage-item').forEach(item => {
         colorPassageItem(item);
         item.addEventListener('click', event => selectPassage(event.target));
     });
-});
 
-window.showDropdown = showDropdown;
-window.filterDropdown = filterDropdown;
-// See usage in <passages_compare.js>
-window.currentButton = null;
-window.dropdownMenu = document.getElementById("dropdown-menu");
+    window.showDropdown = showDropdown;
+    window.filterDropdown = filterDropdown;
+
+    // Needs to be here for the algorithm page, for some reason.
+    window.passagesDropdownMenu = document.querySelector(".passage-dropdown");
+
+});

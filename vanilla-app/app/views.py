@@ -31,7 +31,7 @@ from .forms import *
 from .utils import references, algorithms as alg
 
 
-def index(request: HttpRequest) -> HttpResponse:
+def search(request: HttpRequest) -> HttpResponse:
     context = {}
     return render(request, "index.html", context)
 
@@ -85,14 +85,14 @@ def passages(request: HttpRequest) -> HttpResponse:
 
 
 def passages_compare(request: HttpRequest) -> HttpResponse:
-    passage1_id = request.GET.get("p1_id")
-    passage2_id = request.GET.get("p2_id")
-    ids = [passage1_id, passage2_id]
-    text_passages = passage_provider.get_passages_by_ids(ids, as_json=True)
+    default_ids = [1,2]
+    passage_ids = request.GET.getlist('id', default_ids)
+    if not (2 <= len(passage_ids) <= 4):
+        passage_ids = default_ids
+    text_passages = passage_provider.get_passages_by_ids(passage_ids, as_json=True)
     all_passages = passage_provider.get_all_passages(as_json=True)
-    books = book_provider.get_all_book_instances(as_json=True)
 
-    context = {"text_passages": text_passages, "passages": all_passages, "books": books}
+    context = {"text_passages": text_passages, "passages": all_passages}
 
     return render(request, "passages_compare.html", context)
 
@@ -145,6 +145,10 @@ def get_hebrew_text(request: HttpRequest) -> JsonResponse:
 
 @csrf_exempt  # TEMPORARY TODO
 def get_algorithm_form(request: HttpRequest) -> JsonResponse:
+
+    algorithm_templates = algorithm_provider.get_default_configurations()
+    saved_algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
+
     VerbFormSet = formset_factory(VerbForm, extra=1)
     FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
 
@@ -154,6 +158,8 @@ def get_algorithm_form(request: HttpRequest) -> JsonResponse:
     passages = passage_provider.get_all_passages(as_json=True)
 
     context = {
+        "algorithm_templates": algorithm_templates,
+        "saved_algorithms": saved_algorithms,
         "verb_formset": verb_formset,
         "frequency_formset": frequency_formset,
         "passages": passages,
@@ -214,8 +220,7 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
     configuration = data.get("configuration")
     response = {
         "configuration": None,
-        "score": None,
-        "penalties": None
+        "text": [],
     }
     task = data.get("task")
     if task == "SAVE":
@@ -224,12 +229,17 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
         response["configuration"] = algorithm.configuration
     elif task == "RUN_ALGORITHM":
         text = data.get("text")
-        passage_id = text.get("passage_id")
-        if passage_id:
-            passage: Passage = passage_provider.get_passages_by_ids([passage_id])[0]
-            score, penalties = alg.get_passage_weight_x(configuration, passage)
-            response["score"] = score
-            response["penalties"] = penalties
+        passage_ids = text.get("passage_ids")
+        print(passage_ids)
+        if passage_ids and type(passage_ids) == list:
+            passages: list[Passage] = passage_provider.get_passages_by_ids(passage_ids)
+            for passage in passages:
+                text_data = {}
+                score, penalties = alg.get_passage_weight_x(configuration, passage)
+                text_data["id"] = passage.id
+                text_data["score"] = score
+                text_data["penalties"] = penalties
+                response["text"].append(text_data)
     return JsonResponse(response)
 
 

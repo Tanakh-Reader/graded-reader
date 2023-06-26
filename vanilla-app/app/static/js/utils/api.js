@@ -30,7 +30,7 @@ function getAlgorithmForm() {
                 // 'ref': passageId
             },
             success: function (response) {
-                $('.algorithm-form').html(response.html);
+                $('.algorithm-form-container').html(response.html);
 
                 // Ensure that the DOM has finished updating
                 setTimeout(() => {

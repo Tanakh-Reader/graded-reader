@@ -30,7 +30,7 @@ export async function getBookByName(name) {
 // Make sure a query param is valid
 export function setParamIfValid(queryParams, key, value) {
   if (value !== undefined && value !== '' && value !== null) {
-    queryParams.set(key, value);
+    queryParams.append(key, value);
   }
 }
 

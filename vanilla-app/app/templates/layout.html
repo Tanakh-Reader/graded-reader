@@ -9,7 +9,7 @@
     <title>{% block title %}Hebrew Graded Reader{% endblock %}</title>
     <link rel="shortcut icon" type="image/png" href="{% static 'favicon/favicon.ico' %}" />
     <!-- Tailwind -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"> -->
     <link rel="stylesheet" href="{% static 'css/tw-output.css' %}">
     <!-- Google fonts -->
     <link rel="stylesheet"
@@ -37,9 +37,10 @@
         </h1>
         <nav>
             <ul class="flex justify-end space-x-4">
-                <li><a href="{% url 'index' %}" class="text-gray-900 hover:text-gray-600">Home</a></li>
+                <li><a href="{% url 'search' %}" class="text-gray-900 hover:text-gray-600">Search</a></li>
                 <li><a href="{% url 'read' %}" class="text-gray-900 hover:text-gray-600">Read</a></li>
                 <li><a href="{% url 'passages' %}" class="text-gray-900 hover:text-gray-600">Passages</a></li>
+                <li><a href="{% url 'compare' %}" class="text-gray-900 hover:text-gray-600">Compare</a></li>
                 <li><a href="{% url 'algorithms' %}" class="text-gray-900 hover:text-gray-600">Algorithms</a></li>
                 <li>
                     <a href="{% url 'settings' %}" class="text-gray-900 hover:text-gray-600">
@@ -52,7 +53,7 @@
 
     <main>
         <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="max-w-fit mx-auto sm:px-6 lg:px-8">
                 <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
                     <div class="p-6 sm:px-10 bg-white">
                         {% block content %}{% endblock %}

@@ -45,3 +45,11 @@ g_uvf_utf8
 g_vbe_utf8
 g_vbs_utf8
 """.replace("\n", " ")
+
+# BOOK FEATURES
+
+BOOK_NUMBER = 'bookId'
+BOOK_NAME = 'bookName'
+BOOK_NAME_BHSA = 'bhsaName'
+BOOK_NAME_OSIS = 'abbrOSIS'
+BOOK_CHAPTERS = 'chapters'

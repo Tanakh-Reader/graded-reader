@@ -1,11 +1,11 @@
 {% load static %}
 
 <!-- Dropdown menu for search passages -->
-<div id="dropdown-menu" class="dropdown-menu mt-1 hidden">
+<div class="passage-dropdown">
     <input type="text" class="border-b w-full p-2" id="searchInput" oninput="filterDropdown()" placeholder="Search...">
     <ul class="list-none p-0 overflow-auto max-h-72">
         {% for passage in passages %}
-        <li class="passage-item p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}"
+        <li class="passage-item p-2 hover:bg-gray-200 cursor-pointer" data-ref="{{ passage.reference}}" data-ref-abbr="{{ passage.reference_abbr}}"
             data-id="{{ passage.id}}" data-word-count="{{ passage.word_count }}" data-penalty="{{ passage.penalty }}">
             {{ passage.reference }}
         </li>

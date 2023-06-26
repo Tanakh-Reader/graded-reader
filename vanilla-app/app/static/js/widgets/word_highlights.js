@@ -6,7 +6,7 @@ import { COLORS } from '../utils/theme.js';
 
 
 // Get a reference to the dropdown menu
-const dropdownMenu = document.getElementById('word-highlights-dropdown-menu');
+const highlightsDropdownMenu = document.getElementById('word-highlights-dropdown-menu');
 
 class Condition {
     constructor({ checkboxId, text, color, conditionFunc, actionFunc }) {
@@ -143,18 +143,18 @@ conditions.forEach(condition => {
     listItem.style.display = 'none'; // initially hidden
     condition.menuItem = listItem; // attach the reference to the Condition object
 
-    dropdownMenu.appendChild(listItem);
+    highlightsDropdownMenu.appendChild(listItem);
     condition.attach();
 });
 
 // Prevent the box from closing when checkbox is clicked
-dropdownMenu.addEventListener('click', function (event) {
+highlightsDropdownMenu.addEventListener('click', function (event) {
     event.stopPropagation();
 });
 
 // Add event listener to dropdown
 document.getElementById('word-highlights-dropdown').addEventListener('click', function () {
-    dropdownMenu.classList.toggle('hidden');
+    highlightsDropdownMenu.classList.toggle('hidden');
 });
 
 refreshDropdown();
