@@ -15,7 +15,10 @@
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css?family=Cardo:ital,wght@0,400;0,700;1,400|Alef:ital,wght@0,400;0,700;1,400|Frank+Ruhl+Libre:ital,wght@0,400;0,700;1,400&display=swap">
     <!-- Icons -->
-    <script src="https://use.fontawesome.com/65bf7dd694.js"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
     <!-- JQuery -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"
         integrity="sha512-pumBsjNRGGqkPzKHndZMaAG+bir374sORyzM3uulLV14lN5LyykqNk8eEeUlUkB3U0M4FApyaHraT65ihJhDpQ=="
@@ -42,9 +45,12 @@
                 <li><a href="{% url 'passages' %}" class="text-gray-900 hover:text-gray-600">Passages</a></li>
                 <li><a href="{% url 'compare' %}" class="text-gray-900 hover:text-gray-600">Compare</a></li>
                 <li><a href="{% url 'algorithms' %}" class="text-gray-900 hover:text-gray-600">Algorithms</a></li>
+                <li><a href="{% url 'features' %}" class="text-gray-900 hover:text-gray-600">Features</a></li>
                 <li>
                     <a href="{% url 'settings' %}" class="text-gray-900 hover:text-gray-600">
-                        <i class="fa-solid fa-gear"></i>
+                        <span class="material-symbols-sharp">
+                            settings
+                        </span>
                     </a>
                 </li>
             </ul>

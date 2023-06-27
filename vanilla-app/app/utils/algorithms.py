@@ -12,9 +12,14 @@ from ..data.constants import *
 lex_rank_default = LexRanks()._7_ranks.get_rank_dict()
 
 
-def is_proper_noun(word: int) -> bool:
+def is_proper_noun_bhsa(word: int) -> bool:
     T, L, F = bhsa_provider.api_globals()
     if F.ls.v(word) == "gntl" or F.sp.v(word) == "nmpr":
+        return True
+    return False
+
+def is_proper_noun(word: Word) -> bool:
+    if word.lex_set == "gntl" or word.speech == "nmpr":
         return True
     return False
 
@@ -78,7 +83,7 @@ def get_passage_weight1(passage: Passage, rank_scale=lex_rank_default) -> float:
                 _range = rank_scale[rank]["range"]
                 if lex_freq >= _range[0] and lex_freq < _range[1]:
                     # Give a half penalty for proper nouns.
-                    if is_proper_noun(word):  # proper noun
+                    if is_proper_noun_bhsa(word):  # proper noun
                         total_weight += (rank_scale[rank]["weight"]) / 2
                     # Give a full penalty for other word types.
                     else:
@@ -103,7 +108,7 @@ def get_passage_weight2(passage: Passage, rank_scale=lex_rank_default, div_all=T
                 _range = rank_scale[rank]["range"]
                 if lex_freq >= _range[0] and lex_freq < _range[1]:
                     # Give a half penalty for proper nouns.
-                    if is_proper_noun(word):  # proper noun
+                    if is_proper_noun_bhsa(word):  # proper noun
                         total_weight += (rank_scale[rank]["weight"]) / 2
                     # Give a full penalty for other word types.
                     else:
@@ -158,7 +163,7 @@ def get_passage_weight3(
                         # Give a half penalty for proper nouns.
                         _penalty = rank_scale[rank]["weight"]
                         if (
-                            is_proper_noun(word) and _penalty > min_penalty
+                            is_proper_noun_bhsa(word) and _penalty > min_penalty
                         ):  # proper noun
                             word_weights[lex]["penalty"] = int(math.ceil(_penalty / 2))
                         # Give a full penalty for other word types.
@@ -201,15 +206,16 @@ def get_passage_weight_x(
         if word.lex not in Classify().stop_words:
             for category in categories:
                 category.check_condition(word)
-    print("DONE")
-    for category in categories:
-        for k, v in category.penalties.items():
-            print(k, v, "\n")
+    # for category in categories:
+    #     for k, v in category.penalties.items():
+    #         print(k, v, "\n")
         # print(category.name, category.penalties)
     total_penalty = sum([cat.total_penalty() for cat in categories])
     total_weight = total_penalty / passage.word_count
     score = round(total_weight, 4)
-    penalties = None
+    penalties = {
+        category.name: category.get_penalty_data() for category in categories
+    }
     return score, penalties
 
     # Compare using all words as denominator vs. unique words.
@@ -242,9 +248,24 @@ class Category(ABC):
     def add_penalty(self, condition, word_id, penalty):
         condition = str(condition)
         if condition not in self.penalties:
-            self.penalties[condition] = [(word_id, penalty)]
+            self.penalties[condition] = {
+                'words': [word_id],
+                'penalties': [penalty]
+            }
         else:
-            self.penalties[condition].append((word_id, penalty))
+            self.penalties[condition]['words'].append(word_id)
+            self.penalties[condition]['penalties'].append(penalty)
+
+
+    def get_penalty_data(self):
+        penalty_data = []
+        for condition, data in self.penalties.items():
+            penalty_data.append({
+                'condition': condition,
+                'words': data.get('words'),
+                'penalties': data.get('penalties')
+            })
+        return penalty_data
 
 
     @abstractmethod

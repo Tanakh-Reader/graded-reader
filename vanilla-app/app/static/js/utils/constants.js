@@ -68,3 +68,63 @@ export const TASKS = {
 // Form values
 export const FIELD_NULL_VALUE = "na";
 export const FIELD_NULL_NAME = "N/A";
+
+// Hyperlinks for other Bible resources
+export const HYPERLINKS = {
+    // Resources using BHSA
+    SHEBANQ: {
+        // e.g., https://shebanq.ancient-data.org/hebrew/text?version=4b&book=Genesis&chapter=1&verse=1
+        // shebanq book format
+        URI: 'https://shebanq.ancient-data.org/hebrew/text?version=4b&',
+        BOOK: 'book=',
+        CHAPTER: '&chapter=',
+        VERSE: '&verse=',
+        BOOK_KEY: 'name_shebanq'
+    },
+    PARABIBLE: {
+        // e.g., https://parabible.com/1-Samuel/2#1
+        // most book name formats are supported.
+        URI: 'https://parabible.com',
+        BOOK: '/',
+        CHAPTER: '/',
+        VERSE: '#',
+        BOOK_KEY: 'name_osis'
+    },
+    BIBLE_OL: {
+        // e.g., https://bibleol.3bmoodle.dk/text/show_text/ETCBC4/Genesis/1
+        // shebanq book format
+        URI: 'https://bibleol.3bmoodle.dk/text/show_text/ETCBC4',
+        BOOK: '/',
+        CHAPTER: '/',
+        VERSE: null,
+        BOOK_KEY: 'name_shebanq'
+    },
+    // Other Hebrew resources
+    LOGOS: {
+        // e.g., logosres:bhssesb;ref=BibleBHS.Genesis8.1
+        // most book name formats are supported.
+        URI: 'logosres:bhssesb;ref=BibleBHS',
+        BOOK: '.',
+        CHAPTER: '',
+        VERSE: '.',
+        BOOK_KEY: 'name_osis'
+    },
+    CLEAR_BIBLE: {
+        // e.g., https://doric-symphony-preview.netlify.app/?workspace=reading&osisRef=Gen.1.1
+        // OSIS book format
+        URI: 'https://doric-symphony-preview.netlify.app/?workspace=reading&',
+        BOOK: 'osisRef=',
+        CHAPTER: '.',
+        VERSE: '.',
+        BOOK_KEY: 'name_osis'
+    },
+    STEP_BIBLE: {
+        // e.g., https://www.stepbible.org/?q=version=THOT|version=ESV|reference=Gen.1&options=NVUHGV&display=INTERLEAVED
+        // most book name formats are supported.
+        URI: 'https://www.stepbible.org/?q=version=THOT|version=ESV|',
+        BOOK: 'reference=',
+        CHAPTER: '.',
+        VERSE: '.',
+        BOOK_KEY: 'name_osis'
+    }
+}

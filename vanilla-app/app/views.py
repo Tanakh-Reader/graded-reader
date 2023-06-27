@@ -25,6 +25,8 @@ from .providers.book_provider import book_provider
 from .providers.word_provider import word_provider
 from .providers.passage_provider import passage_provider
 from .providers.algorithm_provider import Algorithm, algorithm_provider
+from .providers.bhsa_features_provider import bhsa_features_provider
+
 
 from .models import Passage, Word
 from .forms import *
@@ -47,7 +49,7 @@ def read(request: HttpRequest) -> HttpResponse:
     words_loaded = word_provider.load_words_if_not_added()
     words = word_provider.get_words_from_reference(reference)
     books = book_provider.get_all_book_instances(as_json=True)
-    reference_string = references.get_reference_string(words)
+    reference_string = references.get_reference_string(words, abbreviation=True)
 
     context = {
         "words": word_provider.words_to_json(words),
@@ -115,6 +117,11 @@ def algorithms(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "algorithms.html", context)
 
+def features(request: HttpRequest) -> HttpResponse:
+    features = bhsa_features_provider.get_features_for_display()
+    context = {'features': features}
+
+    return render(request, "features.html", context)
 
 def settings(request: HttpRequest) -> HttpResponse:
     context = {}
@@ -219,13 +226,13 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
     data: dict = json.loads(request.body)
     configuration = data.get("configuration")
     response = {
-        "configuration": None,
+        "configuration": configuration,
         "text": [],
     }
     task = data.get("task")
     if task == "SAVE":
         algorithm: Algorithm = algorithm_provider.save_algorithm(configuration)
-        print(configuration)
+        print("JUST SAVED?", configuration)
         response["configuration"] = algorithm.configuration
     elif task == "RUN_ALGORITHM":
         text = data.get("text")

@@ -15,11 +15,14 @@ def parse_reference(data_dict: dict):
 
     return reference
 
-def get_reference_string(words: list[Word]):
+def get_reference_string(words: list[Word], abbreviation=False):
     if len(words) == 0:
         return "Choose a passage"
 
-    book = book_provider.get_name(words[0].book)
+    if abbreviation:
+        book = book_provider.get_name_osis(words[0].book)
+    else:
+        book = book_provider.get_name(words[0].book)
 
     ref_string = f"{book} {words[0].chapter}:{words[0].verse}"
     if words[0].chapter != words[-1].chapter:

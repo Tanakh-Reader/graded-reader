@@ -1,0 +1,29 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Features Page{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-10">
+    <h1 class="text-4xl font-bold mb-8">Data Features</h1>
+    <div class="grid grid-cols-1">
+        {% for feature in features %}
+        <span class="inline-flex items-baseline mt-4 mb-2">
+            <a class="text-gray-700" href="{{ feature.url }}" target="_blank" >
+                <h1 class="">{{ feature.name }} ({{ feature.feature }})</h1>
+            </a>
+        </span>
+
+        <ul class="grid grid-cols-2 justify-between space-y-2">
+            {% for code in feature.codes %}
+            <div class="font-bold">{{ code.code }}: </div> 
+            <div class="">{{ code.definition }}</div>
+            {% endfor %}
+        </ul>
+            
+        {% endfor %}
+    </div>
+</div>
+
+<script type="module" src="{% static 'js/features.js' %}"></script>
+{% endblock %}

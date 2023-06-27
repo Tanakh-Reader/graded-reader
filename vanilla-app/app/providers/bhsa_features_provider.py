@@ -67,6 +67,22 @@ class BHSAFeaturesProvider:
         if as_list:
             mapping = [(k, v) for k, v in mapping.items()]
         return mapping
+    
+    def get_features_for_display(self):
+        mapping = self.get_attribute_mappings()
+        features = []
+        for feature, feature_data in mapping.items():
+            feature_formatted = {}
+            codes = []
+            for code, code_data in feature_data.get('codes').items():
+                code_definition = self.get_definition(code_data)
+                codes.append({'code': code, 'definition': code_definition})
+            feature_formatted['feature'] = feature
+            feature_formatted['url'] = feature_data.get('src')
+            feature_formatted['name'] = feature_data.get('name')
+            feature_formatted['codes'] = codes
+            features.append(feature_formatted)
+        return features
 
     
 

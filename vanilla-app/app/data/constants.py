@@ -51,5 +51,6 @@ g_vbs_utf8
 BOOK_NUMBER = 'bookId'
 BOOK_NAME = 'bookName'
 BOOK_NAME_BHSA = 'bhsaName'
+BOOK_NAME_SHEBANQ = 'shebanqName'
 BOOK_NAME_OSIS = 'abbrOSIS'
 BOOK_CHAPTERS = 'chapters'

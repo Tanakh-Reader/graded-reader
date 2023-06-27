@@ -53,7 +53,7 @@
 
   <!-- Passage Cards -->
   {% if passages_loaded %}
-  <div id="passages-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div id="passages-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
     {% for passage in passages %}
     <div class="passage-card bg-white rounded shadow-lg overflow-hidden relative" data-id="{{ passage.id }}"
       data-book="{{ passage.book }}" data-word-count="{{ passage.word_count }}" data-penalty="{{ passage.penalty }}"
@@ -62,7 +62,7 @@
         <input type="checkbox" class="passage-select transform scale-150" onclick="selectPassage(event)">
       </div>
       <div class="p-4">
-        <h2 class="text-lg font-bold mb-2" onclick="submitPassage('{{ passage|escapejs }}')">{{ passage.reference }}
+        <h2 class="text-lg font-bold mb-2" onclick="submitPassage('{{ passage|escapejs }}')">{{ passage.reference_abbr }}
         </h2>
         <p class="text-gray-700 mb-2">Weight: {{ passage.penalty }}<br>Length: {{ passage.word_count }} words</p>
         {% for tag in passage.tags %}

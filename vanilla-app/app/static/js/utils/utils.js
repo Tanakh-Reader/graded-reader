@@ -49,6 +49,23 @@ export function contextToJson(context) {
   return JSON.parse(context);
 }
 
+export function getBookAndChapter(clickEvent) {
+  if (window.location.href.includes(constants.COMPARE_PAGE)) {
+  // The main read page.
+  } else {
+    return null;
+  }
+}
+
+export async function openHyperlink(hyperlinkKey, bookNumber, chapter) {
+  let hyperlinkObj = constants.HYPERLINKS[hyperlinkKey];
+  let book = await getBookByNumber(bookNumber);
+  let bookName = book[hyperlinkObj.BOOK_KEY];
+  let uri = hyperlinkObj.URI + hyperlinkObj.BOOK + bookName + hyperlinkObj.CHAPTER + chapter;
+  console.log(uri);
+  window.open(uri, '_blank');
+}
+
 // Submit a passage to render on the read screen.
 export function submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse) {
   const queryParams = new URLSearchParams();

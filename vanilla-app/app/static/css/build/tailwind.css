@@ -10,15 +10,15 @@ BUTTONS
 }
 
 .add-btn {
-    @apply bg-green-500 hover:bg-green-700;
+    @apply bg-green-700 hover:bg-green-600;
 }
 
 .del-btn {
-    @apply bg-red-500 hover:bg-red-700;
+    @apply bg-red-700 hover:bg-red-600;
 }
 
 .add-btn, .del-btn {
-    @apply text-white font-bold px-2 rounded z-10;
+    @apply text-white font-bold px-2 rounded-lg z-10;
 }
 
 .dismiss-btn {

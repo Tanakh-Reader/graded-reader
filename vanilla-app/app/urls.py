@@ -9,6 +9,7 @@ urlpatterns = [
     path("passages", views.passages, name="passages"),
     path("passages/compare", views.passages_compare, name="compare"),
     path("algorithms", views.algorithms, name="algorithms"),
+    path("features", views.features, name="features"),
     path("settings", views.settings, name="settings"),
     
     # REST ENDPOINTS

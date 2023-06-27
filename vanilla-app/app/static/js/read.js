@@ -11,9 +11,8 @@ async function changeChapter(direction, reference) {
   const currentChapter = parseInt(chapterData[0]);
 
   // Get the current book object
-  const bookIndex = books.findIndex((book) => book.name === bookName);
+  const bookIndex = books.findIndex((book) => book.name_osis === bookName);
   const book = books[bookIndex];
-
   const newChapter = currentChapter + parseInt(direction);
 
   // Get the new chapter

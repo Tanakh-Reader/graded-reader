@@ -2,7 +2,6 @@
 {% load static %}
 
 {% block styles %}
-<!-- <link rel="stylesheet" href="{% static 'css/algorithm_form.css' %}"> -->
 {% endblock %}
 
 
@@ -62,7 +61,7 @@
 
     <!-- Verb forms -->
     <div class="verb-formset space-y-1">
-        <h2>Verbs</h2>
+        <h3>Verbs</h3>
         {{ verb_formset.management_form }}
         {% for form in verb_formset %}
         <div class="verb-form flex flex-row gap-2 items-start">
@@ -82,7 +81,7 @@
     </div>
     <!-- Frequency forms -->
     <div class="freq-formset space-y-1">
-        <h2>Frequencies</h2>
+        <h3>Frequencies</h3>
         {{ frequency_formset.management_form }}
         {% for form in frequency_formset %}
 
@@ -113,8 +112,14 @@
     {% include 'widgets/passage_selector.html' %}
 
     <div class="flex flex-row space-x-6">
-        <input id="run" class="btn" type="submit" value="Run">
-        <input id="save" class="btn" type="submit" value="Save">
+        <button id="run" type="submit"><span class="material-symbols-sharp">
+            play_circle
+        </span> Run</button>
+        <button id="save" type="submit"><span class="material-symbols-sharp">
+            save
+        </span> Save</button>
+
+         
     </div>
 
 </form>

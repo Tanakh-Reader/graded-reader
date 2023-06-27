@@ -80,7 +80,7 @@ def get_passage_tags(passage: Passage):
         # Only look an non-stop words.
         if F.voc_lex_utf8.v(word) not in Classify().stop_words:
             # Check for proper nouns
-            if is_proper_noun(word):
+            if is_proper_noun_bhsa(word):
                 proper_noun_count += 1
             # Check for qere
             if not has_qere and replace(F.qere_utf8.v(word)) not in ["",None]:

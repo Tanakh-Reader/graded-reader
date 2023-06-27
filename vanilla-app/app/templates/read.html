@@ -17,24 +17,35 @@
   <!-- <div class="relative mb-8"> -->
           {% include 'widgets/word_highlights_dropdown.html' %}
 
-  <div class="flex justify-center items-center mb-8 mt-2">
+  <div class="flex justify-center items-center mb-6 mt-2 mx-5 space-x-3">
     <!-- h1 class="text-2xl font-bold inline"></h1> -->
     <!-- <span class="mr-4">
     <button id="bookSelectionButton" class="btn">
       <i class="fa-regular fa-book"></i>
     </button>
   </span> -->
+  <!-- Hyperlink menu -->
+    <div class="w-1/4"></div>
     <button id="prevButton" onclick="changeChapter(-1, '{{ reference }}')"
-      class="mr-4 btn">Prev</button>
-    <span><button id="bookSelectionButton"
+      class=""><span class="material-symbols-sharp">
+        navigate_before
+      </span></button>
+    <div>
+      <button id="bookSelectionButton"
         class="btn">{{ reference }}</button>
       {% include 'widgets/chapter_selector.html' %}
-    </span>
+    </div>
     <button id="nextButton" onclick="changeChapter(1, '{{ reference }}')"
-      class="ml-4 btn">Next</button>
+      class=""><span class="material-symbols-sharp">
+        navigate_next
+      </span></button>
+    <div class="w-1/12 lg:w-1/6"></div>
+    {% include 'widgets/hyperlinks.html' with book=words.0.book chapter=words.0.chapter %}
     <button id="toggleVerseNumbers" onclick="toggleVerseNumbers()"
-      class="ml-4 btn">Verses</button>
-    <div class="ml-4">
+      class=""><span class="material-icons md-42">
+        123
+      </span></button>
+    <div class="">
     </div>
   </div>
 

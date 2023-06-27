@@ -25,6 +25,9 @@ class BookProvider:
     def get_name_bhsa(self, number):
         return self.df.loc[self.df[BOOK_NUMBER] == number, BOOK_NAME_BHSA].values[0]
     
+    def get_name_shebanq(self, number):
+        return self.df.loc[self.df[BOOK_NUMBER] == number, BOOK_NAME_SHEBANQ].values[0]
+    
     def get_number_from_name(self, name):
         return self.df.loc[self.df[BOOK_NAME] == name, BOOK_NUMBER].values[0]
     
@@ -41,8 +44,10 @@ class BookProvider:
     def get_book_instance(self, number):
         name = self.get_name(number)
         name_bhsa = self.get_name_bhsa(number)
+        name_shebanq = self.get_name_shebanq(number)
+        name_osis = self.get_name_osis(number)
         chapters = int(self.get_chapters(number)) # replace pandas default int64
-        return Book(number, name, name_bhsa, chapters)
+        return Book(number, name, name_bhsa, name_shebanq, name_osis, chapters)
     
     def get_all_book_instances(self, as_json=False):
         if len(self.book_instances) == 0:

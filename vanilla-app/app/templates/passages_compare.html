@@ -15,7 +15,9 @@
     <div class="comparisons-header ml-4 mb-6 space-y-3">
         <div id="alg">TEST</div>
         {% include 'widgets/word_highlights_dropdown.html' %}
-        <button class="toggle-form-button btn">Algorithm</button>
+        <button class="toggle-form-button"><span class="material-icons md-48">
+            precision_manufacturing
+        </span></button>
         <button class="add-widget add-btn float-right">+</button>
 
     </div>
@@ -28,6 +30,8 @@
             <div class="passage-header flex flex-row justify-center items-center my-4 space-x-4">
                 <!-- Remove button -->
                 <button class="remove-widget del-btn">-</button>
+                <!-- Hyperlinks -->
+                {% include 'widgets/hyperlinks.html' with book=text_passage.book chapter=text_passage.start_chapter %}
 
                 <!-- Passage selection dropdown -->
                 <div class="w-2/3 flex justify-center">
@@ -38,7 +42,7 @@
                 
                 {% include 'widgets/passage_selector.html' %}
 
-                <h2 class="">{{ text_passage.penalty }}</h2>
+                <h3 class="">{{ text_passage.penalty }}</h3>
             </div>
 
             <!-- Text section -- USED by the API CALL -->
