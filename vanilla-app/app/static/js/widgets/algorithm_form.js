@@ -222,12 +222,21 @@ function runAlgorithm(config, text) {
         const textResponse = response.text
         const score = response.score;
         const penalties = response.penalties;
-        $("#alg").text(JSON.stringify(textResponse, undefined, 2))
+        const items = textResponse.sort(function (a, b) {
+            return a.score - b.score;
+        })
+
+        let text = ""
+        for (let item of items) {
+            text = text + item.id + `<span class='text-red-500'> ${item.score}</span><br>`; // + JSON.stringify(item.penalties, undefined, 2) + '<br>';
+        }
+        $("#alg").html(text)
         console.log(response);
     })
         .catch(error => {
             console.error(error);
         });
+    dismissAlgorithmForm();
 }
 
 function saveAlgorithm(config) {
@@ -274,7 +283,7 @@ function setupFormSubmission() {
                 if (window.location.href.includes(constants.COMPARE_PAGE)) {
                     const referenceButtons = document.querySelectorAll('.reference-button');
                     passageIds = Array.from(referenceButtons).map(button => {
-                        return $(button).data('id');
+                        return $(button).attr('data-id');
                     }).filter(id => id != null);
                 } else {
                     let passageId = $('.psg').attr('data-id');

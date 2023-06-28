@@ -5,7 +5,7 @@ from ..models import Passage
 from ..data.constants import *
 from .bhsa_provider import bhsa_provider
 from .book_provider import book_provider
-from .add_words import replace
+from .hebrew_data_provider import replace
 
 """
 Used by get_passages()
@@ -80,7 +80,7 @@ def get_passage_tags(passage: Passage):
         # Only look an non-stop words.
         if F.voc_lex_utf8.v(word) not in Classify().stop_words:
             # Check for proper nouns
-            if is_proper_noun_bhsa(word):
+            if is_proper_noun(word):
                 proper_noun_count += 1
             # Check for qere
             if not has_qere and replace(F.qere_utf8.v(word)) not in ["",None]:

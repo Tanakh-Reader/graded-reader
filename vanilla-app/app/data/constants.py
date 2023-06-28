@@ -10,6 +10,10 @@ PARAGRAPH_MARKERS = {"פ": "open", "ס": "closed"}
 # Psalm 119 has 176 verses.
 LONGEST_CHAPTER = 176 
 
+# 
+# E.g., if verb is hif and inf and occurs more than this amount, don't penalize.
+VERB_OCC_CAP = 10
+
 # Percent proper nouns to count as genealogy.
 GENEALOGY_PERCENTAGE = 1 / 3
 
@@ -17,6 +21,13 @@ class TAGS:
     QERE = 'qere'
     GENEALOGY = 'genealogy'
 
+class DATA_SOURCE:
+    BHSA = 'bhsa'
+    SQLITE = 'sqlite'
+
+class FEATURE_VALUES:
+    GENTILIC = 'gntl'
+    PROPER_NOUN = 'nmpr'
 
 BHSA_FEATURES = """
 sp

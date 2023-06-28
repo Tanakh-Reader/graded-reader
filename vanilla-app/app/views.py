@@ -243,7 +243,7 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
             for passage in passages:
                 text_data = {}
                 score, penalties = alg.get_passage_weight_x(configuration, passage)
-                text_data["id"] = passage.id
+                text_data["id"] = passage.get_reference(abbreviation=True)
                 text_data["score"] = score
                 text_data["penalties"] = penalties
                 response["text"].append(text_data)

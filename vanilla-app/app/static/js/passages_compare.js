@@ -8,6 +8,8 @@ function submitPassage(passageItem) {
   // Update the Hebrew passage text.
   const hebrewTextDiv = $(currentButton).closest('.passage-container').find('.passage-text')[0];
   getHebrewText(passageId, hebrewTextDiv);
+  hebrewTextDiv.parentElement.querySelector('.passage-penalty').textContent = $(passageItem).data("penalty");
+  sortPassages();
 }
 
 function getHebrewText(passageId, div) {
@@ -19,6 +21,20 @@ function getHebrewText(passageId, div) {
     .catch(error => {
       console.error(error);
     });
+}
+
+// Sort the passages according to their score.
+function sortPassages() {
+  let container = document.querySelector('.comparison-container');
+  let passages = Array.from(container.getElementsByClassName('passage-container'));
+
+  passages.sort((a, b) => {
+    let penaltyA = parseFloat(a.querySelector('.passage-penalty').innerText);
+    let penaltyB = parseFloat(b.querySelector('.passage-penalty').innerText);
+    return penaltyA - penaltyB;  // for ascending order, swap penaltyA and penaltyB for descending order
+  });
+
+  passages.forEach(passage => container.appendChild(passage));
 }
 
 // Add event listener to "add" button
@@ -56,6 +72,9 @@ document.querySelectorAll('.passage-container .remove-widget').forEach(function 
 
 
 window.addEventListener("DOMContentLoaded", (event) => {
+
+  sortPassages();
+
   document.querySelectorAll('.passage-container .passage-item').forEach(item => {
     item.addEventListener('click', event => submitPassage(event.target));
   });
