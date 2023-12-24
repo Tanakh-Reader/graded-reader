@@ -1,0 +1,23 @@
+#!/bin/bash
+
+# Kill any running Django server instances
+echo "Killing any existing Django servers..."
+pkill -f "poetry run python manage.py runserver"
+
+echo "VERSION: $VERSION"
+
+if [[ "$VERSION" == "PROD" || "$VERSION" == "STAGING" ]]; then
+  npm run tw
+  poetry run python manage.py collectstatic --noinput
+fi
+
+# Run the three tasks in parallel.
+concurrently \
+  -n "DJANGO,LINT,TAILWIND" \
+  -c "bgBlue,bgGreen,bgYellow" \
+  "poetry run python manage.py runserver" \
+  "npm run watch:lint" \
+  "npm run watch:tw"
+
+# Keep script running to monitor all background tasks
+wait

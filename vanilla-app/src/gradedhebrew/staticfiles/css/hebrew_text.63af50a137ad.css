@@ -1,0 +1,15 @@
+.word {
+    font-size: x-large;
+    cursor: pointer;
+    /* font-family: 'Frank Ruhl Libre, serif',  */
+    font-family: 'Times New Roman', Times, serif;
+}
+
+.word.selected {
+    font-weight: bold;
+}
+
+.verse-number {
+    font-weight: bold;
+    font-size: larger
+}

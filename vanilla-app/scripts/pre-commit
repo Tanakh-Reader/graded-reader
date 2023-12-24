@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# FILE NOT IN USE
+
+# Get the list of staged files that match your criteria
+# files_to_lint=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|css|json|html)$')
+
+# # Exclude package-lock.json from linting
+# files_to_lint=$(echo "$files_to_lint" | grep -v "package-lock.json")
+
+# cd romi
+
+# # Run your python script on each file
+# for file in $files_to_lint; do
+#     stripped_file=${file#romi/}  # This will remove the "romi/" prefix if it exists
+#     poetry run python lint.py $stripped_file
+#     if [ $? -ne 0 ]; then
+#         echo "Linting failed for $file, commit prevented."
+#         exit 1
+#     fi
+# done

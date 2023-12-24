@@ -1,0 +1,42 @@
+#chapter-selector {
+    position: absolute;
+}
+  
+  #bookDropdown,
+  #chapterDropdown {
+    margin-top: 4px;
+    position: relative;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  #bookDropdown {
+    padding: 8px 0;
+  }
+  
+  #chapterDropdown {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-left: 2px;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+  
+  #bookDropdown div,
+  #chapterDropdown div {
+    color: black;
+    padding: 8px 16px;
+    text-decoration: none;
+    display: block;
+  }
+  
+  #bookDropdown div:hover,
+  #chapterDropdown div:hover {
+    background-color: #f1f1f1;
+  }
+  

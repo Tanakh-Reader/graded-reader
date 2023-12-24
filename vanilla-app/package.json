@@ -1,11 +1,33 @@
 {
-  "dependencies": {
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.23",
-    "tailwindcss": "^3.3.2"
-  },
   "scripts": {
-    "build": "tailwindcss -i app/static/css/build/tailwind.css -o app/static/css/tw-output.css",
-    "watch": "tailwindcss -i app/static/css/build/tailwind.css -o app/static/css/tw-output.css --watch"
+    "prepare": "npx husky install",
+    "start": "cd src && ./../scripts/run-server",
+    "start:dev": "export VERSION=DEV && npm run start",
+    "start:staging": "export VERSION=STAGING && npm run start",
+    "start:prod": "export VERSION=PROD && npm run start",
+    "migrate": "cd src && poetry run python manage.py makemigrations && poetry run python manage.py migrate",
+    "migrate:prod": "export VERSION=PROD && npm run migrate",
+    "migrate:all": "npm run migrate && npm run migrate:prod",
+    "push": "./scripts/git-push",
+    "sync": "npm install && cd src && poetry lock && poetry install",
+    "tw": "tailwindcss -i src/app/static/css/input.css -o src/app/static/css/output.css",
+    "watch:tw": "npm run tw -- --watch",
+    "lint": "cd src && poetry run python ../scripts/lint.py",
+    "watch:lint": "node scripts/watcher.js"
+  },
+  "lint-staged": {
+    "*.{js,css,json,html,py}": [
+      "./scripts/lint-all"
+    ]
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.14",
+    "concurrently": "^8.2.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "postcss": "^8.4.23",
+    "prettier": "3.0",
+    "prettier-plugin-tailwindcss": "^0.5.4",
+    "tailwindcss": "^3.3.3"
   }
 }

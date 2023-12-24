@@ -1,0 +1,15 @@
+#dropdown-menu {
+    position: absolute;
+    z-index: 10;
+    width: 200px;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: none;
+}
+
+.passage-container {
+    background: whitesmoke; /* use theme color */
+    border-radius: 8px;
+}
+

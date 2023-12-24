@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# FILE NOT IN USE
+
+# cd src
+
+# # Update Python dependencies
+# echo "Updating Python dependencies..."
+# poetry lock && poetry install
+
+# # Update Node.js dependencies
+# echo "Updating Node.js dependencies..."
+# npm install

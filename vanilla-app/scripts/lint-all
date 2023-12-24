@@ -1,0 +1,17 @@
+#!/bin/sh
+
+cd src
+
+# Loop over all provided files
+for file in "$@"; do
+    # Exclude package-lock.json from linting
+    if [ "$file" != "package-lock.json" ]; then
+        # Remove the "romi/" prefix if it exists
+        stripped_file=${file#src/}
+        npm run lint $stripped_file
+        if [ $? -ne 0 ]; then
+            echo "Linting failed for $file, commit prevented."
+            exit 1
+        fi
+    fi
+done

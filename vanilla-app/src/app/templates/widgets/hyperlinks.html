@@ -1,0 +1,26 @@
+{% load static %}
+
+<div class="relative inline-block text-left">
+    <button type="button" class="hyperlink-btn text-blue-600 hover:text-blue-900">
+        <span class="material-icons pointer-events-none">
+            open_in_new
+        </span>
+        </button>
+    <div class="hyperlink-menu hidden origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+        <div class="hyperlinks py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu"
+            data-book="{{ book }}" data-chapter="{{ chapter }}">
+            <a href="#" data-resource="SHEBANQ" class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem">SHEBANQ</a>
+            <a href="#" data-resource="PARABIBLE" class="text-gray-700 block px-4 py-2 text-sm"
+                role="menuitem">PARABIBLE</a>
+            <a href="#" data-resource="BIBLE_OL" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem">BIBLE
+                OL</a>
+            <a href="#" data-resource="LOGOS" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem">LOGOS</a>
+            <a href="#" data-resource="CLEAR_BIBLE" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem">CLEAR
+                BIBLE</a>
+            <a href="#" data-resource="STEP_BIBLE" class="text-gray-700 block px-4 py-2 text-sm" role="menuitem">STEP
+                BIBLE</a>
+        </div>
+    </div>
+</div>
+<script type="module" src="{% static 'js/widgets/hyperlinks.js' %}"></script>
