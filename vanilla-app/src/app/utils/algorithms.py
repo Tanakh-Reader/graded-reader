@@ -13,7 +13,10 @@ lex_rank_default = LexRanks()._7_ranks.get_rank_dict()
 
 
 def is_proper_noun(word) -> bool:
-    if hdp.lex_set(word) == FEATURE_VALUES.GENTILIC or hdp.speech(word) == FEATURE_VALUES.PROPER_NOUN:
+    if (
+        hdp.lex_set(word) == FEATURE_VALUES.GENTILIC
+        or hdp.speech(word) == FEATURE_VALUES.PROPER_NOUN
+    ):
         return True
     return False
 
@@ -47,7 +50,6 @@ class CompareData:
 
 
 def get_passage_weight(passage: Passage) -> float:
-
     total_weight: float = 0.0
     # Iterate over words in the passage.
     for word in passage.words():
@@ -59,7 +61,6 @@ def get_passage_weight(passage: Passage) -> float:
 
 
 def get_passage_weight1(passage: Passage, rank_scale=lex_rank_default) -> float:
-
     total_weight: float = 0.0
     # Iterate over words in the passage.
     for word in passage.words():
@@ -81,8 +82,9 @@ def get_passage_weight1(passage: Passage, rank_scale=lex_rank_default) -> float:
 
 
 # Only penalize once per lexical value.
-def get_passage_weight2(passage: Passage, rank_scale=lex_rank_default, div_all=True) -> float:
-
+def get_passage_weight2(
+    passage: Passage, rank_scale=lex_rank_default, div_all=True
+) -> float:
     total_weight: float = 0.0
     unique_words = set()
     # Iterate over words in the passage.
@@ -114,7 +116,6 @@ def get_passage_weight2(passage: Passage, rank_scale=lex_rank_default, div_all=T
 def get_passage_weight3(
     passage: Passage, rank_scale=lex_rank_default, div_all=True, morph=False
 ) -> float:
-
     word_weights: dict[str, dict[str, Any]] = {}
     verb_count = 0
     verb_weight = 0
@@ -183,10 +184,7 @@ def get_passage_weight3(
 
 
 # Decrease penalty for each occurance.
-def get_passage_weight_x(
-    configuration,
-    passage: Passage
-):
+def get_passage_weight_x(configuration, passage: Passage):
     categories = init_categories(configuration)
     print("CONFIG", configuration)
     for word in passage.words_2():
@@ -196,13 +194,11 @@ def get_passage_weight_x(
     # for category in categories:
     #     for k, v in category.penalties.items():
     #         print(k, v, "\n")
-        # print(category.name, category.penalties)
+    # print(category.name, category.penalties)
     total_penalty = sum([cat.total_penalty() for cat in categories])
     total_weight = total_penalty / passage.word_count
     score = round(total_weight, 4)
-    penalties = {
-        category.name: category.get_penalty_data() for category in categories
-    }
+    penalties = {category.name: category.get_penalty_data() for category in categories}
     return score, penalties
 
     # Compare using all words as denominator vs. unique words.
@@ -216,7 +212,6 @@ def get_passage_weight_x(
     #     total_weight /= len(word_weights)
 
 
-
 class Category(ABC):
     def __init__(self, name="", args=[]):
         self.name = name
@@ -228,37 +223,33 @@ class Category(ABC):
 
     def total_penalty(self):
         total = 0
-        for k, v in self.instances.items():
-            total += v.get("penalty")
+        for word_id, penalty in self.instances.items():
+            total += penalty.get("penalty")
         return total
 
     def add_penalty(self, condition, word_id, penalty):
         condition = str(condition)
         if condition not in self.penalties:
-            self.penalties[condition] = {
-                'words': [word_id],
-                'penalties': [penalty]
-            }
+            self.penalties[condition] = {"words": [word_id], "penalties": [penalty]}
         else:
-            self.penalties[condition]['words'].append(word_id)
-            self.penalties[condition]['penalties'].append(penalty)
-
+            self.penalties[condition]["words"].append(word_id)
+            self.penalties[condition]["penalties"].append(penalty)
 
     def get_penalty_data(self):
         penalty_data = []
         for condition, data in self.penalties.items():
-            penalty_data.append({
-                'condition': condition,
-                'words': data.get('words'),
-                'penalties': data.get('penalties')
-            })
+            penalty_data.append(
+                {
+                    "condition": condition,
+                    "words": data.get("words"),
+                    "penalties": data.get("penalties"),
+                }
+            )
         return penalty_data
-
 
     @abstractmethod
     def check_condition(self, word):
         pass
-
 
 
 class Compare(Category):
@@ -269,34 +260,42 @@ class Compare(Category):
             conditions_met = 0
             for condition in conditions:
                 # Get the method from HebrewDataProvider using the 'feature' key from the condition
-                feature_method = getattr(hdp, condition['feature'])
+                feature_method = getattr(hdp, condition["feature"])
                 # Use the method to get the actual feature value from the word
                 feature_value = feature_method(word)
                 # Check the rule
-                if condition['rule'] == 'EQUALS':
+                if condition["rule"] == "EQUALS":
                     # if rule is "EQUALS" then check if feature value is equal to condition value
-                    if feature_value == condition['value']:
+                    if feature_value == condition["value"]:
                         conditions_met += 1
-                elif condition['rule'] == 'EXISTS':
+                elif condition["rule"] == "EXISTS":
                     # if rule is "EXISTS" then check if feature value is not None
                     if feature_value is not None:
                         conditions_met += 1
             # if all conditions are met, add to instances
             if conditions_met == len(conditions):
-                self.instances[hdp.id(word)] = {"conditions": conditions, "penalty": penalty}
+                self.instances[hdp.id(word)] = {
+                    "conditions": conditions,
+                    "penalty": penalty,
+                }
                 self.add_penalty(arg, hdp.id(word), penalty)
 
 
-
 class Frequency(Category):
-    def __init__(self, name, args, apply_taper=True, apply_proper_nouns=True, proper_noun_discount=2):
+    def __init__(
+        self,
+        name,
+        args,
+        apply_taper=True,
+        apply_proper_nouns=True,
+        proper_noun_discount=2,
+    ):
         super().__init__(name, args)  # calling the parent's __init__ method
         self.apply_taper = apply_taper
         self.apply_proper_nouns = apply_proper_nouns
         self.proper_noun_discount = proper_noun_discount
         self.word_weights = {}
         self.min_penalty = 1.7
-        
 
     def check_condition(self, word) -> None:
         lex_id = hdp.lex_id(word)
@@ -323,14 +322,17 @@ class Frequency(Category):
             # Iterate over the ranks present in the rank scale.
             for arg in self.args:
                 start, end, penalty = arg
-                
 
                 if start <= hdp.lex_frequency(word) <= end:
-                    print(start, end, penalty, hdp.lex_frequency(word), hdp.text(word) )
+                    print(start, end, penalty, hdp.lex_frequency(word), hdp.text(word))
                     self.add_penalty(arg, hdp.id(word), penalty)
                     # Give a custom penalty for proper nouns.
                     # TODO: update proper_noun fxn.
-                    if self.apply_proper_nouns and is_proper_noun(word) and penalty > self.min_penalty:
+                    if (
+                        self.apply_proper_nouns
+                        and is_proper_noun(word)
+                        and penalty > self.min_penalty
+                    ):
                         self.word_weights[lex_id]["penalty"] = int(
                             math.ceil(penalty / self.proper_noun_discount)
                         )
@@ -339,8 +341,8 @@ class Frequency(Category):
                         self.word_weights[lex_id]["penalty"] = penalty
             self.word_weights[lex_id]["weight"] += self.word_weights[lex_id]["penalty"]
             self.word_weights[lex_id]["count"] += 1
-            self.instances[hdp.id(word)] = {"range": [start, end], "penalty": penalty}    
-        print(self.word_weights)        
+            self.instances[hdp.id(word)] = {"range": [start, end], "penalty": penalty}
+        print(self.word_weights)
 
 
 class ConstructNoun(Category):
@@ -349,9 +351,18 @@ class ConstructNoun(Category):
             pass
 
 
+# configuration sample
+# {
+#     "name": "3_ranks",
+#     "data": {"verbs": [], "frequencies": [[1, 10, 7], [10, 100, 3], [100, 51000, 1]]},
+#     "updated": "2023-12-25T15:45:19",
+#     "id": None,
+#     "created": "2023-12-25T15:45:19",
+# }
+# TEST: http://127.0.0.1:8000/passages/compare?id=1473&id=1511
 def init_categories(configuration: dict[str, Any]) -> list[Category]:
     categories: list[Category] = []
-    config_data = configuration.get('data')
+    config_data: dict[str, Any] = configuration.get("data")
     verb_conditions = config_data.get("verbs")
     frequency_conditions = config_data.get("frequencies")
     x_conditions = config_data.get("x")

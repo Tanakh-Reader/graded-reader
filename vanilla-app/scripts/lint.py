@@ -119,8 +119,13 @@ def format_js_css(file_path):
 
 
 def format_py(file_path):
+    # Sort imports using isort
+    run_command(f"isort {file_path}")
+    print("Successfully sorted imports with isort")
+
+    # Format code using black
     run_command(f"black {file_path}")
-    print("Succesfully formatted with black")
+    print("Successfully formatted with black")
 
 
 def main(file_path):

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-APP_NAME="vanilla-app"
+APP_NAME="vanilla-app/src"
 
 git pull origin main
 
