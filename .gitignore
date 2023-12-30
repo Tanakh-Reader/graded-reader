@@ -3,3 +3,33 @@
 svelte-app/node_modules/
 vanilla-app/node_modules/
 vanilla-app/gradedhebrew/staticfiles/
+
+# node modules
+*node_modules/
+*package-lock.json
+
+# static files
+local-cdn/
+
+# logging
+*logging
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# python dependencies
+*poetry.lock
+
+# tailwind build
+*output.css
+
+# mac file
+.DS_Store
+
+# the site database
+# *sqlite3
+
+# secrets
+*.env
+google-auth.json

@@ -24,16 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-i!1fts)u1(6)aspydawx8udgg&&va6=d@77h#y1rpwoc1b6c&d"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True 
+DEBUG = True
 
-ALLOWED_HOSTS = ['hebrew-sethbam9.pythonanywhere.com', '127.0.0.1']
+ALLOWED_HOSTS = ["hebrew-sethbam9.pythonanywhere.com", "127.0.0.1"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
     "app",
-    'widget_tweaks',
+    "widget_tweaks",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -80,8 +80,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-        'OPTIONS': {
-            'timeout': 100,
+        "OPTIONS": {
+            "timeout": 100,
         },
     }
 }
@@ -121,19 +121,20 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, "gradedhebrew", "staticfiles")
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    # os.path.join(BASE_DIR, "app", "static"),
-]
+STATIC_URL = "static/"
+STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR.parent / "local-cdn" / "static"
+MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR.parent / "local-cdn" / "media"
+PROTECTED_MEDIA_ROOT = BASE_DIR.parent / "local-cdn" / "protected"
 
 # Check if we're in production or not
-PRODUCTION = os.getenv('DJANGO_PRODUCTION') == "ON"
+PRODUCTION = os.getenv("DJANGO_PRODUCTION") == "ON"
 
 # Only use whitenoise in production
 if PRODUCTION:
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-    MIDDLEWARE += ['whitenoise.middleware.WhiteNoiseMiddleware']
+    MIDDLEWARE += ["whitenoise.middleware.WhiteNoiseMiddleware"]
     DEBUG = False
 
 
