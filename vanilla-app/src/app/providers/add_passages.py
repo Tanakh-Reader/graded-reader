@@ -1,10 +1,10 @@
-
-from ..utils.timer import timer
-from ..utils.algorithms import *
-from ..models import Passage
 from ..data.constants import *
+from ..models import Passage
+from ..utils.algorithms import *
+from ..utils.timer import timer
 from .bhsa_provider import bhsa_provider
 from .book_provider import book_provider
+from .hebrew_data_provider import HebrewDataProvider as hdp
 from .hebrew_data_provider import replace
 
 """
@@ -71,19 +71,19 @@ def valid_passage(passage, verse, passage_size_min, passage_size_max):
 def get_passage_tags(passage: Passage):
     T, L, F = bhsa_provider.api_globals()
 
-    tags = ''
+    tags = ""
     word_count = 0
     proper_noun_count = 0
     has_qere = False
-    
+
     for word in passage.words():
         # Only look an non-stop words.
-        if F.voc_lex_utf8.v(word) not in Classify().stop_words:
+        if hdp.lex_stripped(word) not in Classify().stop_words:
             # Check for proper nouns
             if is_proper_noun(word):
                 proper_noun_count += 1
             # Check for qere
-            if not has_qere and replace(F.qere_utf8.v(word)) not in ["",None]:
+            if not has_qere and replace(F.qere_utf8.v(word)) not in ["", None]:
                 has_qere = True
                 tags += f"{TAGS.QERE},"
             word_count += 1
@@ -91,8 +91,7 @@ def get_passage_tags(passage: Passage):
     if proper_noun_count / word_count >= GENEALOGY_PERCENTAGE:
         tags += f"{TAGS.GENEALOGY},"
 
-    return tags.rstrip(',')
-
+    return tags.rstrip(",")
 
 
 """
@@ -101,6 +100,8 @@ Used by get_passages
 Update all of the data of a passage instance once its end verse 
 has been reached. 
 """
+
+
 def update_passage_data(passage: Passage, rank_scale):
     T, L, F = bhsa_provider.api_globals()
 

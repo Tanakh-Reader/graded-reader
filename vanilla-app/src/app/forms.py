@@ -1,7 +1,10 @@
 from django import forms
+
 from .providers.bhsa_features_provider import bhsa_features_provider
 
-PENALTY_FIELD = forms.DecimalField(min_value=0, widget=forms.NumberInput(attrs={'placeholder': 'Penalty'}))
+PENALTY_FIELD = forms.DecimalField(
+    min_value=0, widget=forms.NumberInput(attrs={"placeholder": "Penalty"})
+)
 
 
 class VerbForm(forms.Form):
@@ -31,5 +34,9 @@ class FrequencyForm(forms.Form):
         required=True,
         widget=forms.NumberInput(attrs={"placeholder": "Start"}),
     )
-    end = forms.IntegerField(min_value=1, required=True, widget=forms.NumberInput(attrs={'placeholder': 'End'}))
+    end = forms.IntegerField(
+        min_value=1,
+        required=True,
+        widget=forms.NumberInput(attrs={"placeholder": "End"}),
+    )
     penalty = PENALTY_FIELD

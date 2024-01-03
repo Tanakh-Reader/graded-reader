@@ -1,14 +1,17 @@
 from ..data.constants import DATA_SOURCE
+from ..utils.general import heb_stripped, word_penalty
 from .book_provider import book_provider
-from ..utils.general import word_penalty
 
 
 # Dealing with BHSA data.
-def replace(value):
+def replace(value, check_string=False):
     if value in {"NA", "n/a", "absent"}:
         return None
-    
+    if check_string and value == "":
+        return None
+
     return value
+
 
 class HebrewDataProvider:
     def __init__(self, mode=None):
@@ -17,7 +20,7 @@ class HebrewDataProvider:
     def sectionFromNode(self, word):
         if self.mode == DATA_SOURCE.BHSA:
             return T.sectionFromNode(word)
-        else: 
+        else:
             return word.book, word.chapter, word.verse
 
     def id(self, word):
@@ -30,7 +33,7 @@ class HebrewDataProvider:
         if self.mode == DATA_SOURCE.BHSA:
             book, _, _ = T.sectionFromNode(word)
             return book_provider.bhsa_to_id(book)
-        else: 
+        else:
             return word.book
 
     def chapter(self, word):
@@ -149,6 +152,9 @@ class HebrewDataProvider:
         else:
             return word.lex
 
+    def lex_stripped(self, word):
+        return heb_stripped(self.lex(word))
+
     def name_type(self, word):
         if self.mode == DATA_SOURCE.BHSA:
             return replace(F.nametype.v(word))
@@ -199,6 +205,7 @@ class HebrewDataProvider:
 
     def pronominal_suffix(self, word):
         if self.mode == DATA_SOURCE.BHSA:
+            # TODO : add check_string = True ?
             return replace(F.g_prs_utf8.v(word))
         else:
             return word.pronominal_suffix
@@ -220,5 +227,6 @@ class HebrewDataProvider:
             return replace(F.g_vbs_utf8.v(word))
         else:
             return word.root_formation
+
 
 hebrew_data_provider = HebrewDataProvider()
