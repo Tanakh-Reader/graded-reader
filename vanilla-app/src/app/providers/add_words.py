@@ -1,10 +1,9 @@
 import math
 
-from ..utils.timer import timer
-from ..utils.algorithms import word_penalty
 from ..models import Word
-
-from .bhsa_provider import bhsa_provider
+from ..utils.algorithms import word_penalty
+from ..utils.timer import timer
+from .bhsa_provider import F
 from .book_provider import book_provider
 from .hebrew_data_provider import hebrew_data_provider as hdp
 
@@ -15,16 +14,14 @@ BATCH_SIZE = 2500  # uploading words to the database
 
 # Add all TF words to the sqlite database
 def add_words_to_database():
-    api = bhsa_provider.get_api()
-    T, L, F = api.T, api.L, api.F
     print("Collecting word data from BHSA")
     timer.start()
 
-    words = []
+    words: list[Word] = []
 
     for node_id in F.otype.s("word"):
         word = Word()
-        book, chapter, verse = hdp.sectionFromNode(node_id)
+        book, chapter, verse = hdp.section_from_node(node_id)
         word.id = node_id
         word.book = book_provider.bhsa_to_id(book)
         word.chapter = chapter

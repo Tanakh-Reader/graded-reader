@@ -1,29 +1,31 @@
-from typing import Any, Union
+from typing import Any
+from typing import SupportsFloat as Numeric
 
 """
-A class with data used to assign difficulty weights to passages based
+A class with data used to assign difficulty penalties to passages based
 on the lexical frequencies of words in the passage. 
 
 ranks: a list of string categories for lexical frequency ranges
 ranges: a 2D list of the numeric range for each rank
-weights: a list of the weight penalties assigned per word for each rank
+penalties: a list of the weight penalties assigned per word for each rank
 """
 
 
 class Rank:
-    def __init__(self, name, ranks, ranges, weights):
+    def __init__(self, name, ranks, ranges, penalties):
         self.name: str = name
         self.ranks: list[str] = ranks
         self.ranges: list[list[int]] = ranges
-        self.weights: list[float] = weights
+        self.penalties: list[Numeric] = penalties
 
     # Auxiliary function to create a single rank_scale dictionary.
+    # Not still in use.
     def get_rank_dict(self) -> dict[str, dict[str, Any]]:
         rank_dict = {}
         for i in range(len(self.ranks)):
             rank_dict[self.ranks[i]] = {
                 "range": self.ranges[i],
-                "weight": self.weights[i],
+                "penalty": self.penalties[i],
             }
         return rank_dict
 
@@ -31,9 +33,17 @@ class Rank:
         ranks = []
         for i in range(len(self.ranks)):
             _range = self.ranges[i]
-            penalty = self.weights[i]
+            penalty = self.penalties[i]
             ranks.append(_range + [penalty])
         return ranks
+
+    def get_penalty(self, i: int) -> Numeric:
+        return self.penalties[i]
+
+    def get_range(self, i: int) -> tuple[int, int]:
+        min_occ = self.ranges[i][0]
+        max_occ = self.ranges[i][0]
+        return min_occ, max_occ
 
 
 """ 
@@ -178,10 +188,10 @@ class LexRanks:
 
 # Include morphology penalties.
 class MorphRank:
-    other: int = 8
-    base: int = 0
+    other: Numeric = 8
+    base: Numeric = 0
 
-    stem_map: dict[str, int] = {
+    stem_map: dict[str, Numeric] = {
         "hif": 2,  # hif‘il
         "hit": 3,  # hitpa“el
         "htpo": other,  # hitpo“el
@@ -193,7 +203,7 @@ class MorphRank:
         "pual": 5,  # pu“al
         "qal": base,  # qal
     }
-    tense_map: dict[str, int] = {
+    tense_map: dict[str, Numeric] = {
         "perf": base,  # perfect
         "impf": 2,  # imperfect
         "wayq": base,  # wayyiqtol
@@ -229,6 +239,7 @@ class Classify:
     stop_words_types: list[str] = ["prep", "art", "conj"]
     # Check if F.voc_lex_utf8.v(word) is in this list. If
     # so it can be excluded since it occurs so often.
+    # TODO confirm that there aren't other lexemes that are just the consonant
     stop_words: list[str] = ["את", "ב", "ל", "ה", "ו", "", None]
     # stop_words: list[str] = ["אֵת", "בְּ", "לְ", "הַ", "וְ"]
     # If you take verb data into account when weighing a

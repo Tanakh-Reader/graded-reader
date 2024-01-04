@@ -1,9 +1,10 @@
 from django.db import models
+from django.db.models.signals import post_init
 from django.dispatch import receiver
 from django.forms.models import model_to_dict
-from django.db.models.signals import post_init
+
+from .providers.bhsa_provider import L
 from .providers.book_provider import book_provider
-from .providers.bhsa_provider import bhsa_provider
 
 
 class Word(models.Model):
@@ -71,32 +72,29 @@ class Passage(models.Model):
 
     def to_dict(self):
         self.penalty = str(self.penalty)
-        self.tags = self.tags.split(',')
+        self.tags = self.tags.split(",")
         passage_dict = model_to_dict(self)
         passage_dict["reference"] = self.get_reference()
         passage_dict["reference_abbr"] = self.get_reference(abbreviation=True)
-        passage_dict['id'] = self.id
+        passage_dict["id"] = self.id
         return passage_dict
 
     def get_vs_words(self, verse):
-        api = bhsa_provider.get_api()
-        verse_words = [w for w in api.L.i(verse, otype="word")]
+        verse_words = [w for w in L.i(verse, otype="word")]
         return verse_words
 
     def get_all_words(self):
-        api = bhsa_provider.get_api()
         words = []
         for verse in self.verses:
-            for word in api.L.i(verse, otype="word"):
+            for word in L.i(verse, otype="word"):
                 words.append(word)
         return words
 
-    def words(self):
+    def word_ids(self):
         return list(range(self.start_word, self.end_word + 1))
-    
-    def words_2(self):
-        return Word.objects.filter(id__gte=self.start_word, id__lte=self.end_word)
 
+    def words(self):
+        return Word.objects.filter(id__gte=self.start_word, id__lte=self.end_word)
 
     def get_reference(self, abbreviation=False):
         if abbreviation:
