@@ -240,7 +240,7 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
         print(passage_ids)
         if passage_ids and type(passage_ids) == list:
             passages: list[Passage] = passage_provider.get_passages_by_ids(passage_ids)
-            for passage in passages[:1]:
+            for passage in passages:
                 text_data = {}
                 score, penalties = alg.get_passage_weight_x(configuration, passage)
                 text_data["id"] = passage.get_reference(abbreviation=True)

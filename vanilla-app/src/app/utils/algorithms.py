@@ -129,28 +129,28 @@ def get_passage_weight_4(
     min_penalty = 1.7  # min penalty for rare words and proper nouns.
     # Iterate over words in the passage.
     for word in passage.word_ids():
-        lex = hdp.lex(word)
+        lex_id = hdp.lex_id(word)
         if hdp.lex_stripped(word) not in Classify().stop_words:
             # Add partial penalty for reocurring words.
-            if lex in word_weights.keys():
+            if lex_id in word_weights.keys():
                 # Only gradually decrease penalty for rarer words.
                 # Decreases by 1 point per occurance.
                 # TODO : does - 1 point make sense here?
-                word_weights[lex]["count"] += 1
+                word_weights[lex_id]["count"] += 1
                 if hdp.lex_frequency(word) < 100:
-                    count = word_weights[lex]["count"]
-                    penalty = word_weights[lex]["penalty"]
+                    count = word_weights[lex_id]["count"]
+                    penalty = word_weights[lex_id]["penalty"]
                     new_weight = penalty - count
                     added_weight = (
                         new_weight if new_weight >= min_penalty else min_penalty
                     )
-                    word_weights[lex]["weight"] += added_weight
+                    word_weights[lex_id]["weight"] += added_weight
                 else:
-                    word_weights[lex]["weight"] += word_weights[lex]["penalty"]
+                    word_weights[lex_id]["weight"] += word_weights[lex_id]["penalty"]
             # Add full penalty for the first occurance.
             else:
                 # Add word to hash table
-                word_weights[lex] = {"count": 0, "weight": 0, "penalty": 0}
+                word_weights[lex_id] = {"count": 0, "weight": 0, "penalty": 0}
                 # Iterate over the ranks present in the rank scale.
                 for i, rank in enumerate(rank_scale.ranks):
                     lex_freq = hdp.lex_frequency(word)
@@ -161,12 +161,14 @@ def get_passage_weight_4(
                         if (
                             is_proper_noun(word) and _penalty > min_penalty
                         ):  # proper noun
-                            word_weights[lex]["penalty"] = int(math.ceil(_penalty / 2))
+                            word_weights[lex_id]["penalty"] = int(
+                                math.ceil(_penalty / 2)
+                            )
                         # Give a full penalty for other word types.
                         else:
-                            word_weights[lex]["penalty"] = _penalty
-                word_weights[lex]["weight"] += word_weights[lex]["penalty"]
-                word_weights[lex]["count"] += 1
+                            word_weights[lex_id]["penalty"] = _penalty
+                word_weights[lex_id]["weight"] += word_weights[lex_id]["penalty"]
+                word_weights[lex_id]["count"] += 1
             # If we're penalizing for morphology
             if morph:
                 if hdp.speech(word) == "verb":
@@ -188,8 +190,7 @@ def get_passage_weight_4(
     else:
         total_weight /= len(word_weights)
 
-    print("ALG_4", word_weights)
-    return round(total_weight, 4)
+    return round(total_weight, 4), word_weights
 
 
 # Decrease penalty for each occurance.
@@ -209,10 +210,6 @@ def get_passage_weight_x(configuration, passage: Passage):
     total_weight = total_penalty / passage.word_count
     score = round(total_weight, 4)
     penalties = {category.name: category.get_penalty_data() for category in categories}
-    print("ALG_X", categories[1].word_occurences)
-    print(score)
-    print(get_passage_weight_4(passage))
-    print("Pen", penalties)
     return score, penalties
 
     # Compare using all words as denominator vs. unique words.
@@ -343,6 +340,7 @@ class Frequency(Category):
             if lex_id in self.word_occurences.keys():
                 count = self.update_count(lex_id)
                 penalty = self.word_occurences[lex_id].get("penalty")
+                # TODO : look at other taper methods?
                 # Only gradually decrease penalty for rarer words.
                 # Decreases by 1 point per occurance.
                 if hdp.lex_frequency(word) < UNCOMMON_WORD_FREQUENCY:
@@ -357,14 +355,18 @@ class Frequency(Category):
                     self.current_penalty = penalty
             # Add full penalty for the first occurance.
             else:
-                # Add word to hash table
+                # Add word to hash tabled
                 self.word_occurences[lex_id] = {
-                    "count": 1,
+                    "count": 0,
                     "penalty": 0,
+                    "definition": None,
                 }
 
                 self.find_occ_range(word)
                 self.word_occurences[lex_id]["penalty"] = self.current_penalty
+                self.word_occurences[lex_id][
+                    "definition"
+                ] = self.current_definition.definition
 
         # When not using the taper.
         else:
@@ -372,7 +374,7 @@ class Frequency(Category):
 
         self.instances[hdp.id(word)] = self.current_definition.definition_obj()
         self.add_penalty(
-            self.current_definition.definition,
+            self.word_occurences[lex_id].get("definition"),
             hdp.id(word),
             self.current_penalty,
         )
@@ -389,7 +391,7 @@ class Frequency(Category):
                 if (
                     self.apply_proper_nouns
                     and is_proper_noun(word)
-                    and _def.penalty > self.min_penalty
+                    and _def.penalty > MIN_RARE_WORD_PENALTY
                 ):
                     self.current_penalty = int(
                         math.ceil(_def.penalty / self.proper_noun_discount)

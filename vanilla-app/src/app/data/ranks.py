@@ -42,7 +42,7 @@ class Rank:
 
     def get_range(self, i: int) -> tuple[int, int]:
         min_occ = self.ranges[i][0]
-        max_occ = self.ranges[i][0]
+        max_occ = self.ranges[i][1]
         return min_occ, max_occ
 
 
