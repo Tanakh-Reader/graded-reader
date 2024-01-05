@@ -1,0 +1,134 @@
+{% extends 'layout.html' %}
+{% load static %}
+{% load list_extras %}
+
+{% block title %}Passages Page{% endblock %}
+
+{% block content %}
+
+    <!-- Container to hold the columns and the canvas, positioned relatively -->
+    <div class="relative flex justify-center gap-3">
+        <div id="column-0"
+             class="flex flex-col items-end gap-1">
+            <!-- Column 1 Header -->
+            <div class="mb-2 font-bold">#</div>
+            <!-- Column 1 Items -->
+            {% for item in listA %}
+                <div class="flex border border-transparent">
+                    <div class="">{{ forloop.counter }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="column-1"
+             class="mr-24 flex flex-col items-end gap-1">
+            <!-- Column 1 Header -->
+            <div class="mb-2 font-bold">Algorithm A</div>
+            <!-- Column 1 Items -->
+            {% for item in listA %}
+                <div class="passage-item flex w-52 overflow-hidden rounded-md border border-black"
+                     data-passage="{{ item.0 }}">
+                    <div class="w-1/3 bg-red-100 px-2">{{ item.1 }}</div>
+                    <div class="w-2/3 bg-gray-100 px-2 text-right">{{ item.0 }}</div>
+                </div>
+            {% endfor %}
+        </div>
+        <div id="column-2"
+             class="flex flex-col items-start gap-1">
+            <!-- Column 2 Header -->
+            <div class="mb-2 font-bold">Algorithm B</div>
+            <!-- Column 2 Items -->
+            {% for item in listB %}
+                <div class="passage-item flex w-52 overflow-hidden rounded-md border border-black"
+                     data-passage="{{ item.0 }}">
+                    <div class="w-2/3 bg-gray-100 px-2">{{ item.0 }}</div>
+                    <div class="w-1/3 bg-red-100 px-2">{{ item.1 }}</div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script src="{% static 'js/libraries/leader-line.min.js' %}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const colors = [
+                '#E53E3E',
+                '#DD6B20',
+                '#38A169',
+                '#3182CE',
+                '#805AD5',
+                '#D53F8C',
+                '#0F766E',
+                '#ECC94B',
+                '#7B341E',
+                '#4C51BF'
+            ];
+
+            const lineReferences = {};
+            const passageColors = {};
+
+            const col1Items = document.querySelectorAll('#column-1 .passage-item');
+            const col2Items = document.querySelectorAll('#column-2 .passage-item');
+
+            col1Items.forEach((item1, index) => {
+                const passage = item1.getAttribute('data-passage');
+                const match = document.querySelector(`#column-2 .passage-item[data-passage='${passage}']`);
+                if (match) {
+                    passageColors[passage] = colors[index % colors.length];
+                    item1.style.borderColor = passageColors[passage]
+                    match.style.borderColor = passageColors[passage]
+                    var line = new LeaderLine(
+                        item1,
+                        match, {
+                            size: 1,
+                            color: passageColors[passage],
+                            path: 'straight',
+                            endPlug: 'behind'
+                        }
+                    );
+                    lineReferences[passage] = line;
+                }
+            });
+
+            // Add event listeners
+            col1Items.forEach(item => {
+                item.addEventListener('mouseenter', highlightPassageAndLine);
+                item.addEventListener('mouseleave', unhighlightPassageAndLine);
+            });
+            col2Items.forEach(item => {
+                item.addEventListener('mouseenter', highlightPassageAndLine);
+                item.addEventListener('mouseleave', unhighlightPassageAndLine);
+            });
+
+            function highlightPassageAndLine(e) {
+                const passage = e.target.getAttribute('data-passage');
+                if (lineReferences[passage]) {
+                    lineReferences[passage].setOptions({
+                        color: 'yellow',
+                        size: 4
+                    });
+                }
+                // Highlight passages
+                document.querySelectorAll(`[data-passage="${passage}"]`).forEach(div => {
+                    div.style.borderColor = 'yellow';
+                    div.style.borderWidth = '2px';
+                });
+            }
+
+            function unhighlightPassageAndLine(e) {
+                const passage = e.target.getAttribute('data-passage');
+                if (lineReferences[passage]) {
+                    lineReferences[passage].setOptions({
+                        color: passageColors[passage],
+                        size: 1
+                    });
+                }
+                // Unhighlight passages
+                document.querySelectorAll(`[data-passage="${passage}"]`).forEach(div => {
+                    div.style.borderColor = passageColors[passage];
+                    div.style.borderWidth = '';
+                });
+            }
+        });
+    </script>
+
+{% endblock %}

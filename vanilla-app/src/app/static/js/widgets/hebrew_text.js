@@ -2,8 +2,18 @@ import * as utils from "../utils/utils.js";
 import * as constants from "../utils/constants.js";
 import * as events from "../utils/events.js";
 
-const wordSummaryDiv = document.getElementById("hovered-word-widget");
 let timer = null;
+
+// Cache commonly accessed DOM elements
+const wordSummaryDiv = document.getElementById("hovered-word-widget");
+const textSpan = document.getElementById("text");
+const englishSpan = document.getElementById("english");
+const speechSpan = document.getElementById("speech");
+const morphSpan = document.getElementById("morph");
+const refSpan = document.getElementById("ref");
+const lexFreqSpan = document.getElementById("lex-freq");
+
+const highlightColorClass = "bg-yellow-200";
 
 function getGradientColor(penalty) {
 	const green = [0, 0, 0];
@@ -81,61 +91,53 @@ function clearTimer() {
 		clearTimeout(timer);
 		timer = null;
 	}
+	document.querySelectorAll(".word").forEach((word) => {
+		word.classList.remove(highlightColorClass);
+	});
 	wordSummaryDiv.style.display = "none";
 }
 
-// Show the basic word data when hovered over.
-function showWordSummary(wordSpan) {
-	// Clear any existing timer
-	clearTimeout(timer);
+function highlightAllMatchingLexemes(hoveredWordJSON) {
+	document.querySelectorAll(".word").forEach((word) => {
+		const wordJSON = utils.contextToJson(word.dataset.dict);
+		if (wordJSON[constants.W_LEX_ID] === hoveredWordJSON[constants.W_LEX_ID]) {
+			word.classList.add(highlightColorClass);
+		}
+	});
+}
 
-	// Set a new timer
+// Show the basic word data (debounced)
+function showWordSummary(wordSpan) {
+	clearTimer();
+
 	timer = setTimeout(async function () {
 		const wordJSON = utils.contextToJson(wordSpan.dataset.dict);
+		highlightAllMatchingLexemes(wordJSON);
 
-		const textSpan = document.getElementById("text");
 		textSpan.innerText = wordJSON[constants.W_TEXT];
-
-		const englishSpan = document.getElementById("english");
 		englishSpan.innerText = wordJSON[constants.W_GLOSS];
-
-		const speechSpan = document.getElementById("speech");
 		speechSpan.innerText = wordJSON[constants.W_SPEECH];
 
-		// Morph
-		const morphSpan = document.getElementById("morph");
-		// const person = wordJSON[constants.W_PERSON];
-		// const number = wordJSON[constants.W_NUMBER];
-		// const gender = wordJSON[constants.W_GENDER];
-		// const verbStem = wordJSON[constants.W_VERB_STEM];
-		// const verbTense = wordJSON[constants.W_VERB_TENSE];
 		const attributes = [
 			wordJSON[constants.W_PERSON],
 			wordJSON[constants.W_NUMBER],
 			wordJSON[constants.W_GENDER],
 			wordJSON[constants.W_VERB_STEM],
 			wordJSON[constants.W_VERB_TENSE],
-		];
-
-		const morphText = attributes
+		]
 			.filter((item) => item !== null && item !== "")
 			.join(", ");
+		morphSpan.innerText = attributes;
 
-		morphSpan.innerText = morphText;
-
-		// Reference
 		const book = await utils.getBookByNumber(wordJSON[constants.W_BOOK]);
-		const ref = `${book.name} ${wordJSON[constants.W_BOOK]}:${
+		refSpan.innerText = `${book.name} ${wordJSON[constants.W_BOOK]}:${
 			wordJSON[constants.W_VERSE]
 		}`;
-		const refSpan = document.getElementById("ref");
-		refSpan.innerText = ref;
 
-		const lexFreqSpan = document.getElementById("lex-freq");
 		lexFreqSpan.innerText = wordJSON[constants.W_LEX_FREQUENCY] + " occ";
 
 		wordSummaryDiv.style.display = "block";
-	}, 400); // 1000 milliseconds = 1 second
+	}, 750);
 }
 
 function toggleSelectedWord(wordJSON) {
@@ -165,6 +167,13 @@ events.subscribe("DOMContentLoaded", (event) => {
 events.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
 	colorWords(event.detail);
 });
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// TODO : use this code to remove JS from the HTML !!!!
+// // Event listeners for each word
+// document.querySelectorAll(".word").forEach(word => {
+//     word.addEventListener('mouseenter', event => showWordSummary(event.target));
+//     word.addEventListener('mouseleave', clearHighlights);
+// });
 
 window.showWordAttributes = showWordAttributes;
 window.dismissWordWidget = dismissWordWidget;

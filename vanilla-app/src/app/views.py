@@ -238,6 +238,7 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
         text = data.get("text")
         passage_ids = text.get("passage_ids")
         print(passage_ids)
+        print("CONFIG", configuration)
         if passage_ids and type(passage_ids) == list:
             passages: list[Passage] = passage_provider.get_passages_by_ids(passage_ids)
             for passage in passages:
@@ -248,6 +249,26 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
                 text_data["penalties"] = penalties
                 response["text"].append(text_data)
     return JsonResponse(response)
+
+
+def x(request):
+    algorithms = algorithm_provider.get_default_configurations()
+    a, b = algorithms[0], algorithms[6]
+    print(a, b)
+    list1 = []
+    list2 = []
+
+    passages = passage_provider.get_passages_by_ids(list(range(41)))
+    for passage in passages:
+        for i, config in enumerate([a, b]):
+            score, penalties = alg.get_passage_weight_x(config, passage)
+            [list1, list2][i].append((passage.get_reference(True), score))
+
+    context = {
+        "listA": sorted(list1, key=lambda x: x[1]),
+        "listB": sorted(list2, key=lambda x: x[1]),
+    }
+    return render(request, "passage_comparison.html", context)
 
 
 @require_POST

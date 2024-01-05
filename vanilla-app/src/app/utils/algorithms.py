@@ -190,12 +190,11 @@ def get_passage_weight_4(
     else:
         total_weight /= len(word_weights)
 
-    return round(total_weight, 4), word_weights
+    return round(total_weight, 4)
 
 
 # Decrease penalty for each occurance.
 def get_passage_weight_x(configuration, passage: Passage):
-    print("CONFIG", configuration)
     categories = init_categories(configuration)
     # Loop over words from the database, where the word is not a stop word.
     for word in passage.words():
