@@ -576,6 +576,10 @@ video {
   pointer-events: none;
 }
 
+.visible {
+  visibility: visible;
+}
+
 .static {
   position: static;
 }
@@ -614,6 +618,14 @@ video {
 
 .z-20 {
   z-index: 20;
+}
+
+.z-10 {
+  z-index: 10;
+}
+
+.z-50 {
+  z-index: 50;
 }
 
 .float-right {
@@ -714,6 +726,14 @@ video {
   margin-right: 6rem;
 }
 
+.mr-32 {
+  margin-right: 8rem;
+}
+
+.mr-52 {
+  margin-right: 13rem;
+}
+
 .block {
   display: block;
 }
@@ -808,6 +828,10 @@ video {
 
 .w-52 {
   width: 13rem;
+}
+
+.w-60 {
+  width: 15rem;
 }
 
 .max-w-7xl {

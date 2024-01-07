@@ -20,13 +20,14 @@
             {% endfor %}
         </div>
         <div id="column-1"
-             class="mr-24 flex flex-col items-end gap-1">
+             class="mr-52 flex flex-col items-end gap-1">
             <!-- Column 1 Header -->
             <div class="mb-2 font-bold">Algorithm A</div>
             <!-- Column 1 Items -->
             {% for item in listA %}
-                <div class="passage-item flex w-52 overflow-hidden rounded-md border border-black"
-                     data-passage="{{ item.0 }}">
+                <div class="col-1 passage-item flex w-60 overflow-hidden rounded-md border border-black"
+                     data-passage="{{ item.0 }}"
+                     data-index="{{ forloop.counter }}">
                     <div class="w-1/3 bg-red-100 px-2">{{ item.1 }}</div>
                     <div class="w-2/3 bg-gray-100 px-2 text-right">{{ item.0 }}</div>
                 </div>
@@ -38,13 +39,17 @@
             <div class="mb-2 font-bold">Algorithm B</div>
             <!-- Column 2 Items -->
             {% for item in listB %}
-                <div class="passage-item flex w-52 overflow-hidden rounded-md border border-black"
-                     data-passage="{{ item.0 }}">
+                <div class="passage-item flex w-60 overflow-hidden rounded-md border border-black"
+                     data-passage="{{ item.0 }}"
+                     data-index="{{ forloop.counter }}">
                     <div class="w-2/3 bg-gray-100 px-2">{{ item.0 }}</div>
                     <div class="w-1/3 bg-red-100 px-2">{{ item.1 }}</div>
                 </div>
             {% endfor %}
         </div>
+    </div>
+    <div id="hover-text"
+         class="absolute z-50 hidden rounded border border-gray-400 bg-white px-1 shadow-lg">
     </div>
 
     <script src="{% static 'js/libraries/leader-line.min.js' %}"></script>
@@ -65,19 +70,75 @@
 
             const lineReferences = {};
             const passageColors = {};
-
             const col1Items = document.querySelectorAll('#column-1 .passage-item');
             const col2Items = document.querySelectorAll('#column-2 .passage-item');
+            const hoverTextDiv = document.getElementById('hover-text');
 
-            col1Items.forEach((item1, index) => {
-                const passage = item1.getAttribute('data-passage');
+            function showHoverText(div) {
+                // Get the text
+                const passage = div.getAttribute('data-passage');
+                const col = div.classList.contains('col-1') ? 2 : 1;
+                const match = document.querySelector(`#column-${col} .passage-item[data-passage='${passage}']`);
+                const selectedIndex = div.getAttribute('data-index');
+                const matchingIndex = match.getAttribute('data-index');
+                const difference = -(selectedIndex - matchingIndex);
+
+                // Position the hover text div next to the hovered div
+                const rect = div.getBoundingClientRect();
+                hoverTextDiv.style.top = `${rect.top + window.scrollY}px`;
+                hoverTextDiv.style.left = `${rect.right + window.scrollX + 10}px`; // 10px to the right
+                hoverTextDiv.innerHTML = `<span class="font-bold text-red-500">${difference}</span>: ${selectedIndex}→${matchingIndex}`; // Set the text
+                hoverTextDiv.classList.remove('hidden'); // Show the div
+            }
+
+            function handlePassageClicked(div) {
+                const currentSelection = document.querySelector(".selected-passage");
+                if (currentSelection && div.getAttribute('data-passage') === currentSelection.getAttribute('data-passage')) {
+                    // Clicking the same passage again: unselect and reset highlight
+                    highlightPassageAndLine(currentSelection, null, true); // Reset the highlight
+                    currentSelection.classList.remove("selected-passage");
+                } else {
+                    // New passage clicked or no current selection
+                    if (currentSelection) {
+                        // Reset previous selection
+                        highlightPassageAndLine(currentSelection, null, true);
+                        currentSelection.classList.remove("selected-passage");
+                    }
+                    // Highlight and select the new passage
+                    div.classList.add("selected-passage");
+                    highlightPassageAndLine(div, "#242423"); // Highlight with new color
+                }
+            }
+
+            function highlightPassageAndLine(div, color = null, reset = false) {
+                const passage = div.getAttribute('data-passage');
+                const lineSize = reset ? 1 : 4;
+                const borderWidth = reset ? '' : '2px';
+                color = color || passageColors[passage];
+                lineReferences[passage].setOptions({
+                    color: color,
+                    size: lineSize
+                });
+                // Highlight passages
+                document.querySelectorAll(`[data-passage="${passage}"]`).forEach(div => {
+                    div.style.borderColor = color;
+                    div.style.borderWidth = borderWidth;
+                });
+                showHoverText(div)
+                if (reset) {
+                    hoverTextDiv.classList.add("hidden")
+                }
+            }
+
+            col1Items.forEach((item, index) => {
+                const passage = item.getAttribute('data-passage');
                 const match = document.querySelector(`#column-2 .passage-item[data-passage='${passage}']`);
                 if (match) {
                     passageColors[passage] = colors[index % colors.length];
-                    item1.style.borderColor = passageColors[passage]
+                    item.style.borderColor = passageColors[passage]
                     match.style.borderColor = passageColors[passage]
                     var line = new LeaderLine(
-                        item1,
+                        item,
                         match, {
                             size: 1,
                             color: passageColors[passage],
@@ -90,44 +151,21 @@
             });
 
             // Add event listeners
-            col1Items.forEach(item => {
-                item.addEventListener('mouseenter', highlightPassageAndLine);
-                item.addEventListener('mouseleave', unhighlightPassageAndLine);
-            });
-            col2Items.forEach(item => {
-                item.addEventListener('mouseenter', highlightPassageAndLine);
-                item.addEventListener('mouseleave', unhighlightPassageAndLine);
-            });
-
-            function highlightPassageAndLine(e) {
-                const passage = e.target.getAttribute('data-passage');
-                if (lineReferences[passage]) {
-                    lineReferences[passage].setOptions({
-                        color: 'yellow',
-                        size: 4
+            [col1Items, col2Items].forEach((column) => {
+                column.forEach((item) => {
+                    item.addEventListener('mouseenter', () => {
+                        if (!item.classList.contains("selected-passage")) {
+                            highlightPassageAndLine(item, "#f7f5ad");
+                        }
                     });
-                }
-                // Highlight passages
-                document.querySelectorAll(`[data-passage="${passage}"]`).forEach(div => {
-                    div.style.borderColor = 'yellow';
-                    div.style.borderWidth = '2px';
-                });
-            }
-
-            function unhighlightPassageAndLine(e) {
-                const passage = e.target.getAttribute('data-passage');
-                if (lineReferences[passage]) {
-                    lineReferences[passage].setOptions({
-                        color: passageColors[passage],
-                        size: 1
+                    item.addEventListener('mouseleave', () => {
+                        if (!item.classList.contains("selected-passage")) {
+                            highlightPassageAndLine(item, null, true); // Reset on mouse leave
+                        }
                     });
-                }
-                // Unhighlight passages
-                document.querySelectorAll(`[data-passage="${passage}"]`).forEach(div => {
-                    div.style.borderColor = passageColors[passage];
-                    div.style.borderWidth = '';
+                    item.addEventListener('click', () => handlePassageClicked(item));
                 });
-            }
+            });
         });
     </script>
 

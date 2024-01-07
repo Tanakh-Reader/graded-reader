@@ -258,7 +258,7 @@ def x(request):
     list1 = []
     list2 = []
 
-    passages = passage_provider.get_passages_by_ids(list(range(41)))
+    passages = passage_provider.get_passages_by_ids(list(range(100, 250)))
     for passage in passages:
         for i, config in enumerate([a, b]):
             score, penalties = alg.get_passage_weight_x(config, passage)
