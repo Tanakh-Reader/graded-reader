@@ -4,7 +4,6 @@ from . import views
 
 urlpatterns = [
     path("", views.read, name="index"),
-    path("x", views.x, name="x"),
     path("read", views.read, name="read"),
     path("search", views.search, name="search"),
     path("passages", views.passages, name="passages"),
@@ -21,6 +20,10 @@ urlpatterns = [
     path("api/check-data-ready", views.check_data_ready, name="check_data_ready"),
     # POST
     path("api/algorithm", views.post_algorithm, name="post_algorithm"),
+    # TODO MOVE
+    path(
+        "compare-algorithms", views.post_algorithm_comparisons, name="post_algorithms"
+    ),
     # DELETE
     path("api/delete-words", views.delete_words, name="delete_words"),
     path("api/delete-passages", views.delete_passages, name="delete_passages"),

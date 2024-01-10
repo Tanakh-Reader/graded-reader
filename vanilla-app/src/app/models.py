@@ -72,8 +72,8 @@ class Passage(models.Model):
 
     def to_dict(self):
         self.penalty = str(self.penalty)
-        self.tags = self.tags.split(",")
         passage_dict = model_to_dict(self)
+        passage_dict["tags"] = self.tags.split(",")
         passage_dict["reference"] = self.get_reference()
         passage_dict["reference_abbr"] = self.get_reference(abbreviation=True)
         passage_dict["id"] = self.id
