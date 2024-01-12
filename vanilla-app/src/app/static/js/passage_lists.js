@@ -3,6 +3,8 @@ import apis from "./utils/api.js";
 import * as events from "./utils/events.js";
 import * as constants from "./utils/constants.js";
 
+// https://anseki.github.io/leader-line/
+
 const colors = [
 	"#E53E3E",
 	"#DD6B20",
@@ -24,9 +26,12 @@ const hoverTextDiv = document.getElementById("hover-text");
 const topDiffsCount = 5;
 const dropdowns = $(document).find("select").toArray();
 const maxLines = 75;
+
+var allLines = true;
 var diffsAdded = 0;
 var maxDiff = -1;
 var minDiff = 1000;
+var currentPassage = null;
 
 function getDiffInnerHTML(color, diff, index1, index2) {
 	return `<span class="font-bold ${color}">${diff}</span>: ${index1}→${index2}`;
@@ -95,7 +100,7 @@ function highlightPassageAndLine(div, color = null, reset = false) {
 		size: lineSize,
 	});
 	// Highlight passages
-	document.querySelectorAll(`[data-passage="${passageId}"]`).forEach((div) => {
+	document.querySelectorAll(`[data-id="${passageId}"]`).forEach((div) => {
 		div.style.borderColor = color;
 		div.style.borderWidth = borderWidth;
 	});
@@ -160,16 +165,20 @@ function buildDiffSummaryDiv() {
 	});
 }
 
+function drawLine(passageObj) {
+	var line = new LeaderLine(passageObj.col1, passageObj.col2, {
+		size: 1,
+		color: passageObj.color,
+		path: "straight",
+		endPlug: "behind",
+	});
+	lineReferences[passageObj.id] = line;
+}
+
 function drawLines() {
 	Object.entries(passageObjects).forEach(([key, value], index) => {
 		if (value.col2) {
-			var line = new LeaderLine(value.col1, value.col2, {
-				size: 1,
-				color: value.color,
-				path: "straight",
-				endPlug: "behind",
-			});
-			lineReferences[value.id] = line;
+			drawLine(value);
 		}
 	});
 }
@@ -262,11 +271,6 @@ function buildAlgorithmDisplay(algJSON, id) {
 			const penalty = morph[1];
 			let text = "";
 			morphConditions.forEach((morphCondition) => {
-				// if (morphCondition.rule === "EQUALS") {
-				//     text += `${morphCondition.feature}=${morphCondition.value}`
-				// } else {
-				//     text += `${morphCondition.feature}=${morphCondition.value
-				// }
 				// TODO : update with constants
 				const feature = {
 					verb_tense: "vt",
@@ -320,6 +324,11 @@ document.addEventListener("DOMContentLoaded", function () {
 	if (collectPassagesData()) {
 		document.getElementById("comparisons").style.display = "flex";
 		buildDiffSummaryDiv();
-		drawLines();
+		if (col1Items.length > maxLines) {
+			allLines = false;
+			drawLines();
+		} else {
+			drawLines();
+		}
 	}
 });

@@ -254,7 +254,11 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
 def post_algorithm_comparisons(request: HttpRequest):
     # algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
     algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
-    context = {"algorithms": algorithms}
+    context = {
+        "algorithms": algorithms,
+        "saved_algorithms": algorithms,
+        "algorithm_templates": algorithm_provider.get_default_configurations(),
+    }
     try:
         count = int(request.POST.get("count"))
         alg1_id = int(request.POST.get("algorithm1"))
