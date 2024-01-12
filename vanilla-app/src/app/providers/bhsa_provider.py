@@ -1,13 +1,29 @@
+import os
+
+from django.conf import settings
+from tf.core.api import Api, Locality, NodeFeatures, Text
 from tf.fabric import Fabric
-from ..utils.timer import timer
+
+# from tf.core.nodefeature import NodeFeature
 from ..data import constants
+from ..utils.timer import timer
+
+ROOT_DIR = settings.BASE_DIR.parent.parent
+
+
+# Wrapper class for defining static data types
+class HebrewApi:
+    def __init__(self, api: Api):
+        self.T: Text = api.T
+        self.L: Locality = api.L
+        self.F: NodeFeatures = api.F
 
 
 class BHSAProvider:
-    path = "../bhsa/tf/2021"
-    api = None
+    path = os.path.join(ROOT_DIR, "bhsa/tf/2021")
+    api: Api = None
 
-    def get_api(self):
+    def get_api(self) -> Api:
         if self.api:
             return self.api
 
@@ -15,21 +31,21 @@ class BHSAProvider:
         timer.start()
 
         tf = Fabric(locations=self.path)
-        self.api = tf.load(features=constants.BHSA_FEATURES)
+        self.api = tf.load(features=constants.BHSA_FEATURES, add=False)
         self.api.makeAvailableIn(locals())
 
         timer.end()
         print(f"TF API LOADED\n")
 
         return self.api
-    
-    def api_globals(self):
 
+    def api_globals(self) -> tuple[Text, Locality, NodeFeatures]:
         api = self.get_api()
         return api.T, api.L, api.F
 
 
 bhsa_provider = BHSAProvider()
+T, L, F = bhsa_provider.api_globals()
 
 # TODO: error using TF on the web
 # 2023-04-26 17:35:50   0.00s Not all of the warp features otype and oslots are present in#012/home/bhsa/tf/2021

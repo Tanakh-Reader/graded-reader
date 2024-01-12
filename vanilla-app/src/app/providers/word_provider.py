@@ -1,13 +1,12 @@
 import threading
 
-from .add_words import add_words_to_database
 from ..data import constants
-from ..models import Word, Passage
+from ..models import Passage, Word
+from .add_words import add_words_to_database
 
 
 # Class that interfaces with the Sqlite DB to get words.
 class WordProvider:
-
     words_loaded = False
     loading_in_progress = False
     attribute_mappings = None
@@ -27,18 +26,39 @@ class WordProvider:
                 add_words_task.start()
             return False
 
-    def get_words_from_passage(self, passage: Passage, as_json=False):
+    def get_all_words(self, as_json=False):
+        words = Word.objects.all()
 
-        words = self.get_words_by_ids(
-            passage.start_word,
-            passage.end_word,
-            as_json
-        )
-        
+        if as_json:
+            return self.words_to_json(words)
+
+        return words
+
+    def get_verbs(self, lex_ids):
+        verbs = {}
+        # for lex_id in lex_ids:
+        # obj = {}
+        words = Word.objects.filter(speech="verb")
+        for word in words:
+            if word.lex_frequency >= 10:
+                if word.lex_id not in verbs:
+                    verbs[word.lex_id] = {
+                        # "stem": {},
+                        # "text": word.lex,
+                    }  # {"stem": {}, "tense": {}}
+                if word.verb_stem not in verbs[word.lex_id]:
+                    verbs[word.lex_id][word.verb_stem] = 1
+                else:
+                    verbs[word.lex_id][word.verb_stem] += 1
+
+        return verbs
+
+    def get_words_from_passage(self, passage: Passage, as_json=False):
+        words = self.get_words_by_ids(passage.start_word, passage.end_word, as_json)
+
         return words
 
     def get_words_by_ids(self, start_id, end_id, as_json=False):
-        
         words = Word.objects.filter(
             id__gte=start_id,
             id__lte=end_id,
@@ -83,14 +103,14 @@ class WordProvider:
             return self.words_to_json(referenced_words)
 
         return referenced_words
-    
+
     def words_to_json(self, words: list[Word]):
         return [word.to_dict() for word in words]
-    
+
     def delete_all(self):
         Word.objects.all().delete()
         self.words_loaded = False
         self.loading_in_progress = False
 
-    
+
 word_provider = WordProvider()

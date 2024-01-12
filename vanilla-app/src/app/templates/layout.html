@@ -3,14 +3,16 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
         <title>
             {% block title %}Hebrew Graded Reader{% endblock %}
         </title>
         <link rel="shortcut icon"
               type="image/png"
               href="{% static 'favicon/favicon.ico' %}" />
-        <link rel="stylesheet" href="{% static 'css/output.css' %}">
+        <link rel="stylesheet"
+              href="{% static 'css/output.css' %}">
         <!-- Google fonts -->
         <link rel="stylesheet"
               href="https://fonts.googleapis.com/css?family=Cardo:ital,wght@0,400;0,700;1,400|Alef:ital,wght@0,400;0,700;1,400|Frank+Ruhl+Libre:ital,wght@0,400;0,700;1,400&display=swap">
@@ -29,10 +31,11 @@
                 src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.1/dist/cdn.min.js"></script>
         <!-- Other head content -->
         {% block styles %}{% endblock %}
-        <link rel="stylesheet" href="{% static 'css/layout.css' %}">
+        <link rel="stylesheet"
+              href="{% static 'css/layout.css' %}">
     </head>
     <body>
-        <header class="shadow flex justify-between items-center px-6 py-4">
+        <header class="flex items-center justify-between px-6 py-4 shadow">
             <h1 class="text-3xl font-bold">
                 {% block header %}
                     <a href="{% url 'index' %}">Hebrew Graded Reader</a>
@@ -41,26 +44,35 @@
             <nav>
                 <ul class="flex justify-end space-x-4">
                     <li>
-                        <a href="{% url 'search' %}" class="text-gray-900 hover:text-gray-600">Search</a>
+                        <a href="{% url 'search' %}"
+                           class="text-gray-900 hover:text-gray-600">Search</a>
                     </li>
                     <li>
-                        <a href="{% url 'read' %}" class="text-gray-900 hover:text-gray-600">Read</a>
+                        <a href="{% url 'read' %}"
+                           class="text-gray-900 hover:text-gray-600">Read</a>
                     </li>
                     <li>
-                        <a href="{% url 'passages' %}" class="text-gray-900 hover:text-gray-600">Passages</a>
+                        <a href="{% url 'passages' %}"
+                           class="text-gray-900 hover:text-gray-600">Passages</a>
                     </li>
                     <li>
-                        <a href="{% url 'compare' %}" class="text-gray-900 hover:text-gray-600">Compare</a>
+                        <a href="{% url 'compare' %}"
+                           class="text-gray-900 hover:text-gray-600">Compare</a>
                     </li>
+                    {% comment %} <li>
+                        <a href="{% url 'algorithms' %}" class="text-gray-900 hover:text-gray-600">Algorithms</a>
+                    </li> {% endcomment %}
                     <li>
-                        <a href="{% url 'algorithms' %}"
+                        <a href="{% url 'post_algorithms' %}"
                            class="text-gray-900 hover:text-gray-600">Algorithms</a>
                     </li>
                     <li>
-                        <a href="{% url 'features' %}" class="text-gray-900 hover:text-gray-600">Features</a>
+                        <a href="{% url 'features' %}"
+                           class="text-gray-900 hover:text-gray-600">Features</a>
                     </li>
                     <li>
-                        <a href="{% url 'settings' %}" class="text-gray-900 hover:text-gray-600">
+                        <a href="{% url 'settings' %}"
+                           class="text-gray-900 hover:text-gray-600">
                             <span class="material-icons">settings</span>
                         </a>
                     </li>
@@ -69,9 +81,9 @@
         </header>
         <main>
             <div class="py-12">
-                <div class="max-w-fit mx-auto sm:px-6 lg:px-8">
-                    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg">
-                        <div class="p-6 sm:px-10 bg-white">
+                <div class="mx-auto max-w-fit sm:px-6 lg:px-8">
+                    <div class="overflow-hidden bg-white shadow-xl sm:rounded-lg">
+                        <div class="bg-white p-6 sm:px-10">
                             {% block content %}{% endblock %}
                         </div>
                     </div>
@@ -79,7 +91,7 @@
             </div>
         </main>
         <footer class="border-t">
-            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 {% block footer %}
                     Tanakh Reader &copy; {% now 'Y' %}
                 {% endblock %}

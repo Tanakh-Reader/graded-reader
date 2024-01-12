@@ -1,40 +1,38 @@
 # https://dev.to/besil/my-django-svelte-setup-for-fullstack-development-3an8
 import json
+
 from django.core.paginator import Paginator
 from django.http import (
+    Http404,
+    HttpRequest,
     HttpResponse,
     HttpResponseNotAllowed,
     HttpResponseRedirect,
     JsonResponse,
-    Http404,
-    HttpRequest,
 )
-from django.urls import reverse
-from django.views.decorators.http import require_GET, require_POST
-from django.views.decorators.cache import cache_page
-
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
+from django.urls import reverse
+from django.views.decorators.cache import cache_page
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
 
-
-from django.shortcuts import render
-
-from django.shortcuts import redirect
-
-from .providers.book_provider import book_provider
-from .providers.word_provider import word_provider
-from .providers.passage_provider import passage_provider
+from .forms import *
+from .models import Passage, Word
 from .providers.algorithm_provider import Algorithm, algorithm_provider
 from .providers.bhsa_features_provider import bhsa_features_provider
-
-
-from .models import Passage, Word
-from .forms import *
-from .utils import references, algorithms as alg
+from .providers.book_provider import book_provider
+from .providers.passage_provider import passage_provider
+from .providers.word_provider import word_provider
+from .utils import algorithms as alg
+from .utils import references
 
 
 def search(request: HttpRequest) -> HttpResponse:
     context = {}
+    # words = word_provider.get_verbs([1437611, 1437621])
+    # print(words)
+    # return JsonResponse(words)
     return render(request, "index.html", context)
 
 
@@ -61,7 +59,8 @@ def read(request: HttpRequest) -> HttpResponse:
 
 
 from django.forms import formset_factory
-from .forms import VerbForm, FrequencyForm
+
+from .forms import FrequencyForm, VerbForm
 
 
 # @cache_page(60 * 15)
@@ -87,8 +86,8 @@ def passages(request: HttpRequest) -> HttpResponse:
 
 
 def passages_compare(request: HttpRequest) -> HttpResponse:
-    default_ids = [1,2]
-    passage_ids = request.GET.getlist('id', default_ids)
+    default_ids = [1, 2]
+    passage_ids = request.GET.getlist("id", default_ids)
     if not (2 <= len(passage_ids) <= 4):
         passage_ids = default_ids
     text_passages = passage_provider.get_passages_by_ids(passage_ids, as_json=True)
@@ -98,16 +97,17 @@ def passages_compare(request: HttpRequest) -> HttpResponse:
 
     return render(request, "passages_compare.html", context)
 
+
 @csrf_exempt  # TEMPORARY TODO
 def algorithms(request: HttpRequest) -> HttpResponse:
     VerbFormSet = formset_factory(VerbForm, extra=1)
     FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
     verb_formset = VerbFormSet(prefix="verbs")
     frequency_formset = FrequencyFormSet(prefix="freqs")
-    
+
     passages = passage_provider.get_all_passages(as_json=True)
     algorithm_templates = algorithm_provider.get_default_configurations()
-    saved_algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
+    saved_algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
     context = {
         "algorithm_templates": algorithm_templates,
         "saved_algorithms": saved_algorithms,
@@ -117,11 +117,13 @@ def algorithms(request: HttpRequest) -> HttpResponse:
     }
     return render(request, "algorithms.html", context)
 
+
 def features(request: HttpRequest) -> HttpResponse:
     features = bhsa_features_provider.get_features_for_display()
-    context = {'features': features}
+    context = {"features": features}
 
     return render(request, "features.html", context)
+
 
 def settings(request: HttpRequest) -> HttpResponse:
     context = {}
@@ -150,11 +152,11 @@ def get_hebrew_text(request: HttpRequest) -> JsonResponse:
     text_html = render_to_string("widgets/hebrew_text.html", context)
     return JsonResponse({"html": text_html})
 
+
 @csrf_exempt  # TEMPORARY TODO
 def get_algorithm_form(request: HttpRequest) -> JsonResponse:
-
     algorithm_templates = algorithm_provider.get_default_configurations()
-    saved_algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
+    saved_algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
 
     VerbFormSet = formset_factory(VerbForm, extra=1)
     FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
@@ -177,7 +179,7 @@ def get_algorithm_form(request: HttpRequest) -> JsonResponse:
             # Process the data and generate your configuration.json
             verb_data = [form.cleaned_data for form in verb_formset]
             freq_data = [form.cleaned_data for form in frequency_formset]
-            algorithm_name = request.POST.get('name')
+            algorithm_name = request.POST.get("name")
 
             configuration = {
                 "verbs": verb_data,
@@ -188,22 +190,23 @@ def get_algorithm_form(request: HttpRequest) -> JsonResponse:
 
             # TODO: Do something with the configuration
 
-            return JsonResponse({'status': 'success', 'message': 'Yah Baby'})
+            return JsonResponse({"status": "success", "message": "Yah Baby"})
 
         else:
             # Form validation failed, return errors
             verb_errors = verb_formset.errors
             freq_errors = frequency_formset.errors
-            return JsonResponse({
-                'status': 'error', 
-                'message': 'Validation failed',
-                'verb_errors': verb_errors,
-                'freq_errors': freq_errors,
-            })
+            return JsonResponse(
+                {
+                    "status": "error",
+                    "message": "Validation failed",
+                    "verb_errors": verb_errors,
+                    "freq_errors": freq_errors,
+                }
+            )
 
     form_html = render_to_string("widgets/algorithm_form.html", context)
     return JsonResponse({"html": form_html})
-
 
 
 def get_books(request: HttpRequest) -> JsonResponse:
@@ -238,6 +241,7 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
         text = data.get("text")
         passage_ids = text.get("passage_ids")
         print(passage_ids)
+        print("CONFIG", configuration)
         if passage_ids and type(passage_ids) == list:
             passages: list[Passage] = passage_provider.get_passages_by_ids(passage_ids)
             for passage in passages:
@@ -248,6 +252,53 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
                 text_data["penalties"] = penalties
                 response["text"].append(text_data)
     return JsonResponse(response)
+
+
+def post_algorithm_comparisons(request: HttpRequest):
+    # algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
+    algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
+    context = {
+        "algorithms": algorithms,
+        "saved_algorithms": algorithms,
+        "algorithm_templates": algorithm_provider.get_default_configurations(),
+    }
+    try:
+        count = int(request.POST.get("count"))
+        alg1_id = int(request.POST.get("algorithm1"))
+        alg2_id = int(request.POST.get("algorithm2"))
+
+        alg1 = algorithm_provider.get_algorithm_by_id(
+            alg1_id,
+        )
+        alg2 = algorithm_provider.get_algorithm_by_id(alg2_id)
+
+        list1 = []
+        list2 = []
+
+        passages: list[Passage] = passage_provider.get_easiest_passages(count)
+
+        for passage in passages:
+            for i, config in enumerate([alg1.configuration, alg2.configuration]):
+                score, penalties = alg.get_passage_weight_x(config, passage)
+                [list1, list2][i].append((passage.to_dict(), score))
+        for list in [list1, list2]:
+            list.sort(key=lambda x: x[1])
+        context.update(
+            {
+                "listA": list1,
+                "listB": list2,
+                "algA": alg1_id,
+                "algB": alg2_id,
+                "count": count,
+            }
+        )
+    except Exception as e:
+        print(e)
+        pass
+
+    return render(request, "passage_comparison.html", context)
+
+    # return JsonResponse(context)
 
 
 @require_POST
