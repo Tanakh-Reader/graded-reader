@@ -30,6 +30,9 @@ from .utils import references
 
 def search(request: HttpRequest) -> HttpResponse:
     context = {}
+    # words = word_provider.get_verbs([1437611, 1437621])
+    # print(words)
+    # return JsonResponse(words)
     return render(request, "index.html", context)
 
 

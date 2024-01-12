@@ -1,9 +1,7 @@
 {% load widget_tweaks %}
 {% load static %}
 
-{% block styles %}
-{% endblock %}
-
+{% block styles %}{% endblock %}
 
 <!-- 
 <div class="verb-form row">
@@ -26,37 +24,45 @@
     <div class="col">
         <button type="button" class="remove-verb-button">-</button>
     </div>
-     -->
+-->
 
 <!-- Data to access in the JS. -->
-<div id="data" data-verb-count="{{ verb_formset.total_form_count }}"
-    data-freq-count="{{ frequency_formset.total_form_count }}"></div>
+<div id="data"
+     data-verb-count="{{ verb_formset.total_form_count }}"
+     data-freq-count="{{ frequency_formset.total_form_count }}"></div>
 
-<form class="algorithm-form hidden flex-col items-stretch bg-gray-300 p-3 rounded-md space-y-3 z-20 mt-1 absolute"
-    method="post">
+<form class="algorithm-form absolute z-20 mt-1 hidden flex-col items-stretch space-y-3 rounded-md bg-gray-300 p-3"
+      method="post">
 
-    
     <div class="flex flex-row justify-between">
         <!-- Saved algorithms -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div class="dropdown-container">
-                <select id="dropdown1" class="border px-2 rounded ">
-                    <option selected disabled value="">TEMPLATES</option> <!-- Default option -->
+                <select id="dropdown1" class="rounded border px-2">
+                    <option selected disabled value="">TEMPLATES</option>
+                    <!-- Default option -->
                     {% for obj in algorithm_templates %}
-                    <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
+                        <option value="{{ obj.id }}" data-definition="{{ obj }}">
+                            {{ obj.name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
             <div class="dropdown-container">
-                <select id="dropdown2" class="border px-2 rounded ">
-                    <option selected disabled value="">CUSTOM</option> <!-- Default option -->
+                <select id="dropdown2" class="rounded border px-2">
+                    <option selected disabled value="">CUSTOM</option>
+                    <!-- Default option -->
                     {% for obj in saved_algorithms %}
-                    <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
+                        <option value="{{ obj.id }}" data-definition="{{ obj }}">
+                            {{ obj.name }}
+                        </option>
                     {% endfor %}
                 </select>
             </div>
         </div>
-        <button class="dismiss-btn" type="button" onclick="dismissAlgorithmForm()">x</button>
+        <button class="dismiss-btn"
+                type="button"
+                onclick="dismissAlgorithmForm()">x</button>
     </div>
 
     <!-- Verb forms -->
@@ -64,19 +70,22 @@
         <h3>Verbs</h3>
         {{ verb_formset.management_form }}
         {% for form in verb_formset %}
-        <div class="verb-form flex flex-row gap-2 items-start">
-            {% for field in form %}
-            <div>
-                {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+            <div class="verb-form flex flex-row items-start gap-2">
+                {% for field in form %}
+                    <div>
+                        {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+                    </div>
+                {% endfor %}
+                <div class="flex items-center">
+                    <!-- vertically centers the button -->
+                    <button class="remove-button del-btn" type="button">-</button>
+                </div>
             </div>
-            {% endfor %}
-            <div class="flex items-center"> <!-- vertically centers the button -->
-                <button class="remove-button del-btn" type="button">-</button>
-            </div>
-        </div>
         {% endfor %}
         <div class="pt-1">
-            <button class="add-btn" type="button" id="add-verb-button">+</button>
+            <button class="add-btn"
+                    type="button"
+                    id="add-verb-button">+</button>
         </div>
     </div>
     <!-- Frequency forms -->
@@ -85,44 +94,54 @@
         {{ frequency_formset.management_form }}
         {% for form in frequency_formset %}
 
-        <div class="freq-form flex flex-row gap-2 items-start">
-            {% for field in form %}
-            <div>
-                {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+            <div class="freq-form flex flex-row items-start gap-2">
+                {% for field in form %}
+                    <div>
+                        {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+                    </div>
+                {% endfor %}
+                <div class="flex items-center">
+                    <!-- vertically centers the button -->
+                    <button class="remove-button del-btn" type="button">-</button>
+                </div>
             </div>
-            {% endfor %}
-            <div class="flex items-center"> <!-- vertically centers the button -->
-                <button class="remove-button del-btn" type="button">-</button>
-            </div>
-        </div>
 
         {% endfor %}
         <div class="pt-1">
-            <button class="add-btn" type="button" id="add-freq-button">+</button>
+            <button class="add-btn"
+                    type="button"
+                    id="add-freq-button">+</button>
         </div>
     </div>
     <div class="">
-        <input id="alg-name" class="border rounded px-2" type="text" name="name" placeholder="Algorithm name">
+        <input id="alg-name"
+               class="rounded border px-2"
+               type="text"
+               name="name"
+               placeholder="Algorithm name">
     </div>
 
     <!-- Passage selection dropdown -->
     <div>
-        <button class="psg border rounded px-2 bg-white" type="button" onclick="showDropdown(this)">Passage</button>
+        <button class="psg rounded border bg-white px-2"
+                type="button"
+                onclick="showDropdown(this)">Passage</button>
     </div>
     {% include 'widgets/passage_selector.html' %}
 
     <div class="flex flex-row space-x-6">
-        <button id="run" type="submit"><span class="material-symbols-sharp">
-            play_circle
-        </span> Run</button>
-        <button id="save" type="submit"><span class="material-symbols-sharp">
-            save
-        </span> Save</button>
+        <button id="run" type="submit">
+            <span class="material-symbols-sharp">play_circle</span> Run
+        </button>
+        <button id="save" type="submit">
+            <span class="material-symbols-sharp">save</span> Save
+        </button>
+        <button id="save-copy" type="submit">
+            <span class="material-symbols-sharp">save</span> Save Copy
+        </button>
 
-         
     </div>
 
 </form>
-
 
 <!-- JavaScript code goes here -->

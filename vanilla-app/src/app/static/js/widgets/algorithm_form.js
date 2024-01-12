@@ -137,12 +137,13 @@ function populateVerbForm(form, data) {
 	const penaltyField = form.querySelector("input[name$=penalty]");
 
 	verbTenseField.value =
-		getValue(data, constants.W_VERB_TENSE) || constants.FIELD_NULL_VALUE;
+		getValue(data[0], constants.W_VERB_TENSE) || constants.FIELD_NULL_VALUE;
 	verbStemField.value =
-		getValue(data, constants.W_VERB_STEM) || constants.FIELD_NULL_VALUE;
+		getValue(data[0], constants.W_VERB_STEM) || constants.FIELD_NULL_VALUE;
 	suffixField.value =
-		getValue(data, constants.W_PRONOMINAL_SUFFIX) || constants.FIELD_NULL_VALUE;
-	penaltyField.value = data.slice(-1);
+		getValue(data[0], constants.W_PRONOMINAL_SUFFIX) ||
+		constants.FIELD_NULL_VALUE;
+	penaltyField.value = data[1];
 }
 
 function populateAlgorithmForm(algorithmConfig) {
@@ -290,6 +291,10 @@ function setupFormSubmission() {
 				const config = getConfiguration();
 				if (event.submitter.id === "save") {
 					saveAlgorithm(config);
+					// Handle text data
+				} else if (event.submitter.id === "save-copy") {
+					config.id = null;
+					saveAlgorithm(config, true);
 					// Handle text data
 				} else {
 					// If a page with rendered text, set those texts to be the passages.
