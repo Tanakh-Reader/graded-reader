@@ -5,76 +5,156 @@ import * as events from "../utils/events.js";
 
 await apis.getAlgorithmForm();
 
-const verbClassName = "verb";
-const frequencyClassName = "freq";
+// Object to store the initial clones of each formset
+const formsetClones = {};
 
-const formsetNames = [verbClassName, frequencyClassName];
+// Function to update the names and IDs of form inputs to maintain proper indexing
+function updateFormIndices(formsetSelector) {
+	// Get all the forms within the formset
+	const forms = document.querySelectorAll(formsetSelector);
+	// Iterate over each form and update the index of each input
+	forms.forEach((form, index) => {
+		form.querySelectorAll("input, select").forEach((input) => {
+			// Replace the form index in the name attribute
+			const name = input.name.replace(/-\d+-/, `-${index}-`);
+			input.name = name;
+			input.id = `id_${name}`; // Update the ID to match the name
+		});
+	});
+}
+
+// Function to set up event listeners for adding and removing forms
+function setupFormsetHandlers(formsetClassName) {
+	// Selectors for various elements within the formsets
+	const addButtonSelector = `#add-${formsetClassName}-form`;
+	const formsetContainerSelector = `.${formsetClassName}-formset`;
+	const formSelector = `.${formsetClassName}-form`;
+	const totalFormsInputSelector = `#id_${formsetClassName}-TOTAL_FORMS`;
+
+	// Clone the initial form and store it when the page is loaded
+	formsetClones[formsetClassName] = document
+		.querySelector(formSelector)
+		.cloneNode(true);
+
+	// Add new form to the formset when the add button is clicked
+	document.querySelector(addButtonSelector).addEventListener("click", () => {
+		// Get the current total form count from the management form
+		// const formIndex = parseInt(
+		// 	document.querySelector(totalFormsInputSelector).value,
+		// );
+		// // Clone the stored form and update its indices
+		// const newForm = formsetClones[formsetClassName].cloneNode(true);
+		// newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, formIndex);
+		// // Append the new form to the formset container
+		// document.querySelector(formsetContainerSelector).appendChild(newForm);
+		// // Increment the total form count in the management form
+		// document.querySelector(totalFormsInputSelector).value = formIndex + 1;
+		// // Update indices to reflect the new form addition
+		// updateFormIndices(formSelector);
+		addForm(formsetClassName);
+	});
+
+	// Remove a form from the formset when the remove button is clicked
+	document
+		.querySelector(formsetContainerSelector)
+		.addEventListener("click", (event) => {
+			if (event.target.classList.contains("remove-form-button")) {
+				// Remove the form that contains the clicked remove button
+				event.target.closest(formSelector).remove();
+				// Update the total form count in the management form
+				document.querySelector(totalFormsInputSelector).value =
+					document.querySelectorAll(formSelector).length;
+				// Update indices to reflect the form removal
+				updateFormIndices(formSelector);
+			}
+		});
+
+	removeForms(formsetClassName);
+}
+
+function addForm(formType) {
+	const formsetContainerSelector = `.${formType}-formset`;
+	const formIndex = document.querySelector(`#id_${formType}-TOTAL_FORMS`).value;
+	const newForm = formsetClones[formType].cloneNode(true);
+	newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, formIndex);
+	document.querySelector(formsetContainerSelector).appendChild(newForm);
+	document.querySelector(`#id_${formType}-TOTAL_FORMS`).value =
+		parseInt(formIndex) + 1;
+	updateFormIndices(`.${formType}-form`);
+	return newForm;
+}
+
+const verbClassName = "verb";
+const frequencyClassName = "frequency";
+
+// const formsetNames = [verbClassName, frequencyClassName];
 
 var currentConfiguration = {};
 // Lets you still add when all the entries have been deleted.
-const formsToClone = {
-	verb: document.querySelector(`.${verbClassName}-form`),
-	freq: document.querySelector(`.${frequencyClassName}-form`),
-};
+// const formsToClone = {
+// 	verb: document.querySelector(`.${verbClassName}-form`),
+// 	freq: document.querySelector(`.${frequencyClassName}-form`),
+// };
 
-const dataDiv = document.querySelector(`#data`).dataset;
-var verbCount = dataDiv.verbCount;
-var freqCount = dataDiv.freqCount;
+// const dataDiv = document.querySelector(`#data`).dataset;
+// var verbCount = dataDiv.verbCount;
+// var freqCount = dataDiv.freqCount;
 
 // Dictionary to track form indexes
-var formCount = {
-	verb: verbCount,
-	freq: freqCount,
-};
+// var formCount = {
+// 	verb: verbCount,
+// 	freq: freqCount,
+// };
 
 var savedAlgorithms = $(document).find(".dropdown-container select").toArray();
 
-function updateRemoveButtons(type) {
-	// If there's only one form of this type, hide the 'remove' button
-	var formDocument = document.querySelector(`.${type}-form`);
-	if (formCount[type] > 0) {
-		// Update event listeners for the 'remove' buttons
-		formDocument.querySelectorAll(`.remove-button`).forEach(function (button) {
-			// First, remove any existing event listener
-			var newButton = button.cloneNode(true);
-			button.parentNode.replaceChild(newButton, button);
+// function updateRemoveButtons(type) {
+// 	// If there's only one form of this type, hide the 'remove' button
+// 	var formDocument = document.querySelector(`.${type}-form`);
+// 	if (formCount[type] > 0) {
+// 		// Update event listeners for the 'remove' buttons
+// 		formDocument.querySelectorAll(`.remove-button`).forEach(function (button) {
+// 			// First, remove any existing event listener
+// 			var newButton = button.cloneNode(true);
+// 			button.parentNode.replaceChild(newButton, button);
 
-			// Then, add the new event listener
-			newButton.addEventListener("click", function (event) {
-				event.target.parentNode.parentNode.remove(); // Note the additional parentNode reference here
-				formCount[type]--;
+// 			// Then, add the new event listener
+// 			newButton.addEventListener("click", function (event) {
+// 				event.target.parentNode.parentNode.remove(); // Note the additional parentNode reference here
+// 				formCount[type]--;
 
-				// Update the 'remove' buttons again after removing a form
-				updateRemoveButtons(type);
-			});
-		});
-	}
-}
+// 				// Update the 'remove' buttons again after removing a form
+// 				updateRemoveButtons(type);
+// 			});
+// 		});
+// 	}
+// }
 
-function addForm(type) {
-	// Select the first form of this type to clone
-	var formToClone = formsToClone[type];
+// function addForm(type) {
+// 	// Select the first form of this type to clone
+// 	var formToClone = formsToClone[type];
 
-	// Create a new form div and replace __prefix__ in its HTML
-	var newForm = formToClone.cloneNode(true);
-	newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, formCount[type]);
+// 	// Create a new form div and replace __prefix__ in its HTML
+// 	var newForm = formToClone.cloneNode(true);
+// 	newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, formCount[type]);
 
-	// Increase the form count
-	formCount[type]++;
+// 	// Increase the form count
+// 	formCount[type]++;
 
-	// Insert the new form before the '+' button
-	document.querySelector(`#add-${type}-button`).before(newForm);
+// 	// Insert the new form before the '+' button
+// 	document.querySelector(`#add-${type}-button`).before(newForm);
 
-	// Update the 'remove' buttons after adding a new form
-	updateRemoveButtons(type);
+// 	// Update the 'remove' buttons after adding a new form
+// 	updateRemoveButtons(type);
 
-	return newForm;
-}
+// 	return newForm;
+// }
 
 // ****************************************************************
 // FUNCTIONS TO POPULATE THE FORM WITH EXISTING ALGORITHM DATA
 // ****************************************************************
 
+// Find the matching object via its feature in a list of objects
 function getValue(data, feature) {
 	const item = data.find((item) => item.feature === feature);
 	return item ? item.value : null;
@@ -85,7 +165,7 @@ function removeForms(formType) {
 	let forms = formset.querySelectorAll(`.${formType}-form`);
 
 	// Keep the first form and remove the rest
-	for (let i = 1; i < forms.length; i++) {
+	for (let i = 0; i < forms.length; i++) {
 		forms[i].remove();
 	}
 }
@@ -100,8 +180,8 @@ function populateFormset(formType, data, populateForm) {
 
 	const formset = document.querySelector(`.${formType}-formset`);
 	let forms = formset.querySelectorAll(`.${formType}-form`);
-	console.log(formType, forms);
 	if (forms.length === 0) {
+		console.log("No forms found, creating a new one");
 		var firstForm = addForm(formType);
 	} else {
 		firstForm = forms[0];
@@ -110,15 +190,49 @@ function populateFormset(formType, data, populateForm) {
 
 	for (let i = 1; i < data.length; i++) {
 		let newForm = addForm(formType);
-
-		// After adding the form, it should be the last one in the formset
-		// let newF3orm = forms[forms.length - 1];
+		// if (!newForm) {
+		// 	newForm = addForm(formType); // Create a new form if it doesn't exist
+		// }
 		populateForm(newForm, data[i]);
 	}
 
 	const totalFormsInput = formset.querySelector("input[name$=TOTAL_FORMS]");
 	totalFormsInput.value = data.length;
 }
+
+// function populateFormset(formType, data, populateForm) {
+// 	if (!data || data.length === 0) {
+// 		console.log("No data for ", formType);
+// 		return null;
+// 	}
+
+// 	removeForms(formType);
+
+// 	const formset = document.querySelector(`.${formType}-formset`);
+// 	let forms = formset.querySelectorAll(`.${formType}-form`);
+// 	console.log(formType, forms);
+// 	if (forms.length === 0) {
+// 		// var firstForm = addForm(formType);
+// 		var firstForm = setupFormsetHandlers(formType);
+// 		console.log("ff", firstForm);
+// 	} else {
+// 		firstForm = forms[0];
+// 	}
+// 	populateForm(firstForm, data[0]);
+
+// 	for (let i = 1; i < data.length; i++) {
+// 		// let newForm = addForm(formType);
+// 		var newForm = setupFormsetHandlers(formType);
+// 		console.log(i, newForm);
+
+// 		// After adding the form, it should be the last one in the formset
+// 		// let newF3orm = forms[forms.length - 1];
+// 		populateForm(newForm, data[i]);
+// 	}
+
+// 	const totalFormsInput = formset.querySelector("input[name$=TOTAL_FORMS]");
+// 	totalFormsInput.value = data.length;
+// }
 
 function populateFrequencyForm(form, data) {
 	const startField = form.querySelector("input[name$=start]");
@@ -147,14 +261,17 @@ function populateVerbForm(form, data) {
 }
 
 function populateAlgorithmForm(algorithmConfig) {
-	const algorithmData = algorithmConfig.data;
+	// const algorithmData = algorithmConfig.data;
+	document.querySelector("input[name$=name]").value = algorithmConfig.name;
+	document.querySelector("input[name$=algorithm-id]").value =
+		algorithmConfig.id;
 	populateFormset(
 		frequencyClassName,
-		algorithmData.frequencies,
+		algorithmConfig.frequencies,
 		populateFrequencyForm,
 	);
-	populateFormset(verbClassName, algorithmData.verbs, populateVerbForm);
-	document.querySelector("#alg-name").value = algorithmConfig.name;
+	console.log(algorithmConfig, algorithmConfig.verbs);
+	populateFormset(verbClassName, algorithmConfig.verbs, populateVerbForm);
 
 	// Set the config for when posting.
 	currentConfiguration = algorithmConfig;
@@ -270,61 +387,69 @@ function setupFormSubmission() {
 	document
 		.querySelector(".algorithm-form")
 		.addEventListener("submit", function (event) {
+			const submitType = document.querySelector("input[name$=submit-action]");
 			event.preventDefault(); // prevent the form from submitting
 
-			var formData = new FormData(event.target);
-
-			// apis.submitForm(formData, constants.GET_ALGORITHM_FORM_API);
-
-			let isValidForm = true;
-			document
-				.querySelectorAll('input[type="number"]')
-				.forEach(function (input) {
-					if (input.value.trim() === "") {
-						console.log(input);
-						isValidForm = false;
-					}
-				});
-			if (!isValidForm) {
-				alert("Please fill all the fields.");
+			// let isValidForm = true;
+			// document
+			// 	.querySelectorAll('input[type="number"]')
+			// 	.forEach(function (input) {
+			// 		if (input.value.trim() === "") {
+			// 			console.log(input);
+			// 			isValidForm = false;
+			// 		}
+			// 	});
+			// if (!isValidForm) {
+			// 	alert("Please fill all the fields.");
+			// } else {
+			// const config = getConfiguration();
+			if (event.submitter.id === "save") {
+				// saveAlgorithm(config);
+				// formData.submission = "SAVE";
+				submitType.value = "SAVE";
+				apis.submitForm(
+					new FormData(event.target),
+					constants.GET_ALGORITHM_FORM_API,
+				);
+				// Handle text data
+			} else if (event.submitter.id === "save-copy") {
+				// config.id = null;
+				// saveAlgorithm(config, true);
+				// Handle text data
+				submitType.value = "COPY";
+				apis.submitForm(
+					new FormData(event.target),
+					constants.GET_ALGORITHM_FORM_API,
+				);
 			} else {
-				const config = getConfiguration();
-				if (event.submitter.id === "save") {
-					saveAlgorithm(config);
-					// Handle text data
-				} else if (event.submitter.id === "save-copy") {
-					config.id = null;
-					saveAlgorithm(config, true);
-					// Handle text data
+				// If a page with rendered text, set those texts to be the passages.
+				var passageIds = null;
+				if (window.location.href.includes(constants.COMPARE_PAGE)) {
+					const referenceButtons =
+						document.querySelectorAll(".reference-button");
+					passageIds = Array.from(referenceButtons)
+						.map((button) => {
+							return $(button).attr("data-id");
+						})
+						.filter((id) => id != null);
 				} else {
-					// If a page with rendered text, set those texts to be the passages.
-					var passageIds = null;
-					if (window.location.href.includes(constants.COMPARE_PAGE)) {
-						const referenceButtons =
-							document.querySelectorAll(".reference-button");
-						passageIds = Array.from(referenceButtons)
-							.map((button) => {
-								return $(button).attr("data-id");
-							})
-							.filter((id) => id != null);
-					} else {
-						let passageId = $(".psg").attr("data-id");
-						console.log(passageId);
-						console.log($(".psg"));
-						if (passageId) {
-							passageIds = [passageId];
-						}
+					let passageId = $(".psg").attr("data-id");
+					console.log(passageId);
+					console.log($(".psg"));
+					if (passageId) {
+						passageIds = [passageId];
 					}
-					if (!passageIds || passageIds.length === 0) {
-						alert("Please select a passage.");
-					}
-					const text = {
-						passage_ids: passageIds,
-					};
-					runAlgorithm(config, text);
 				}
-				currentConfiguration = {};
+				if (!passageIds || passageIds.length === 0) {
+					alert("Please select a passage.");
+				}
+				const text = {
+					passage_ids: passageIds,
+				};
+				runAlgorithm(config, text);
 			}
+			currentConfiguration = {};
+			// }
 		});
 }
 
@@ -371,16 +496,18 @@ function dismissAlgorithmForm() {
 events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
 	setupToggleFormButtons();
 
-	formsetNames.forEach(function (type) {
-		document
-			.querySelector(`#add-${type}-button`)
-			.addEventListener("click", function () {
-				addForm(type);
-			});
+	// formsetNames.forEach(function (type) {
+	// 	document
+	// 		.querySelector(`#add-${type}-button`)
+	// 		.addEventListener("click", function () {
+	// 			addForm(type);
+	// 		});
 
-		// Update the 'remove' buttons at the start
-		updateRemoveButtons(type);
-	});
+	// 	// Update the 'remove' buttons at the start
+	// 	updateRemoveButtons(type);
+	// });
+
+	["frequency", "verb", "noun", "clause"].forEach(setupFormsetHandlers);
 
 	savedAlgorithms.forEach((dropdown) => {
 		dropdown.addEventListener("change", (event) => {

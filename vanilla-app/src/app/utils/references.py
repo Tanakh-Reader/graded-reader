@@ -1,5 +1,6 @@
-from ..providers.book_provider import book_provider
 from ..models import Word
+from ..providers.book_provider import book_provider
+
 
 # Takes a request.POST or .GET and returns a reference.
 def parse_reference(data_dict: dict):
@@ -15,8 +16,9 @@ def parse_reference(data_dict: dict):
 
     return reference
 
+
 def get_reference_string(words: list[Word], abbreviation=False):
-    if len(words) == 0:
+    if not words:
         return "Choose a passage"
 
     if abbreviation:

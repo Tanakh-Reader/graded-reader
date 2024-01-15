@@ -2,6 +2,8 @@
 import json
 
 from django.core.paginator import Paginator
+from django.core.serializers.json import DjangoJSONEncoder
+from django.forms import formset_factory, modelform_factory
 from django.http import (
     Http404,
     HttpRequest,
@@ -10,7 +12,7 @@ from django.http import (
     HttpResponseRedirect,
     JsonResponse,
 )
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.cache import cache_page
@@ -18,8 +20,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from .forms import *
-from .models import Passage, Word
-from .providers.algorithm_provider import Algorithm, algorithm_provider
+from .models import Algorithm, Passage, Word
+from .providers.algorithm_provider import algorithm_provider
 from .providers.bhsa_features_provider import bhsa_features_provider
 from .providers.book_provider import book_provider
 from .providers.passage_provider import passage_provider
@@ -58,11 +60,6 @@ def read(request: HttpRequest) -> HttpResponse:
     return render(request, "read.html", context)
 
 
-from django.forms import formset_factory
-
-from .forms import FrequencyForm, VerbForm
-
-
 # @cache_page(60 * 15)
 def passages(request: HttpRequest) -> HttpResponse:
     book = request.GET.get("book")
@@ -99,7 +96,7 @@ def passages_compare(request: HttpRequest) -> HttpResponse:
 
 
 @csrf_exempt  # TEMPORARY TODO
-def algorithms(request: HttpRequest) -> HttpResponse:
+def algorithms2(request: HttpRequest) -> HttpResponse:
     VerbFormSet = formset_factory(VerbForm, extra=1)
     FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
     verb_formset = VerbFormSet(prefix="verbs")
@@ -115,7 +112,29 @@ def algorithms(request: HttpRequest) -> HttpResponse:
         "frequency_formset": frequency_formset,
         "passages": passages,
     }
+    return render(request, "algorithms2.html", context)
+
+
+@csrf_exempt  # TEMPORARY TODO
+def algorithms(request: HttpRequest) -> HttpResponse:
+    algorithms = Algorithm.objects.all()
+
+    context = {
+        "algorithms": algorithms,
+    }
     return render(request, "algorithms.html", context)
+
+
+@require_POST
+@csrf_exempt  # Only use this if you are sure about the CSRF implications
+def delete_algorithm(request: HttpRequest):
+    algorithm_id = request.POST.get("id")
+    algorithm = get_object_or_404(Algorithm, pk=algorithm_id)
+    algorithm.delete()
+
+    return JsonResponse(
+        {"status": "success", "message": f"Deleted: ${algorithm.as_config(True)}"}
+    )
 
 
 def features(request: HttpRequest) -> HttpResponse:
@@ -153,60 +172,94 @@ def get_hebrew_text(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"html": text_html})
 
 
+def run(request: HttpRequest, algorithm: Algorithm):
+    data: dict = json.loads(request.body)
+    config = algorithm.as_config(True)
+    response = {
+        "configuration": config,
+        "text": [],
+    }
+    text = data.get("text")
+    passage_ids = text.get("passage_ids")
+    print(passage_ids)
+    if passage_ids and type(passage_ids) == list:
+        passages: list[Passage] = passage_provider.get_passages_by_ids(passage_ids)
+        for passage in passages:
+            text_data = {}
+            score, penalties = alg.get_passage_weight_x(config, passage)
+            text_data["id"] = passage.get_reference(abbreviation=True)
+            text_data["score"] = score
+            text_data["penalties"] = penalties
+            response["text"].append(text_data)
+
+    return response
+
+
 @csrf_exempt  # TEMPORARY TODO
-def get_algorithm_form(request: HttpRequest) -> JsonResponse:
+def algorithm_form(request: HttpRequest) -> JsonResponse:
     algorithm_templates = algorithm_provider.get_default_configurations()
-    saved_algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
-
-    VerbFormSet = formset_factory(VerbForm, extra=1)
-    FrequencyFormSet = formset_factory(FrequencyForm, extra=1)
-
-    verb_formset = VerbFormSet(request.POST or None, prefix="verbs")
-    frequency_formset = FrequencyFormSet(request.POST or None, prefix="freqs")
-
+    saved_algorithms = [a.as_config(True) for a in Algorithm.objects.all()]
     passages = passage_provider.get_all_passages(as_json=True)
+
+    form = AlgorithmForm(request)
 
     context = {
         "algorithm_templates": algorithm_templates,
         "saved_algorithms": saved_algorithms,
-        "verb_formset": verb_formset,
-        "frequency_formset": frequency_formset,
         "passages": passages,
-    }
+    } | form.get_context()
+
+    exception = None
 
     if request.method == "POST":
-        if verb_formset.is_valid() and frequency_formset.is_valid():
-            # Process the data and generate your configuration.json
-            verb_data = [form.cleaned_data for form in verb_formset]
-            freq_data = [form.cleaned_data for form in frequency_formset]
-            algorithm_name = request.POST.get("name")
+        if form.is_valid():
+            try:
+                action = request.POST.get("submit-action")
+                algorithm_id = request.POST.get("algorithm-id")
+                # If SAVE, fetch the algorithm to update if one exists.
+                if action == "SAVE":
+                    algorithm, created = Algorithm.objects.get_or_create(
+                        pk=algorithm_id
+                    )
+                    form.update_base_form(algorithm)
 
-            configuration = {
-                "verbs": verb_data,
-                "frequencies": freq_data,
-                "algorithm_name": algorithm_name,
-                # process further as needed...
-            }
+                if form.base_form.is_valid():
+                    algorithm = form.update_algorithm()
 
-            # TODO: Do something with the configuration
+                    if action == "RUN":
+                        response = run(request, algorithm)
+                        return JsonResponse(response)
 
-            return JsonResponse({"status": "success", "message": "Yah Baby"})
-
+                    else:
+                        algorithm.save()
+                    return JsonResponse(
+                        {
+                            "alg": algorithm.as_config(True),
+                            "status": "success",
+                            "message": "Yah Baby",
+                        }
+                    )
+                else:
+                    return JsonResponse(
+                        {
+                            "status": "error",
+                            "message": {
+                                "errors": form.get_errors(),
+                            },
+                        }
+                    )
+            except Exception as e:
+                exception = e
         else:
-            # Form validation failed, return errors
-            verb_errors = verb_formset.errors
-            freq_errors = frequency_formset.errors
             return JsonResponse(
                 {
                     "status": "error",
-                    "message": "Validation failed",
-                    "verb_errors": verb_errors,
-                    "freq_errors": freq_errors,
+                    "message": {"exception": exception, "errors": form.get_errors()},
                 }
             )
 
     form_html = render_to_string("widgets/algorithm_form.html", context)
-    return JsonResponse({"html": form_html})
+    return JsonResponse({"status": "success", "html": form_html})
 
 
 def get_books(request: HttpRequest) -> JsonResponse:

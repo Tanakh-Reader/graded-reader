@@ -1,0 +1,53 @@
+{% extends 'layout.html' %}
+{% load static %}
+
+{% block title %}Algorithms Page{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-10">
+  <h1 class="text-4xl font-bold mb-8">Let's Build!</h1>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div class="dropdown-container">
+      <h2 class="text-lg font-bold mb-2">Templates</h2>
+      <select id="dropdown1" class="border border-gray-400 rounded px-2 py-1">
+        <option selected disabled value="">N/A</option> <!-- Default option -->
+        {% for obj in algorithm_templates %}
+        <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="dropdown-container">
+      <h2 class="text-lg font-bold mb-2">Saved Algorithms</h2>
+      <select id="dropdown2" class="border border-gray-400 rounded px-2 py-1">
+        <option selected disabled value="">N/A</option> <!-- Default option -->
+        {% for obj in saved_algorithms %}
+        <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="dropdown-container">
+      <h2 class="text-lg font-bold mb-2">PlaceHolder</h2>
+      <select id="dropdown3" class="border border-gray-400 rounded px-2 py-1">
+        <option selected disabled value="">N/A</option> <!-- Default option -->
+        {% for obj in algorithm_templates %}
+        <option value="{{ obj.id }}" data-definition="{{ obj }}">{{ obj.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <pre id="definition" class="bg-gray-100 rounded-md p-4 mt-8 text-xs"></pre>
+  <button id="generateBtn" class="mt-6 btn">Generate passages</button>
+</div>
+
+<!-- Algorithm form -->
+<h2>Result</h2>
+<div class="my-3" id="alg">...</div>
+
+<!--  USED by the API CALL -->
+<div class="algorithm-form-container"></div>
+
+<script type="module" src="{% static 'js/widgets/passage_selector.js' %}"></script>
+<script type="module" src="{% static 'js/widgets/algorithm_form.js' %}"></script>
+<script type="module" src="{% static 'js/algorithms.js' %}"></script>
+{% endblock %}
