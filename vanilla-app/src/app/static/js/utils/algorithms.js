@@ -3,15 +3,24 @@ import * as utils from "./utils.js";
 import apis from "./api.js";
 
 export function buildAlgorithmDisplay(algJSON, id) {
+	const pillClasses = "bg-yellow-50 rounded px-2 border border-yellow-300";
+
 	const freqs = algJSON.frequencies;
 	const verbs = algJSON.verbs;
 	const nouns = algJSON.construct_nouns;
 	const clauses = algJSON.clauses;
+	const phrases = algJSON.phrases;
 
 	const freqsDiv = document.querySelector(`#algorithm-${id} .frequencies`);
 	const verbsDiv = document.querySelector(`#algorithm-${id} .verbs`);
 	const nounsDiv = document.querySelector(`#algorithm-${id} .nouns`);
 	const clausesDiv = document.querySelector(`#algorithm-${id} .clauses`);
+	const phrasesDiv = document.querySelector(`#algorithm-${id} .phrases`);
+
+	[freqsDiv, verbsDiv, nounsDiv, clausesDiv].forEach((div) => {
+		div.innerHTML = "";
+		div.style.display = "none";
+	});
 
 	const freqExtrasDiv = document.querySelector(
 		`#algorithm-${id} .frequency-extras`,
@@ -22,7 +31,7 @@ export function buildAlgorithmDisplay(algJSON, id) {
 	);
 
 	if (freqs.length > 0) {
-		freqsDiv.innerHTML = `<div class="font-bold">Lexical Frequency</div>`;
+		freqsDiv.innerHTML = `<div class="font-bold">Lexical Frequencies</div>`;
 		freqs.forEach((freq) => {
 			const freqDiv = document.createElement("div");
 			const minOcc = freq[0];
@@ -33,9 +42,8 @@ export function buildAlgorithmDisplay(algJSON, id) {
             `;
 			freqsDiv.appendChild(freqDiv);
 		});
+		freqsDiv.style.display = "flex";
 	}
-
-	const pillClasses = "bg-yellow-50 rounded px-1";
 
 	freqExtrasDiv.innerHTML = `
 	<div class="${pillClasses}">Filler words: <span class="font-bold text-red-500">${algJSON.include_stop_words}</span></div>
@@ -68,6 +76,7 @@ export function buildAlgorithmDisplay(algJSON, id) {
             `;
 			verbsDiv.appendChild(morphDiv);
 		});
+		verbsDiv.style.display = "flex";
 	}
 
 	verbExtrasDiv.innerHTML = `
@@ -85,10 +94,11 @@ export function buildAlgorithmDisplay(algJSON, id) {
             `;
 			nounsDiv.appendChild(nounDiv);
 		});
+		nounsDiv.style.display = "flex";
 	}
 
 	if (clauses.length > 0) {
-		clausesDiv.innerHTML = `<div class="font-bold">Clauses</div>`;
+		clausesDiv.innerHTML = `<div class="font-bold">Clause/Phrase Types</div>`;
 		clauses.forEach((clause) => {
 			const clauseDiv = document.createElement("div");
 			const clauseType = clause[0];
@@ -97,6 +107,20 @@ export function buildAlgorithmDisplay(algJSON, id) {
             <span class="font-bold text-red-500">${penalty}</span>: ${clauseType}`;
 			clausesDiv.appendChild(clauseDiv);
 		});
+		clausesDiv.style.display = "flex";
+	}
+
+	if (phrases.length > 0) {
+		phrasesDiv.innerHTML = `<div class="font-bold">Phrase Functions</div>`;
+		phrases.forEach((phrase) => {
+			const phraseDiv = document.createElement("div");
+			const phraseFunction = phrase[0];
+			const penalty = phrase[1];
+			phraseDiv.innerHTML = `
+            <span class="font-bold text-red-500">${penalty}</span>: ${phraseFunction}`;
+			phrasesDiv.appendChild(phraseDiv);
+		});
+		phrasesDiv.style.display = "flex";
 	}
 
 	configExtrasDiv.innerHTML = `

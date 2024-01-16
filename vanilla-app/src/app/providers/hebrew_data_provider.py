@@ -196,7 +196,7 @@ class HebrewDataProvider:
             return replace(F.kq_hybrid_utf8.v(word))
         else:
             return word.ketiv
-        
+
     def ketiv_qere(self, word: Union[Word, int]):
         value = self.qere(word) or self.ketiv(word)
         return replace(value, check_string=True)
@@ -237,6 +237,31 @@ class HebrewDataProvider:
             return replace(F.g_vbs_utf8.v(word))
         else:
             return word.root_formation
+
+    # TODO : phrase or phrase_atom ??
+    def phrase_id(self, word: Union[Word, int]):
+        word_id = word
+        if type(word) is Word:
+            word_id = word.id
+        return L.u(word_id, otype="phrase")[0]
+
+    def phrase_type(self, word: Union[Word, int]):
+        phrase_id = self.phrase_id(word)
+        return replace(F.typ.v(phrase_id))
+
+    def phrase_function(self, word: Union[Word, int]):
+        phrase_id = self.phrase_id(word)
+        return replace(F.function.v(phrase_id))
+
+    def clause_id(self, word: Union[Word, int]):
+        word_id = word
+        if type(word) is Word:
+            word_id = word.id
+        return L.u(word_id, otype="clause")[0]
+
+    def clause_type(self, word: Union[Word, int]):
+        clause_id = self.clause_id(word)
+        return replace(F.typ.v(clause_id))
 
 
 hebrew_data_provider = HebrewDataProvider()

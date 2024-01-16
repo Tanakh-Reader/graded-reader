@@ -86,6 +86,21 @@ function getAllBooks() {
 	});
 }
 
+function getAllAlgorithms() {
+	return new Promise((resolve, reject) => {
+		$.ajax({
+			url: constants.GET_ALGORITHMS_API,
+			method: "GET",
+			success: function (response) {
+				resolve(response.algorithms); // Resolve the promise with the response
+			},
+			error: function (error) {
+				reject(error); // Reject the promise if there's an error
+			},
+		});
+	});
+}
+
 function deleteAlgorithm(id) {
 	return new Promise((resolve, reject) => {
 		$.ajax({
@@ -162,6 +177,7 @@ function postAlgorithm(configuration, task, text = null) {
 export default {
 	getHebrewText,
 	getAllBooks,
+	getAllAlgorithms,
 	checkDataReady,
 	getAlgorithmForm,
 	submitForm,

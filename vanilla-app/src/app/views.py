@@ -20,6 +20,7 @@ from django.views.decorators.cache import cache_page
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
+from .algorithm import algorithms as alg
 from .forms import *
 from .models import Algorithm, Passage, Word
 from .providers.algorithm_provider import algorithm_provider
@@ -27,7 +28,6 @@ from .providers.bhsa_features_provider import bhsa_features_provider
 from .providers.book_provider import book_provider
 from .providers.passage_provider import passage_provider
 from .providers.word_provider import word_provider
-from .utils import algorithms as alg
 from .utils import references
 
 
@@ -256,6 +256,11 @@ def get_books(request: HttpRequest) -> JsonResponse:
     return JsonResponse({"books": books})
 
 
+def get_algorithms(request: HttpRequest) -> JsonResponse:
+    algorithms = algorithm_provider.get_all_configs(as_json=True)
+    return JsonResponse({"algorithms": algorithms})
+
+
 def check_data_ready(request: HttpRequest) -> JsonResponse:
     data_source = request.GET.get("data_source")
     if data_source == "WORDS":
@@ -326,6 +331,7 @@ def post_algorithm_comparisons(request: HttpRequest):
             passage: Passage
             for i, config in enumerate([alg1.as_config(), alg2.as_config()]):
                 score, penalties = alg.get_passage_weight_x(config, passage)
+                # print(penalties)
                 [list1, list2][i].append((passage.to_dict(), score))
         for list in [list1, list2]:
             list.sort(key=lambda x: x[1])
@@ -363,8 +369,7 @@ def delete_passages(request: HttpRequest) -> HttpResponseRedirect:
 @csrf_exempt  # Only use this if you are sure about the CSRF implications
 def delete_algorithm(request: HttpRequest):
     algorithm_id = int(request.POST.get("id"))
-    algorithm = get_object_or_404(Algorithm, pk=algorithm_id)
-    algorithm.delete()
+    algorithm = algorithm_provider.delete_algorithm(algorithm_id)
 
     return JsonResponse(
         {"status": "success", "message": f"Deleted: ${algorithm.as_config(True)}"}

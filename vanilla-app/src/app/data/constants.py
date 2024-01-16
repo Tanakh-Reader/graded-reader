@@ -35,6 +35,8 @@ class FEATURE_VALUES:
 
 
 BHSA_FEATURES = """
+function
+typ
 sp
 ps
 gn

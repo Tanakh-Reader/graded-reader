@@ -7,7 +7,7 @@ await apis.getAlgorithmForm();
 
 // Object to store the initial clones of each formset
 const formsetClones = {};
-const formsetClasses = ["frequency", "verb", "noun", "clause"];
+const formsetClasses = ["frequency", "verb", "noun", "clause", "phrase"];
 var savedAlgorithms = null;
 var algorithmNameInput = null;
 var algorithmIdInput = null;
@@ -19,15 +19,15 @@ var verbStemCheckbox = null;
 var penaltyDivisorSelect = null;
 
 const defaultValues = {
-    algorithmName: '', // Replace with actual default
-    algorithmId: '', // Replace with actual default
-    includeStopWords: false, // Replace with actual default
-    penalizeByVerbStem: true, // Replace with actual default
-    taperDiscount: 1, // Replace with actual default
-    properNounDivisor: 2, // Replace with actual default
-    qerePenalty: 7, // Replace with actual default
-    totalPenaltyDivisor: "WORDS" // Assuming this is the default for dropdowns
-}; 
+	algorithmName: "", // Replace with actual default
+	algorithmId: "", // Replace with actual default
+	includeStopWords: false, // Replace with actual default
+	penalizeByVerbStem: true, // Replace with actual default
+	taperDiscount: 1, // Replace with actual default
+	properNounDivisor: 2, // Replace with actual default
+	qerePenalty: 7, // Replace with actual default
+	totalPenaltyDivisor: "WORDS", // Assuming this is the default for dropdowns
+};
 
 // Function to update the names and IDs of form inputs to maintain proper indexing
 function updateFormIndices(formsetSelector) {
@@ -105,8 +105,8 @@ function addForm(formType) {
 	return newForm;
 }
 
-const verbClassName = "verb";
-const frequencyClassName = "frequency";
+// const verbClassName = "verb";
+// const frequencyClassName = "frequency";
 
 // const formsetNames = [verbClassName, frequencyClassName];
 
@@ -279,33 +279,65 @@ function populateVerbForm(form, data) {
 	penaltyField.value = data[1];
 }
 
+function populateConstructNounForm(form, data) {
+	const chainLengthField = form.querySelector("input[name$=chain_length]");
+	const penaltyField = form.querySelector("input[name$=penalty]");
+
+	chainLengthField.value = data[0];
+	penaltyField.value = data[1];
+}
+
+function populateClauseForm(form, data) {
+	const clauseTypeField = form.querySelector("select[name$=clause_type]");
+	const penaltyField = form.querySelector("input[name$=penalty]");
+
+	clauseTypeField.value = data[0];
+	penaltyField.value = data[1];
+}
+
+function populatePhraseForm(form, data) {
+	const phraseTypeField = form.querySelector("select[name$=phrase_function]");
+	const penaltyField = form.querySelector("input[name$=penalty]");
+
+	phraseTypeField.value = data[0];
+	penaltyField.value = data[1];
+}
+
 function update(element, value) {
-    if (value != null) {
-        if (element.type === 'checkbox') {
-            element.checked = value;
-        } else {
-            element.value = value;
-        }
-    }
+	if (value != null) {
+		if (element.type === "checkbox") {
+			element.checked = value;
+		} else {
+			element.value = value;
+		}
+	}
 }
 
 function populateAlgorithmForm(algorithmConfig) {
 	// const algorithmData = algorithmConfig.data;
 	update(algorithmNameInput, algorithmConfig.name);
-    update(algorithmIdInput, algorithmConfig.id);
-    update(stopWordsCheckbox, algorithmConfig.include_stop_words);
-    update(taperDiscountInput, algorithmConfig.taper_discount);
-    update(properNounInput, algorithmConfig.proper_noun_divisor);
-    update(qereInput, algorithmConfig.qere_penalty);
-    update(verbStemCheckbox, algorithmConfig.penalize_by_verb_stem);
-    update(penaltyDivisorSelect, algorithmConfig.total_penalty_divisor);
+	update(algorithmIdInput, algorithmConfig.id);
+	update(stopWordsCheckbox, algorithmConfig.include_stop_words);
+	update(taperDiscountInput, algorithmConfig.taper_discount);
+	update(properNounInput, algorithmConfig.proper_noun_divisor);
+	update(qereInput, algorithmConfig.qere_penalty);
+	update(verbStemCheckbox, algorithmConfig.penalize_by_verb_stem);
+	update(penaltyDivisorSelect, algorithmConfig.total_penalty_divisor);
 
 	populateFormset(
-		frequencyClassName,
+		"frequency",
 		algorithmConfig.frequencies,
 		populateFrequencyForm,
 	);
-	populateFormset(verbClassName, algorithmConfig.verbs, populateVerbForm);
+	populateFormset("verb", algorithmConfig.verbs, populateVerbForm);
+	populateFormset(
+		"noun",
+		algorithmConfig.construct_nouns,
+		populateConstructNounForm,
+	);
+	populateFormset("clause", algorithmConfig.clauses, populateClauseForm);
+
+	populateFormset("phrase", algorithmConfig.phrases, populatePhraseForm);
 
 	// Set the config for when posting.
 	currentConfiguration = algorithmConfig;
@@ -315,59 +347,59 @@ function populateAlgorithmForm(algorithmConfig) {
 // FUNCTIONS TO SUBMIT THE FORM
 // ****************************************************************
 
-function getConfiguration() {
-	var config = currentConfiguration;
-	var data = {};
-	// Get verb data
-	var verbForms = document.querySelectorAll(`.${verbClassName}-form`);
-	data.verbs = Array.from(verbForms)
-		.map((form) => {
-			var inputsAndSelects = form.querySelectorAll("input, select"); // include select
-			// TODO check for not null or N/A ? Or handle on the backend?
-			var verb_tense = {
-				feature: constants.W_VERB_TENSE,
-				rule: constants.EQUALS,
-				value: inputsAndSelects[0].value,
-			};
-			var verb_stem = {
-				feature: constants.W_VERB_STEM,
-				rule: constants.EQUALS,
-				value: inputsAndSelects[1].value,
-			};
-			var suffix = {
-				feature: constants.W_PRONOMINAL_SUFFIX,
-				rule: constants.EXISTS,
-				value: inputsAndSelects[2].value,
-			};
-			let verb_data = [];
-			// Only push items that have been selected by the user.
-			[verb_tense, verb_stem, suffix].forEach((item) => {
-				if (item.value !== constants.FIELD_NULL_VALUE) {
-					verb_data.push(item);
-				}
-			});
-			let penalty = parseFloat(inputsAndSelects[3].value);
-			return [verb_data, penalty];
-		})
-		.filter((value) => value != null && value.length > 1); // filter out empty arrays
+// function getConfiguration() {
+// 	var config = currentConfiguration;
+// 	var data = {};
+// 	// Get verb data
+// 	var verbForms = document.querySelectorAll(`.${verbClassName}-form`);
+// 	data.verbs = Array.from(verbForms)
+// 		.map((form) => {
+// 			var inputsAndSelects = form.querySelectorAll("input, select"); // include select
+// 			// TODO check for not null or N/A ? Or handle on the backend?
+// 			var verb_tense = {
+// 				feature: constants.W_VERB_TENSE,
+// 				rule: constants.EQUALS,
+// 				value: inputsAndSelects[0].value,
+// 			};
+// 			var verb_stem = {
+// 				feature: constants.W_VERB_STEM,
+// 				rule: constants.EQUALS,
+// 				value: inputsAndSelects[1].value,
+// 			};
+// 			var suffix = {
+// 				feature: constants.W_PRONOMINAL_SUFFIX,
+// 				rule: constants.EXISTS,
+// 				value: inputsAndSelects[2].value,
+// 			};
+// 			let verb_data = [];
+// 			// Only push items that have been selected by the user.
+// 			[verb_tense, verb_stem, suffix].forEach((item) => {
+// 				if (item.value !== constants.FIELD_NULL_VALUE) {
+// 					verb_data.push(item);
+// 				}
+// 			});
+// 			let penalty = parseFloat(inputsAndSelects[3].value);
+// 			return [verb_data, penalty];
+// 		})
+// 		.filter((value) => value != null && value.length > 1); // filter out empty arrays
 
-	// Get frequency data
-	var frequencyForms = document.querySelectorAll(`.${frequencyClassName}-form`);
-	data.frequencies = Array.from(frequencyForms).map((form) => {
-		var inputsAndSelects = form.querySelectorAll("input, select"); // include select
-		return [
-			parseInt(inputsAndSelects[0].value),
-			parseInt(inputsAndSelects[1].value),
-			parseFloat(inputsAndSelects[2].value),
-		];
-	});
+// 	// Get frequency data
+// 	var frequencyForms = document.querySelectorAll(`.${frequencyClassName}-form`);
+// 	data.frequencies = Array.from(frequencyForms).map((form) => {
+// 		var inputsAndSelects = form.querySelectorAll("input, select"); // include select
+// 		return [
+// 			parseInt(inputsAndSelects[0].value),
+// 			parseInt(inputsAndSelects[1].value),
+// 			parseFloat(inputsAndSelects[2].value),
+// 		];
+// 	});
 
-	// Set name
-	config.name = document.querySelector("#alg-name").value;
+// 	// Set name
+// 	config.name = document.querySelector("#alg-name").value;
 
-	config.data = data;
-	return config;
-}
+// 	config.data = data;
+// 	return config;
+// }
 
 function runAlgorithm(config, text) {
 	console.log("RUN ALG");
@@ -507,16 +539,42 @@ function setupToggleFormButtons() {
 				// To compensate for tailwind classes not affecting inline style.
 				let display = window.getComputedStyle(form).display;
 				if (display === "none") {
+					form.style.display = "inline-flex";
 					let rect = e.target.getBoundingClientRect();
 					form.style.top =
 						rect.top + window.scrollY + button.offsetHeight + "px";
-					form.style.left = rect.left + window.scrollX + "px";
-					form.style.display = "inline-flex";
+
+					// Calculate the horizontal center position of the button
+					let buttonCenter = rect.left + button.offsetWidth / 2;
+
+					// Calculate the width of the form
+					let formWidth = form.offsetWidth;
+
+					if (buttonCenter > (window.innerWidth + 20) / 2) {
+						// Button is more than halfway to the right of the screen
+						// Position form to the left of the button
+						form.style.left = rect.left - formWidth + "px";
+					} else {
+						// Button is less than halfway to the right of the screen
+						// Position form to the right of the button
+						form.style.left = rect.left + button.offsetWidth + "px";
+					}
+					checkEditAlgorithm(button);
 				} else {
 					form.style.display = "none";
 				}
 			});
 		});
+	}
+}
+
+function checkEditAlgorithm(button) {
+	if (button.classList.contains("edit-algorithm")) {
+		const algorithmConfig = utils.contextToJson(
+			button.closest(".algorithm-definition").dataset.definition,
+		);
+		document.querySelector("#dropdown2").value = algorithmConfig.id;
+		populateAlgorithmForm(algorithmConfig);
 	}
 }
 
@@ -530,20 +588,20 @@ function resetAlgorithmForm() {
 		dropdown.value = constants.FIELD_NULL_VALUE;
 	});
 	// Reset text inputs
-    algorithmNameInput.value = defaultValues.algorithmName; // defaultValues should store the default values
-    algorithmIdInput.value = defaultValues.algorithmId;
+	algorithmNameInput.value = defaultValues.algorithmName; // defaultValues should store the default values
+	algorithmIdInput.value = defaultValues.algorithmId;
 
-    // Reset checkboxes
-    stopWordsCheckbox.checked = defaultValues.includeStopWords;
-    verbStemCheckbox.checked = defaultValues.penalizeByVerbStem;
+	// Reset checkboxes
+	stopWordsCheckbox.checked = defaultValues.includeStopWords;
+	verbStemCheckbox.checked = defaultValues.penalizeByVerbStem;
 
-    // Reset number inputs
-    taperDiscountInput.value = defaultValues.taperDiscount;
-    properNounInput.value = defaultValues.properNounDivisor;
-    qereInput.value = defaultValues.qerePenalty;
+	// Reset number inputs
+	taperDiscountInput.value = defaultValues.taperDiscount;
+	properNounInput.value = defaultValues.properNounDivisor;
+	qereInput.value = defaultValues.qerePenalty;
 
-    // Reset select/dropdown
-    penaltyDivisorSelect.value = defaultValues.totalPenaltyDivisor;
+	// Reset select/dropdown
+	penaltyDivisorSelect.value = defaultValues.totalPenaltyDivisor;
 }
 
 // ****************************************************************
@@ -561,8 +619,12 @@ events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
 	taperDiscountInput = document.querySelector("input[name$=taper_discount]");
 	properNounInput = document.querySelector("input[name$=proper_noun_divisor]");
 	qereInput = document.querySelector("input[name$=qere_penalty]");
-	verbStemCheckbox = document.querySelector("input[name$=penalize_by_verb_stem]");
-	penaltyDivisorSelect = document.querySelector("select[name$=total_penalty_divisor]");
+	verbStemCheckbox = document.querySelector(
+		"input[name$=penalize_by_verb_stem]",
+	);
+	penaltyDivisorSelect = document.querySelector(
+		"select[name$=total_penalty_divisor]",
+	);
 
 	savedAlgorithms.forEach((dropdown) => {
 		dropdown.addEventListener("change", (event) => {

@@ -1,7 +1,6 @@
 import math
 
 from ..models import Word
-from ..utils.algorithms import word_penalty
 from ..utils.timer import timer
 from .bhsa_provider import F
 from .book_provider import book_provider

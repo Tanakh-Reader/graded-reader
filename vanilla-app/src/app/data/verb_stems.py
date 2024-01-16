@@ -1,4 +1,4 @@
-verb_stems = {
+VERB_STEMS: dict[str, dict[str, int]] = {
     "1437604": {"qal": 38, "nif": 10},
     "1437611": {"qal": 3540, "nif": 21},
     "1437621": {"qal": 5284, "nif": 21, "hif": 2},

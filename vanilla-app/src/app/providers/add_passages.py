@@ -1,6 +1,6 @@
 from ..data.constants import *
 from ..models import Passage
-from ..utils.algorithms import *
+from ..algorithm.algorithms import *
 from ..utils.timer import timer
 from .bhsa_provider import F, L, T
 from .book_provider import book_provider

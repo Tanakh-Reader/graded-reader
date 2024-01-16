@@ -7,7 +7,7 @@
 {% block content %}
     <div class="mx-auto flex flex-col py-10">
         <h1 class="mb-8 text-4xl font-bold">Algorithms</h1>
-        <div class="my-12 grid grid-cols-2 gap-10 lg:grid-cols-3">
+        <div class="my-12 grid grid-cols-2 gap-10 xl:grid-cols-3">
             {% if not algorithms %}
                 <button class="toggle-form-button">
                     <span class="material-icons md-42">precision_manufacturing</span>
@@ -15,14 +15,14 @@
             {% endif %}
             {% for algorithm in algorithms %}
                 <div id="algorithm-{{ algorithm.id }}"
-                     class="algorithm-definition flex w-72 flex-col gap-2 rounded-lg bg-white p-6 text-sm shadow-lg"
+                     class="algorithm-definition flex w-96 flex-col gap-2 rounded-lg bg-white p-6 text-sm shadow-lg"
                      data-definition="{{ algorithm|to_json }}">
                     <div class="flex flex-row justify-between">
                         <div class="text-xl font-bold">{{ algorithm.name }}</div>
                         <div class="flex items-center space-x-4">
                             <div>
-                                <button class="toggle-form-button">
-                                    <span class="material-icons md-14">precision_manufacturing</span>
+                                <button class="toggle-form-button edit-algorithm">
+                                    <span class="material-icons md-14">edit</span>
                                 </button>
                             </div>
                             <div>
@@ -32,13 +32,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="frequencies flex flex-col text-sm"></div>
-                    <div class="frequency-extras grid grid-cols-2 gap-3"></div>
-                    <div class="verbs flex flex-col text-sm"></div>
-                    <div class="verb-extras"></div>
-                    <div class="nouns flex flex-col text-sm"></div>
-                    <div class="clauses flex flex-col text-sm"></div>
-                    <div class="config-extras"></div>
+                    {% include 'widgets/algorithm_data.html' %}
                 </div>
             {% endfor %}
         </div>

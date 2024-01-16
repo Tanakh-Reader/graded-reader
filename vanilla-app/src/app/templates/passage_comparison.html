@@ -9,7 +9,7 @@
 
 {% block content %}
 
-    <div class="my-10 rounded-md bg-slate-50 p-4 shadow-lg">
+    <div class="my-10 rounded-md bg-white p-4 shadow-lg">
         <!-- Algorithm form -->
         <button class="toggle-form-button">
             <span class="material-icons md-42">precision_manufacturing</span>
@@ -18,7 +18,7 @@
               method="post"
               action="{% url 'post_algorithms' %}">
             {% csrf_token %}
-            <div class="flex flex-row justify-between gap-10 rounded-md bg-white p-2">
+            <div class="flex flex-row justify-between gap-10 rounded-md bg-white p-3 shadow">
                 <!-- Saved algorithms -->
                 <div class="dropdown-container">
                     <select name="algorithm1" class="rounded border px-2">
@@ -78,15 +78,9 @@
              class="flex space-x-12">
             {% for i in "12" %}
                 <div id="algorithm-{{ i }}"
-                     class="hidden w-72 flex-col gap-2 rounded bg-white p-3 text-sm">
+                     class="hidden min-w-80 flex-col gap-2 rounded bg-white p-3 px-3 text-sm shadow">
                     <div class="mb-2 font-bold">Algorithm {{ i }}</div>
-                    <div class="frequencies flex flex-col text-sm"></div>
-                    <div class="frequency-extras grid grid-cols-2 gap-3"></div>
-                    <div class="verbs flex flex-col text-sm"></div>
-                    <div class="verb-extras"></div>
-                    <div class="nouns flex flex-col text-sm"></div>
-                    <div class="clauses flex flex-col text-sm"></div>
-                    <div class="config-extras"></div>
+                    {% include 'widgets/algorithm_data.html' %}
                 </div>
             {% endfor %}
         </div>

@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+from typing import SupportsFloat as Numeric
+from typing import Union
+
 from django.db import models
 from django.db.models.signals import post_init
 from django.dispatch import receiver
@@ -127,72 +130,15 @@ DIVIDED_BY_CHOICES = (
 )
 
 
-class VerbFeature:
-    feature: str
-    rule: str
-    value: str
-
-
-VerbConfig = list[tuple[VerbFeature, float]]
-
-
-class FrequencyFeature:
-    start: int
-    end: int
-    penalty: float
-
-
-FrequencyConfig = list[FrequencyFeature]
-
-
-class ConstructNounFeature:
-    length: int
-    penalty: float
-
-
-ConstructNounConfig = list[ConstructNounFeature]
-
-
-class ClauseFeature:
-    feature: str
-    penalty: float
-
-
-ClauseConfig = list[ClauseFeature]
-
-
-class AlgorithmConfig:
-    def __init__(self, algorithm: Algorithm):
-        self.id: int = algorithm.pk
-        self.name: str = algorithm.name
-        self.verbs: list[VerbConfig] = algorithm.verbs
-        self.frequencies: list[FrequencyConfig] = algorithm.frequencies
-        self.construct_nouns: list[ConstructNounConfig] = algorithm.construct_nouns
-        self.clauses: list[ClauseConfig] = algorithm.clauses
-        self.qere_penalty: float = algorithm.qere_penalty
-        self.penalize_by_verb_stem: bool = algorithm.penalize_by_verb_stem
-        self.taper_discount: float = algorithm.taper_discount
-        self.proper_noun_divisor: float = algorithm.proper_noun_divisor
-        self.include_stop_words: bool = algorithm.include_stop_words
-        self.total_penalty_divisor: str = algorithm.total_penalty_divisor
-
-
-    def passage_penalty(self, passage: Passage, lexeme_count: int, penalty: float):
-        divisor = {"WORDS": passage.word_count, "LEXEMES": lexeme_count}.get(
-            self.total_penalty_divisor
-        )
-        total_penalty = penalty / divisor
-        return round(total_penalty, 4)
-
-
 class Algorithm(models.Model):
     name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    verbs = models.JSONField(default=list)
     frequencies = models.JSONField(default=list)
+    verbs = models.JSONField(default=list)
     construct_nouns = models.JSONField(default=list)
     clauses = models.JSONField(default=list)
+    phrases = models.JSONField(default=list)
     qere_penalty = models.FloatField(default=7)
     penalize_by_verb_stem = models.BooleanField(default=True)
     taper_discount = models.FloatField(default=1)
@@ -205,8 +151,16 @@ class Algorithm(models.Model):
     def __str__(self):
         return self.name
 
-    def as_config(self, as_json=False) -> AlgorithmConfig:
+    def as_config(self, as_json=False):
+        from .algorithm.models import AlgorithmConfig
         config = AlgorithmConfig(self)
         if as_json:
             return vars(config)
+        else:
+            config.set_definitions()
         return config
+
+
+# ----------------------------------------------------------------
+# ----------------------------------------------------------------
+# Algorithm Condition Models

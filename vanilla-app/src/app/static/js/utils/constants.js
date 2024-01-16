@@ -7,6 +7,7 @@ export const DATA_LOADED_API = "/api/check-data-ready";
 export const GET_HEBREW_TEXT_API = "/api/hebrew-text";
 export const GET_ALGORITHM_FORM_API = "/api/algorithm-form";
 export const GET_BOOKS_API = "/api/get-books";
+export const GET_ALGORITHMS_API = "/api/get-algorithms";
 export const POST_ALGORITHM_API = "/api/algorithm";
 export const DELETE_WORDS_API = "/api/delete-words";
 export const DELETE_PASSAGES_API = "/api/delete-passages";

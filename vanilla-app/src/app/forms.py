@@ -1,6 +1,6 @@
 from django import forms
-from django.http import HttpRequest
 from django.forms import BaseFormSet
+from django.http import HttpRequest
 
 from .models import Algorithm
 from .providers.bhsa_features_provider import bhsa_features_provider
@@ -45,15 +45,15 @@ class FrequencyForm(forms.Form):
 
 class VerbForm(forms.Form):
     VERB_TENSES = [
-        ("na", "VERB TENSES"),
+        ("na", "TENSES"),
     ] + bhsa_features_provider.get_value_definition_mappings("vt", as_list=True)
 
     VERB_STEMS = [
-        ("na", "VERB STEMS"),
+        ("na", "STEMS"),
     ] + bhsa_features_provider.get_value_definition_mappings("vs", as_list=True)
 
     SUFFIXES = [
-        ("na", "HAS SUFFIX"),
+        ("na", "SUFFIX"),
         ("false", "False"),
         ("true", "True"),
     ]
@@ -88,7 +88,7 @@ class ConstructNounForm(forms.Form):
         min_value=1,
         required=True,
         widget=forms.NumberInput(
-            attrs={"required": True, "placeholder": "Noun-chain length"}
+            attrs={"required": True, "placeholder": "Chain length"}
         ),
     )
     penalty = PENALTY_FIELD
@@ -104,7 +104,7 @@ class ConstructNounForm(forms.Form):
 class ClauseForm(forms.Form):
     # TODO : update this
     CLAUSE_TYPES = [
-        ("na", "CLAUSE TYPES"),
+        ("na", "TYPES"),
     ] + bhsa_features_provider.get_value_definition_mappings("typ", as_list=True)
 
     clause_type = forms.ChoiceField(choices=CLAUSE_TYPES)
@@ -116,6 +116,26 @@ class ClauseForm(forms.Form):
         if ct != "na":
             return [
                 ct,
+                cleaned_data.get("penalty"),
+            ]
+        return []
+
+
+class PhraseForm(forms.Form):
+    # TODO : update this
+    PHRASE_FUNCTIONS = [
+        ("na", "FUNCTIONS"),
+    ] + bhsa_features_provider.get_value_definition_mappings("function", as_list=True)
+
+    phrase_function = forms.ChoiceField(choices=PHRASE_FUNCTIONS)
+    penalty = PENALTY_FIELD
+
+    def clean(self):
+        cleaned_data = super().clean()
+        pf = cleaned_data.get("phrase_function")
+        if pf != "na":
+            return [
+                pf,
                 cleaned_data.get("penalty"),
             ]
         return []
@@ -141,6 +161,7 @@ class AlgorithmForm:
             ConstructNounForm, formset=CustomFormSet
         )
         ClauseFormSet = forms.formset_factory(ClauseForm, formset=CustomFormSet)
+        PhraseFormSet = forms.formset_factory(PhraseForm, formset=CustomFormSet)
 
         self.base_form = self.BaseForm(request.POST or None)
         self.frequency_formset: FrequencyForm = FrequencyFormSet(
@@ -152,6 +173,9 @@ class AlgorithmForm:
         )
         self.clause_formset: ClauseForm = ClauseFormSet(
             request.POST or None, prefix="clause"
+        )
+        self.phrase_formset: PhraseForm = PhraseFormSet(
+            request.POST or None, prefix="phrase"
         )
         self.request = request
 
@@ -165,6 +189,7 @@ class AlgorithmForm:
         algorithm.verbs = self.verb_formset.filtered_cleaned_data
         algorithm.construct_nouns = self.construct_noun_formset.filtered_cleaned_data
         algorithm.clauses = self.clause_formset.filtered_cleaned_data
+        algorithm.phrases = self.phrase_formset.filtered_cleaned_data
         return algorithm
 
     def get_context(self):
@@ -174,6 +199,7 @@ class AlgorithmForm:
             "verb_formset": self.verb_formset,
             "construct_noun_formset": self.construct_noun_formset,
             "clause_formset": self.clause_formset,
+            "phrase_formset": self.phrase_formset,
         }
 
     def get_errors(self):
@@ -182,6 +208,7 @@ class AlgorithmForm:
             "frequency_errors": self.frequency_formset.errors,
             "noun_errors": self.construct_noun_formset.errors,
             "clause_errors": self.clause_formset.errors,
+            "phrase_errors": self.phrase_formset.errors,
             "algorithm_errors": self.base_form.errors,
         }
 
@@ -207,4 +234,5 @@ class AlgorithmForm:
             and self.frequency_formset.is_valid()
             and self.construct_noun_formset.is_valid()
             and self.clause_formset.is_valid()
+            and self.phrase_formset.is_valid()
         )
