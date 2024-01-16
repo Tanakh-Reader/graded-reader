@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import math
 from abc import ABC, abstractmethod
 from typing import Any
@@ -6,7 +8,7 @@ from typing import Union
 
 from ..data.constants import *
 from ..data.ranks import Classify, LexRanks, MorphRank, Rank
-from ..models import Passage, Word
+from ..models import AlgorithmConfig, Passage, Word
 from ..providers.hebrew_data_provider import hebrew_data_provider as hdp
 from .general import word_penalty
 
@@ -194,11 +196,17 @@ def get_passage_weight_4(
 
 
 # Decrease penalty for each occurance.
-def get_passage_weight_x(configuration, passage: Passage):
+def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
     categories = init_categories(configuration)
+    lexemes = set()
     # Loop over words from the database, where the word is not a stop word.
     for word in passage.words():
-        if hdp.lex_stripped(word) not in Classify().stop_words:
+        if configuration.include_stop_words:
+            lexemes.add(hdp.lex_id(word))
+            for category in categories:
+                category.check_condition(word)
+        elif hdp.lex_stripped(word) not in Classify().stop_words:
+            lexemes.add(hdp.lex_id(word))
             for category in categories:
                 category.check_condition(word)
     # for category in categories:
@@ -206,8 +214,7 @@ def get_passage_weight_x(configuration, passage: Passage):
     #         print(k, v, "\n")
     # print(category.name, category.penalties)
     total_penalty = sum([cat.total_penalty() for cat in categories])
-    total_weight = total_penalty / passage.word_count
-    score = round(total_weight, 4)
+    score = configuration.passage_penalty(passage, len(lexemes), total_penalty)
     penalties = {category.name: category.get_penalty_data() for category in categories}
     return score, penalties
 
@@ -223,9 +230,9 @@ def get_passage_weight_x(configuration, passage: Passage):
 
 
 class Category(ABC):
-    def __init__(self, name="", definitions: list[Any] = []):
+    def __init__(self, name="", config: AlgorithmConfig = None):
         self.name = name
-        self.definitions = definitions
+        self.config = config
         # Maps each word_id to a condition and penalty.
         self.instances: dict[int, dict[str, Any]] = {}
         # Maps each condition to a list of tuples [word_id, penalty].
@@ -288,155 +295,8 @@ class Category(ABC):
 #         3,
 #     ],
 # ]
-class Compare(Category):
-    def check_condition(self, word):
-        for _def in self.definitions:
-            _def: MorphDefinition
-            for i in _def.conditions_range:
-                # Get the method from HebrewDataProvider using the 'feature' key from the condition
-                # One of hdp.{verb_tense, verb_stem, pronominal_suffix}
-                feature_method = getattr(hdp, _def.feature(i))
-                # Use the method to get the actual feature value from the word
-                feature_value = feature_method(word)
-                # Check the rule
-                if not _def.check_condition(feature_value, i):
-                    break
-            # if all conditions are met, add to instances
-            if _def.all_conditions_met():
-                self.instances[hdp.id(word)] = _def.definition_obj()
-                self.add_penalty(_def.definition, hdp.id(word), _def.penalty)
 
 
-class Frequency(Category):
-    def __init__(
-        self,
-        name,
-        definitions,
-        # TODO : allow the user to configure these /
-        # add to the config object?
-        apply_taper=True,
-        apply_proper_nouns=True,
-        proper_noun_discount=2,
-    ):
-        super().__init__(name, definitions)  # calling the parent's __init__ method
-        self.apply_taper = apply_taper
-        self.apply_proper_nouns = apply_proper_nouns
-        self.proper_noun_discount = proper_noun_discount
-        # Example:
-        # {
-        #     1438894: {"count": 1, "condition": 2, "penalty": 2},
-        #     1439750: {"count": 1, "condition": 2, "penalty": 2},
-        # }
-        self.word_occurences: dict[int, dict[str, Numeric]] = {}
-        self.current_penalty = 0
-        self.current_definition: FrequencyDefinition = None
-
-    # TODO : alternate logic without word_occurences when not using a taper.
-    def check_condition(self, word) -> None:
-        lex_id = hdp.lex_id(word)
-        # If taper, gradually reduce the penalty per lex occurence.
-        if self.apply_taper:
-            if lex_id in self.word_occurences.keys():
-                count = self.update_count(lex_id)
-                penalty = self.word_occurences[lex_id].get("penalty")
-                # TODO : look at other taper methods?
-                # Only gradually decrease penalty for rarer words.
-                # Decreases by 1 point per occurance.
-                if hdp.lex_frequency(word) < UNCOMMON_WORD_FREQUENCY:
-                    decreased_penalty = penalty - count
-                    updated_penalty = (
-                        decreased_penalty
-                        if decreased_penalty >= MIN_RARE_WORD_PENALTY
-                        else MIN_RARE_WORD_PENALTY
-                    )
-                    self.current_penalty = updated_penalty
-                else:
-                    self.current_penalty = penalty
-            # Add full penalty for the first occurance.
-            else:
-                # Add word to hash tabled
-                self.word_occurences[lex_id] = {
-                    "count": 0,
-                    "penalty": 0,
-                    "definition": None,
-                }
-
-                self.find_occ_range(word)
-                self.word_occurences[lex_id]["penalty"] = self.current_penalty
-                self.word_occurences[lex_id][
-                    "definition"
-                ] = self.current_definition.definition
-
-        # When not using the taper.
-        else:
-            self.find_occ_range(word)
-
-        self.instances[hdp.id(word)] = self.current_definition.definition_obj()
-        self.add_penalty(
-            self.word_occurences[lex_id].get("definition"),
-            hdp.id(word),
-            self.current_penalty,
-        )
-
-    # Find the occurrence range for the current word.
-    def find_occ_range(self, word):
-        # Iterate over the frequency definitions.
-        for _def in self.definitions:
-            _def: FrequencyDefinition
-            if _def.check_condition(word):
-                self.current_definition = _def
-                # Give a custom penalty for proper nouns.
-                # TODO: update proper_noun fxn.
-                if (
-                    self.apply_proper_nouns
-                    and is_proper_noun(word)
-                    and _def.penalty > MIN_RARE_WORD_PENALTY
-                ):
-                    self.current_penalty = int(
-                        math.ceil(_def.penalty / self.proper_noun_discount)
-                    )
-                # Give a full penalty for other word types.
-                else:
-                    self.current_penalty = _def.penalty
-
-                return True
-
-    def update_count(self, lex_id: int):
-        self.word_occurences[lex_id]["count"] += 1
-        return self.word_occurences[lex_id].get("count")
-
-
-class ConstructNoun(Category):
-    def check_condition(self, word) -> None:
-        if hdp.state(word) == "c":
-            pass
-
-
-class AlgorithmConfiguration:
-    def __init__(self, config_json: dict[str, Any]):
-        self.name: str = config_json.get("name")
-        alg_data: dict[str, list[Any]] = config_json.get("data")
-        verb_defs = alg_data.get("verbs", [])
-        freq_defs = alg_data.get("frequencies", [])
-        self.verbs: list[MorphDefinition] = [
-            MorphDefinition(verb_def) for verb_def in verb_defs
-        ]
-        self.frequencies: list[FrequencyDefinition] = [
-            FrequencyDefinition(freq_def) for freq_def in freq_defs
-        ]
-
-
-# [
-#     [{"feature": "verb_tense", "rule": "EQUALS", "value": "impv"}, 3],
-#     [{"feature": "verb_stem", "rule": "EQUALS", "value": "hof"}, 4],
-#     [{"feature": "pronominal_suffix", "rule": "EXISTS", "value": "true"}, 2],
-#     [
-#         {"feature": "verb_tense", "rule": "EQUALS", "value": "perf"},
-#         {"feature": "verb_stem", "rule": "EQUALS", "value": "hif"},
-#         {"feature": "pronominal_suffix", "rule": "EXISTS", "value": "true"},
-#         3,
-#     ],
-# ]
 class MorphDefinition:
     def __init__(self, definition: tuple[list[dict[str, str]], int]):
         self.definition = definition
@@ -495,23 +355,201 @@ class FrequencyDefinition:
         return {"condition": self.range, "penalty": self.penalty}
 
 
-# configuration sample
-# {
-#     "name": "3_ranks",
-#     "data": {"morph": [], "frequencies": [[1, 10, 7], [10, 100, 3], [100, 51000, 1]]},
-#     "updated": "2023-12-25T15:45:19",
-#     "id": None,
-#     "created": "2023-12-25T15:45:19",
-# }
+class ConstructNounDefinition:
+    def __init__(self, definition: tuple[int, Numeric]):
+        self.definition = definition
+        self.chain_length = definition[0]
+        self.penalty = definition[1]
+
+    def check_condition(self, chain_length):
+        return chain_length >= self.chain_length
+
+    def definition_obj(self):
+        return {"condition": self.chain_length, "penalty": self.penalty}
+
+
+class Frequency(Category):
+    def __init__(
+        self,
+        name,
+        config,
+    ):
+        super().__init__(name, config)  # calling the parent's __init__ method
+        self.definitions = [FrequencyDefinition(f) for f in config.frequencies]
+        self.word_occurences: dict[int, dict[str, Numeric]] = {}
+        self.current_penalty = 0
+        self.current_definition: FrequencyDefinition = None
+
+    # TODO : alternate logic without word_occurences when not using a taper.
+    def check_condition(self, word) -> None:
+        lex_id = hdp.lex_id(word)
+        # If taper, gradually reduce the penalty per lex occurence.
+        # if self.apply_taper:
+        if lex_id in self.word_occurences.keys():
+            count = self.update_count(lex_id)
+            penalty = self.word_occurences[lex_id].get("penalty")
+            # TODO : look at other taper methods?
+            # Only gradually decrease penalty for rarer words.
+            # Decreases by 1 point per occurance.
+            if hdp.lex_frequency(word) < UNCOMMON_WORD_FREQUENCY:
+                decreased_penalty = penalty - (count * self.config.taper_discount)
+                updated_penalty = (
+                    decreased_penalty
+                    if decreased_penalty >= MIN_RARE_WORD_PENALTY
+                    else MIN_RARE_WORD_PENALTY
+                )
+                self.current_penalty = updated_penalty
+            else:
+                self.current_penalty = penalty
+        # Add full penalty for the first occurance.
+        else:
+            # Add word to hash tabled
+            self.word_occurences[lex_id] = {
+                "count": 0,
+                "penalty": 0,
+                "definition": None,
+            }
+
+            self.find_occ_range(word)
+            self.word_occurences[lex_id]["penalty"] = self.current_penalty
+            self.word_occurences[lex_id][
+                "definition"
+            ] = self.current_definition.definition
+
+        # # When not using the taper.
+        # else:
+        #     self.find_occ_range(word)
+
+        self.instances[hdp.id(word)] = self.current_definition.definition_obj()
+        self.add_penalty(
+            self.word_occurences[lex_id].get("definition"),
+            hdp.id(word),
+            self.current_penalty,
+        )
+
+    # Find the occurrence range for the current word.
+    def find_occ_range(self, word):
+        if hdp.ketiv_qere(word) and self.config.qere_penalty != 0:
+            self.instances[hdp.id(word)] = "Qere"
+            self.add_penalty("Qere", hdp.id(word), self.config.qere_penalty)
+            return
+        # Iterate over the frequency definitions.
+        for _def in self.definitions:
+            _def: FrequencyDefinition
+            if _def.check_condition(word):
+                self.current_definition = _def
+                # Give a custom penalty for proper nouns.
+                if is_proper_noun(word) and _def.penalty > MIN_RARE_WORD_PENALTY:
+                    self.current_penalty = int(
+                        math.ceil(_def.penalty / self.config.proper_noun_divisor)
+                    )
+                # Give a full penalty for other word types.
+                else:
+                    self.current_penalty = _def.penalty
+
+                return True
+
+    def update_count(self, lex_id: int):
+        self.word_occurences[lex_id]["count"] += 1
+        return self.word_occurences[lex_id].get("count")
+
+
+class Morph(Category):
+    def __init__(
+        self,
+        name,
+        config,
+    ):
+        super().__init__(name, config)  # calling the parent's __init__ method
+        self.definitions = [MorphDefinition(f) for f in config.verbs]
+
+    def check_condition(self, word):
+        for _def in self.definitions:
+            _def: MorphDefinition
+            for i in _def.conditions_range:
+                # Get the method from HebrewDataProvider using the 'feature' key from the condition
+                # One of hdp.{verb_tense, verb_stem, pronominal_suffix}
+                feature_method = getattr(hdp, _def.feature(i))
+                # Use the method to get the actual feature value from the word
+                feature_value = feature_method(word)
+                # Check the rule
+                if not _def.check_condition(feature_value, i):
+                    break
+            # if all conditions are met, add to instances
+            if _def.all_conditions_met():
+                self.instances[hdp.id(word)] = _def.definition_obj()
+                self.add_penalty(_def.definition, hdp.id(word), _def.penalty)
+
+
+class ConstructNoun(Category):
+    def __init__(
+        self,
+        name,
+        config,
+    ):
+        super().__init__(name, config)  # calling the parent's __init__ method
+        self.definitions = [ConstructNounDefinition(f) for f in config.construct_nouns]
+        # Sort in reverse to check chain-length condition and exit properly.
+        self.definitions.sort(key=lambda x: x.chain_length, reverse=True)
+        self.current_chain_length: int = 0
+
+    def check_condition(self, word) -> None:
+        if hdp.state(word) == "c":
+            self.current_chain_length += 1
+        else:
+            # If true, end of chain is reached.
+            if self.current_chain_length > 0:
+                for _def in self.definitions:
+                    _def: ConstructNounDefinition
+                    if _def.check_condition(self.current_chain_length):
+                        self.instances[hdp.id(word)] = _def.definition_obj()
+                        self.add_penalty(_def.definition, hdp.id(word), _def.penalty)
+                        break
+                self.current_chain_length = 0
+
+
+class Clause(Category):
+    def __init__(
+        self,
+        name,
+        config,
+    ):
+        super().__init__(name, config)  # calling the parent's __init__ method
+        self.definitions = [ConstructNounDefinition(f) for f in config.construct_nouns]
+        self.current_clause: int = 0
+
+    def check_condition(self, word):
+        for _def in self.config.clauses:
+            pass
+
+
+# [
+#     [{"feature": "verb_tense", "rule": "EQUALS", "value": "impv"}, 3],
+#     [{"feature": "verb_stem", "rule": "EQUALS", "value": "hof"}, 4],
+#     [{"feature": "pronominal_suffix", "rule": "EXISTS", "value": "true"}, 2],
+#     [
+#         {"feature": "verb_tense", "rule": "EQUALS", "value": "perf"},
+#         {"feature": "verb_stem", "rule": "EQUALS", "value": "hif"},
+#         {"feature": "pronominal_suffix", "rule": "EXISTS", "value": "true"},
+#         3,
+#     ],
+# ]
+
+
 # TEST: http://127.0.0.1:8000/passages/compare?id=1473&id=1511
-def init_categories(configuration: dict) -> list[Category]:
-    alg_config = AlgorithmConfiguration(configuration)
+def init_categories(config: AlgorithmConfig) -> list[Category]:
     categories: list[Category] = []
 
-    if alg_config.verbs and len(alg_config.verbs) > 0:
-        categories.append(Compare("verbs", alg_config.verbs))
+    if config.verbs:
+        categories.append(Morph("verbs", config))
 
-    if alg_config.frequencies and len(alg_config.frequencies) > 0:
-        categories.append(Frequency("frequency", alg_config.frequencies))
+    if config.frequencies:
+        categories.append(Frequency("frequencies", config))
+
+    if config.construct_nouns:
+        categories.append(ConstructNoun("construct_nouns", config))
+
+    if config.clauses:
+        categories.append(Clause("clauses", config))
 
     return categories

@@ -98,11 +98,13 @@ class AlgorithmProvider:
         algorithms: list[Algorithm] = []
         all_ranks = ranks.LexRanks.all_ranks
         for rank in all_ranks:
-            config = {"name": rank.name, "data": {"frequencies": rank.get_rank_array()}}
-            algorithm = Algorithm(None, config)
-            algorithms.append(algorithm)
+            config = {"name": rank.name, "frequencies": rank.get_rank_array()}
+            # algorithm = Algorithm(None, config)
+            # algorithms.append(algorithm)
+            algorithms.append(config)
         if configs_only:
-            return [alg.configuration for alg in algorithms]
+            # return [alg.configuration for alg in algorithms]
+            return algorithms
         return algorithms
 
     def get_all_algorithms(self, configs_only=False):

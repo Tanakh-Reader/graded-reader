@@ -118,8 +118,10 @@ def update_passage_data(passage: Passage):
     passage.penalty = get_passage_weight_4(passage)
 
     # Update the passage's word frequency and verb data.
+    lexemes = {}
     for word in passage.word_ids():
         # Update the types and stems of verbs present.
+        # lexemes.
         if F.sp.v(word) == "verb":
             # TODO
             # if F.vt.v(word) not in c.easy_vtypes:

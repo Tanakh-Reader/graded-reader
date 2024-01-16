@@ -7,6 +7,27 @@ await apis.getAlgorithmForm();
 
 // Object to store the initial clones of each formset
 const formsetClones = {};
+const formsetClasses = ["frequency", "verb", "noun", "clause"];
+var savedAlgorithms = null;
+var algorithmNameInput = null;
+var algorithmIdInput = null;
+var stopWordsCheckbox = null;
+var taperDiscountInput = null;
+var properNounInput = null;
+var qereInput = null;
+var verbStemCheckbox = null;
+var penaltyDivisorSelect = null;
+
+const defaultValues = {
+    algorithmName: '', // Replace with actual default
+    algorithmId: '', // Replace with actual default
+    includeStopWords: false, // Replace with actual default
+    penalizeByVerbStem: true, // Replace with actual default
+    taperDiscount: 1, // Replace with actual default
+    properNounDivisor: 2, // Replace with actual default
+    qerePenalty: 7, // Replace with actual default
+    totalPenaltyDivisor: "WORDS" // Assuming this is the default for dropdowns
+}; 
 
 // Function to update the names and IDs of form inputs to maintain proper indexing
 function updateFormIndices(formsetSelector) {
@@ -105,8 +126,6 @@ var currentConfiguration = {};
 // 	verb: verbCount,
 // 	freq: freqCount,
 // };
-
-var savedAlgorithms = $(document).find(".dropdown-container select").toArray();
 
 // function updateRemoveButtons(type) {
 // 	// If there's only one form of this type, hide the 'remove' button
@@ -260,17 +279,32 @@ function populateVerbForm(form, data) {
 	penaltyField.value = data[1];
 }
 
+function update(element, value) {
+    if (value != null) {
+        if (element.type === 'checkbox') {
+            element.checked = value;
+        } else {
+            element.value = value;
+        }
+    }
+}
+
 function populateAlgorithmForm(algorithmConfig) {
 	// const algorithmData = algorithmConfig.data;
-	document.querySelector("input[name$=name]").value = algorithmConfig.name;
-	document.querySelector("input[name$=algorithm-id]").value =
-		algorithmConfig.id;
+	update(algorithmNameInput, algorithmConfig.name);
+    update(algorithmIdInput, algorithmConfig.id);
+    update(stopWordsCheckbox, algorithmConfig.include_stop_words);
+    update(taperDiscountInput, algorithmConfig.taper_discount);
+    update(properNounInput, algorithmConfig.proper_noun_divisor);
+    update(qereInput, algorithmConfig.qere_penalty);
+    update(verbStemCheckbox, algorithmConfig.penalize_by_verb_stem);
+    update(penaltyDivisorSelect, algorithmConfig.total_penalty_divisor);
+
 	populateFormset(
 		frequencyClassName,
 		algorithmConfig.frequencies,
 		populateFrequencyForm,
 	);
-	console.log(algorithmConfig, algorithmConfig.verbs);
 	populateFormset(verbClassName, algorithmConfig.verbs, populateVerbForm);
 
 	// Set the config for when posting.
@@ -411,6 +445,7 @@ function setupFormSubmission() {
 					new FormData(event.target),
 					constants.GET_ALGORITHM_FORM_API,
 				);
+				// apis.getAlgorithmForm();
 				// Handle text data
 			} else if (event.submitter.id === "save-copy") {
 				// config.id = null;
@@ -489,6 +524,28 @@ function dismissAlgorithmForm() {
 	document.querySelector(".algorithm-form").style.display = "none";
 }
 
+function resetAlgorithmForm() {
+	formsetClasses.forEach(removeForms);
+	savedAlgorithms.forEach((dropdown) => {
+		dropdown.value = constants.FIELD_NULL_VALUE;
+	});
+	// Reset text inputs
+    algorithmNameInput.value = defaultValues.algorithmName; // defaultValues should store the default values
+    algorithmIdInput.value = defaultValues.algorithmId;
+
+    // Reset checkboxes
+    stopWordsCheckbox.checked = defaultValues.includeStopWords;
+    verbStemCheckbox.checked = defaultValues.penalizeByVerbStem;
+
+    // Reset number inputs
+    taperDiscountInput.value = defaultValues.taperDiscount;
+    properNounInput.value = defaultValues.properNounDivisor;
+    qereInput.value = defaultValues.qerePenalty;
+
+    // Reset select/dropdown
+    penaltyDivisorSelect.value = defaultValues.totalPenaltyDivisor;
+}
+
 // ****************************************************************
 // INITIALIZE FUNCTIONS
 // ****************************************************************
@@ -496,18 +553,16 @@ function dismissAlgorithmForm() {
 events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
 	setupToggleFormButtons();
 
-	// formsetNames.forEach(function (type) {
-	// 	document
-	// 		.querySelector(`#add-${type}-button`)
-	// 		.addEventListener("click", function () {
-	// 			addForm(type);
-	// 		});
-
-	// 	// Update the 'remove' buttons at the start
-	// 	updateRemoveButtons(type);
-	// });
-
-	["frequency", "verb", "noun", "clause"].forEach(setupFormsetHandlers);
+	formsetClasses.forEach(setupFormsetHandlers);
+	savedAlgorithms = $(document).find(".saved-algorithms select").toArray();
+	algorithmNameInput = document.querySelector("input[name$=name]");
+	algorithmIdInput = document.querySelector("input[name$=algorithm-id]");
+	stopWordsCheckbox = document.querySelector("input[name$=include_stop_words]");
+	taperDiscountInput = document.querySelector("input[name$=taper_discount]");
+	properNounInput = document.querySelector("input[name$=proper_noun_divisor]");
+	qereInput = document.querySelector("input[name$=qere_penalty]");
+	verbStemCheckbox = document.querySelector("input[name$=penalize_by_verb_stem]");
+	penaltyDivisorSelect = document.querySelector("select[name$=total_penalty_divisor]");
 
 	savedAlgorithms.forEach((dropdown) => {
 		dropdown.addEventListener("change", (event) => {
@@ -523,4 +578,5 @@ events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
 });
 
 window.populateAlgorithmForm = populateAlgorithmForm;
+window.resetAlgorithmForm = resetAlgorithmForm;
 window.dismissAlgorithmForm = dismissAlgorithmForm;

@@ -1,96 +1,55 @@
 {% extends 'layout.html' %}
 {% load static %}
+{% load json %}
 
 {% block title %}Algorithms Page{% endblock %}
 
 {% block content %}
     <div class="mx-auto flex flex-col py-10">
         <h1 class="mb-8 text-4xl font-bold">Algorithms</h1>
-        {% for algorithm in algorithms %}
-            <div class="mb-4 rounded-lg bg-white p-6 shadow-lg">
-                <div class="flex flex-col gap-2">
+        <div class="my-12 grid grid-cols-2 gap-10 lg:grid-cols-3">
+            {% if not algorithms %}
+                <button class="toggle-form-button">
+                    <span class="material-icons md-42">precision_manufacturing</span>
+                </button>
+            {% endif %}
+            {% for algorithm in algorithms %}
+                <div id="algorithm-{{ algorithm.id }}"
+                     class="algorithm-definition flex w-72 flex-col gap-2 rounded-lg bg-white p-6 text-sm shadow-lg"
+                     data-definition="{{ algorithm|to_json }}">
                     <div class="flex flex-row justify-between">
                         <div class="text-xl font-bold">{{ algorithm.name }}</div>
-                        <div class="">
-                            <a href="#"
-                               class="delete-btn mt-3 rounded bg-red-500 px-2 font-bold text-white hover:bg-red-700"
-                               data-id="{{ algorithm.pk }}">x</a>
+                        <div class="flex items-center space-x-4">
+                            <div>
+                                <button class="toggle-form-button">
+                                    <span class="material-icons md-14">precision_manufacturing</span>
+                                </button>
+                            </div>
+                            <div>
+                                <a href="#"
+                                   class="delete-btn rounded bg-red-500 px-2 font-bold text-white hover:bg-red-300"
+                                   data-id="{{ algorithm.id }}">x</a>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex flex-row gap-3">
-                        <strong>Created:</strong> {{ algorithm.created_at }}
-                        <strong>Updated:</strong> {{ algorithm.updated_at }}
-                    </div>
-                    {% if algorithm.frequencies %}
-
-                        <div>
-                            <strong>Frequencies:</strong>{{ algorithm.frequencies }}
-                        </div>
-                    {% endif %}
-                    <div>
-                        <strong>Penalize Stop Words:</strong> {{ algorithm.include_stop_words }}
-                    </div>
-                    <div class="flex flex-row gap-3">
-                        <strong>Taper Discount:</strong> {{ algorithm.taper_discount }}
-                        <strong>Proper Noun Divisor:</strong> {{ algorithm.proper_noun_divisor }}
-                        <strong>Qere Penalty:</strong> {{ algorithm.qere_penalty }}
-                    </div>
-                    {% if algorithm.verbs %}
-                        <div>
-                            <strong>Verbs:</strong> {{ algorithm.verbs }}
-                        </div>
-                    {% endif %}
-
-                    <div>
-                        <strong>Penalize by Verb Stem:</strong> {{ algorithm.penalize_by_verb_stem }}
-                    </div>
-                    {% if algorithm.construct_nouns.count > 0 %}
-                        <div>
-                            <strong>Construct Nouns:</strong> {{ algorithm.construct_nouns }}
-                        </div>
-                    {% endif %}
-
-                    {% if algorithm.clauses.count > 0 %}
-                        <div>
-                            <strong>Clauses:</strong> {{ algorithm.clauses }}
-                        </div>
-                    {% endif %}
-
-                    <div>
-                        <strong>Total Penalty Divisor:</strong> {{ algorithm.get_total_penalty_divisor_display }}
-                    </div>
+                    <div class="frequencies flex flex-col text-sm"></div>
+                    <div class="frequency-extras grid grid-cols-2 gap-3"></div>
+                    <div class="verbs flex flex-col text-sm"></div>
+                    <div class="verb-extras"></div>
+                    <div class="nouns flex flex-col text-sm"></div>
+                    <div class="clauses flex flex-col text-sm"></div>
+                    <div class="config-extras"></div>
                 </div>
-
-            </div>
-        {% endfor %}
-
+            {% endfor %}
+        </div>
     </div>
 
-    <script>
-        $(document).ready(function() {
-            $('.delete-btn').on('click', function(e) {
-                e.preventDefault();
+    <!--  USED by the API CALL -->
+    <div class="algorithm-form-container"></div>
 
-                var algorithmId = $(this).data('id');
-
-                // Send request to the server
-                $.ajax({
-                    url: '{% url "delete_algorithm" %}',
-                    method: 'POST',
-                    data: {
-                        id: algorithmId
-                    },
-                    success: function() {
-                        // Refresh the page on successful deletion
-                        window.location.reload();
-                    },
-                    error: function() {
-                        // Handle error
-                        alert('Deletion failed');
-                    }
-                });
-            });
-        });
-    </script>
+    <script type="module"
+            src="{% static 'js/algorithms.js' %}"></script>
+    <script type="module"
+            src="{% static 'js/widgets/algorithm_form.js' %}"></script>
 
 {% endblock %}

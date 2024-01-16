@@ -6,19 +6,19 @@
 
 {% block styles %}{% endblock %}
 
-<form class="algorithm-form absolute z-20 mt-1 hidden flex-col items-stretch space-y-3 rounded-md bg-gray-300 p-3"
+<form class="algorithm-form absolute z-20 mt-1 hidden flex-col items-stretch space-y-3 rounded-md bg-gray-300 p-3 min-w-128 text-sm "
       method="post">
 
     {% csrf_token %}
 
     <!-- ALGORITHM CONFIG DROPDOWNS -->
 
-    <div class="flex flex-row justify-between">
+    <div class="saved-algorithms flex flex-row justify-between">
         <!-- Saved algorithms -->
         <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div class="dropdown-container">
                 <select id="dropdown1" class="rounded border px-2">
-                    <option selected disabled value="">TEMPLATES</option>
+                    <option selected disabled value="na">TEMPLATES</option>
                     <!-- Default option -->
                     {% for obj in algorithm_templates %}
                         <option value="{{ obj.id }}" data-definition="{{ obj }}">
@@ -29,7 +29,7 @@
             </div>
             <div class="dropdown-container">
                 <select id="dropdown2" class="rounded border px-2">
-                    <option selected disabled value="">CUSTOM</option>
+                    <option selected disabled value="na">CUSTOM</option>
                     <!-- Default option -->
                     {% for obj in saved_algorithms %}
                         <option value="{{ obj.id }}"
@@ -40,9 +40,14 @@
                 </select>
             </div>
         </div>
+        <div class="flex flex-row gap-2">
+            <button class="dismiss-btn"
+                type="button"
+                onclick="resetAlgorithmForm()">Reset</button>
         <button class="dismiss-btn"
                 type="button"
                 onclick="dismissAlgorithmForm()">x</button>
+        </div>
     </div>
 
     <!-- LEXICAL FREQUENCY PENALTIES -->
@@ -70,22 +75,22 @@
             id="add-frequency-form">+</button>
     <!-- Extra options -->
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">
+        <div class=" font-bold">
             Penalize stop words ("את", "ב", "ל", "ה", "ו")?
         </div>
         {{ algorithm_form.include_stop_words|add_class:"" }}
     </div>
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">Penalty discount per occurrence:</div>
-        {{ algorithm_form.taper_discount|add_class:"border px-2 rounded w-20" }}
+        <div class=" font-bold">Penalty discount per occurrence:</div>
+        {{ algorithm_form.taper_discount|add_class:"border px-2  rounded w-20" }}
     </div>
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">Proper noun penalty divisor:</div>
-        {{ algorithm_form.proper_noun_divisor|add_class:"border px-2 rounded w-20" }}
+        <div class=" font-bold">Proper noun penalty divisor:</div>
+        {{ algorithm_form.proper_noun_divisor|add_class:"border px-2  rounded w-20" }}
     </div>
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">Qere/Ketiv penalty:</div>
-        {{ algorithm_form.qere_penalty|add_class:"border px-2 rounded w-20" }}
+        <div class=" font-bold">Qere/Ketiv penalty:</div>
+        {{ algorithm_form.qere_penalty|add_class:"border px-2  rounded w-20" }}
     </div>
 
     <!-- VERB MORPHOLOGY PENALTIES -->
@@ -112,7 +117,7 @@
             id="add-verb-form">+</button>
     <!-- Extra options -->
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">Penalize by verb stem frequncy?</div>
+        <div class=" font-bold">Penalize by verb stem frequncy?</div>
         {{ algorithm_form.penalize_by_verb_stem|add_class:"" }}
     </div>
 
@@ -162,13 +167,13 @@
     <!-- CONFIGURATION -->
 
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">Total penalty divisor:</div>
-        {{ algorithm_form.total_penalty_divisor|add_class:"border px-2 rounded w-32" }}
+        <div class=" font-bold">Total penalty divisor:</div>
+        {{ algorithm_form.total_penalty_divisor|add_class:"border px-2 rounded w-32 " }}
     </div>
 
     <div class="flex flex-row gap-2">
-        <div class="text-sm font-bold">Algorithm name:</div>
-        {{ algorithm_form.name|add_class:"" }}
+        <div class=" font-bold">Algorithm name:</div>
+        {{ algorithm_form.name|add_class:"w-64  px-2 rounded" }}
     </div>
 
     <!-- Passage selection dropdown -->

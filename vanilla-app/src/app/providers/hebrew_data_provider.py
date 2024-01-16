@@ -196,6 +196,10 @@ class HebrewDataProvider:
             return replace(F.kq_hybrid_utf8.v(word))
         else:
             return word.ketiv
+        
+    def ketiv_qere(self, word: Union[Word, int]):
+        value = self.qere(word) or self.ketiv(word)
+        return replace(value, check_string=True)
 
     def nominal_ending(self, word: Union[Word, int]):
         if type(word) is not Word:

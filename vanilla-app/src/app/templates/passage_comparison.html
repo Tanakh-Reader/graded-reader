@@ -1,6 +1,9 @@
 {% extends 'layout.html' %}
 {% load static %}
+
+{% load widget_tweaks %}
 {% load list_extras %}
+{% load json %}
 
 {% block title %}Passages Page{% endblock %}
 
@@ -25,11 +28,11 @@
                             {% if obj.id == algA %}
                                 <option selected
                                         value="{{ obj.id }}"
-                                        data-definition="{{ obj }}"
+                                        data-definition="{{ obj|to_json }}"
                                         data-index="1">{{ obj.name }}</option>
                             {% else %}
                                 <option value="{{ obj.id }}"
-                                        data-definition="{{ obj }}"
+                                        data-definition="{{ obj|to_json }}"
                                         data-index="1">{{ obj.name }}</option>
                             {% endif %}
                         {% endfor %}
@@ -43,11 +46,11 @@
                             {% if obj.id == algB %}
                                 <option selected
                                         value="{{ obj.id }}"
-                                        data-definition="{{ obj }}"
+                                        data-definition="{{ obj|to_json }}"
                                         data-index="2">{{ obj.name }}</option>
                             {% else %}
                                 <option value="{{ obj.id }}"
-                                        data-definition="{{ obj }}"
+                                        data-definition="{{ obj|to_json }}"
                                         data-index="2">{{ obj.name }}</option>
                             {% endif %}
                         {% endfor %}
@@ -73,26 +76,19 @@
 
         <div id="algorithm-definitions"
              class="flex space-x-12">
-            <div id="algorithm-1"
-                 class="hidden w-64 flex-col gap-2 rounded bg-white p-3">
-                <div class="mb-2 font-bold">Algorithm A</div>
-                <div class="freq flex flex-col text-sm">
-                    {% comment %} <div class="font-bold">Frequencies</div> {% endcomment %}
+            {% for i in "12" %}
+                <div id="algorithm-{{ i }}"
+                     class="hidden w-72 flex-col gap-2 rounded bg-white p-3 text-sm">
+                    <div class="mb-2 font-bold">Algorithm {{ i }}</div>
+                    <div class="frequencies flex flex-col text-sm"></div>
+                    <div class="frequency-extras grid grid-cols-2 gap-3"></div>
+                    <div class="verbs flex flex-col text-sm"></div>
+                    <div class="verb-extras"></div>
+                    <div class="nouns flex flex-col text-sm"></div>
+                    <div class="clauses flex flex-col text-sm"></div>
+                    <div class="config-extras"></div>
                 </div>
-                <div class="morph flex flex-col text-sm">
-                    {% comment %} <div class="font-bold">Morphology</div> {% endcomment %}
-                </div>
-            </div>
-            <div id="algorithm-2"
-                 class="hidden w-64 flex-col gap-2 rounded bg-white p-3">
-                <div class="mb-2 font-bold">Algorithm B</div>
-                <div class="freq flex flex-col text-sm">
-                    {% comment %} <div class="font-bold">Frequencies</div> {% endcomment %}
-                </div>
-                <div class="morph flex flex-col text-sm">
-                    {% comment %} <div class="font-bold">Morphology</div> {% endcomment %}
-                </div>
-            </div>
+            {% endfor %}
         </div>
     </div>
 
@@ -129,7 +125,7 @@
             <div id="column-1"
                  class="mr-52 flex flex-col items-end gap-1">
                 <!-- Column 1 Header -->
-                <div class="mb-2 font-bold">Algorithm A</div>
+                <div class="mb-2 font-bold">Algorithm 1</div>
                 <!-- Column 1 Items -->
                 {% for item in listA %}
                     <div class="col-1 passage-item flex w-60 overflow-hidden rounded-md border border-black"
@@ -146,7 +142,7 @@
             <div id="column-2"
                  class="flex flex-col items-start gap-1">
                 <!-- Column 2 Header -->
-                <div class="mb-2 font-bold">Algorithm B</div>
+                <div class="mb-2 font-bold">Algorithm 2</div>
                 <!-- Column 2 Items -->
                 {% for item in listB %}
                     <div class="col-2 passage-item flex w-60 overflow-hidden rounded-md border border-black"

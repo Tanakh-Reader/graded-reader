@@ -1,18 +1,18 @@
-import * as constants from './utils/constants.js';
-import * as utils from './utils/utils.js';
-import apis from './utils/api.js';
+import * as constants from "./utils/constants.js";
+import * as utils from "./utils/utils.js";
+import apis from "./utils/api.js";
+import * as alg from "./utils/algorithms.js";
 
+const algorithmDivs = $(document).find(".algorithm-definition").toArray();
+algorithmDivs.forEach((div) => {
+	const definition = utils.contextToJson(div.dataset.definition);
+	alg.buildAlgorithmDisplay(definition, definition.id);
+});
 
-const dropdowns = $(document).find('.container select').toArray();
-const definitionDiv = document.querySelector('#definition');
-dropdowns.forEach((dropdown) => {
-    dropdown.addEventListener('change', (event) => {
-        const selectedOption = event.target.selectedOptions[0];
-        const definition = utils.contextToJson(selectedOption.dataset.definition);
-        definitionDiv.textContent = JSON.stringify(definition, undefined, 2);
-        const algorithmConfig = utils.contextToJson(selectedOption.dataset.definition);
-
-        // Populate the forms with this data
-        populateAlgorithmForm(algorithmConfig)
-    });
+$(document).ready(function () {
+	$(".delete-btn").on("click", function (e) {
+		e.preventDefault();
+		var algorithmId = $(this).data("id");
+		apis.deleteAlgorithm(algorithmId);
+	});
 });

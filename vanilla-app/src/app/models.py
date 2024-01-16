@@ -63,6 +63,7 @@ class Passage(models.Model):
     start_verse = models.PositiveSmallIntegerField(blank=True, null=True)
     end_verse = models.PositiveSmallIntegerField(blank=True, null=True)
     word_count = models.PositiveSmallIntegerField(db_index=True, blank=True, null=True)
+    # lexeme_count = models.PositiveSmallIntegerField(blank=True, null=True)
     penalty = models.DecimalField(db_index=True, max_digits=7, decimal_places=4)
     tags = models.TextField(blank=True, null=True)
 
@@ -171,9 +172,17 @@ class AlgorithmConfig:
         self.qere_penalty: float = algorithm.qere_penalty
         self.penalize_by_verb_stem: bool = algorithm.penalize_by_verb_stem
         self.taper_discount: float = algorithm.taper_discount
-        self.proper_noun_discount: float = algorithm.proper_noun_divisor
+        self.proper_noun_divisor: float = algorithm.proper_noun_divisor
         self.include_stop_words: bool = algorithm.include_stop_words
         self.total_penalty_divisor: str = algorithm.total_penalty_divisor
+
+
+    def passage_penalty(self, passage: Passage, lexeme_count: int, penalty: float):
+        divisor = {"WORDS": passage.word_count, "LEXEMES": lexeme_count}.get(
+            self.total_penalty_divisor
+        )
+        total_penalty = penalty / divisor
+        return round(total_penalty, 4)
 
 
 class Algorithm(models.Model):

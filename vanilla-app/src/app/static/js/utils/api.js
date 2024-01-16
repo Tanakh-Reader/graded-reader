@@ -62,8 +62,7 @@ function submitForm(formData, formUrl) {
 					// Something went wrong
 					console.error("Error:", data);
 					alert(JSON.stringify(data.message || data));
-                                        // resolve(data);
-
+					// resolve(data);
 				}
 			})
 			.fail(function (error) {
@@ -81,6 +80,26 @@ function getAllBooks() {
 				resolve(response.books); // Resolve the promise with the response
 			},
 			error: function (error) {
+				reject(error); // Reject the promise if there's an error
+			},
+		});
+	});
+}
+
+function deleteAlgorithm(id) {
+	return new Promise((resolve, reject) => {
+		$.ajax({
+			url: constants.DELETE_ALGORITHM_API,
+			method: "POST",
+			data: {
+				id: id,
+			},
+			success: function (response) {
+				window.location.reload();
+				resolve(response);
+			},
+			error: function (error) {
+				alert("Deletion failed");
 				reject(error); // Reject the promise if there's an error
 			},
 		});
@@ -147,4 +166,5 @@ export default {
 	getAlgorithmForm,
 	submitForm,
 	postAlgorithm,
+	deleteAlgorithm,
 };

@@ -50,7 +50,7 @@ class BookProvider:
         return Book(number, name, name_bhsa, name_shebanq, name_osis, chapters)
     
     def get_all_book_instances(self, as_json=False):
-        if len(self.book_instances) == 0:
+        if not self.book_instances:
             for number in self.book_to_id.values():
                 book = self.get_book_instance(number)
                 self.book_instances.append(book)

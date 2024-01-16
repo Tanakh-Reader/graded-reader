@@ -1,5 +1,6 @@
 # https://dev.to/besil/my-django-svelte-setup-for-fullstack-development-3an8
 import json
+import traceback
 
 from django.core.paginator import Paginator
 from django.core.serializers.json import DjangoJSONEncoder
@@ -120,21 +121,9 @@ def algorithms(request: HttpRequest) -> HttpResponse:
     algorithms = Algorithm.objects.all()
 
     context = {
-        "algorithms": algorithms,
+        "algorithms": [a.as_config(True) for a in algorithms],
     }
     return render(request, "algorithms.html", context)
-
-
-@require_POST
-@csrf_exempt  # Only use this if you are sure about the CSRF implications
-def delete_algorithm(request: HttpRequest):
-    algorithm_id = request.POST.get("id")
-    algorithm = get_object_or_404(Algorithm, pk=algorithm_id)
-    algorithm.delete()
-
-    return JsonResponse(
-        {"status": "success", "message": f"Deleted: ${algorithm.as_config(True)}"}
-    )
 
 
 def features(request: HttpRequest) -> HttpResponse:
@@ -217,7 +206,7 @@ def algorithm_form(request: HttpRequest) -> JsonResponse:
                 action = request.POST.get("submit-action")
                 algorithm_id = request.POST.get("algorithm-id")
                 # If SAVE, fetch the algorithm to update if one exists.
-                if action == "SAVE":
+                if action == "SAVE" and algorithm_id:
                     algorithm, created = Algorithm.objects.get_or_create(
                         pk=algorithm_id
                     )
@@ -309,7 +298,8 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
 
 def post_algorithm_comparisons(request: HttpRequest):
     # algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
-    algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
+    # algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
+    algorithms = [a.as_config(True) for a in Algorithm.objects.all()]
     context = {
         "algorithms": algorithms,
         "saved_algorithms": algorithms,
@@ -320,10 +310,12 @@ def post_algorithm_comparisons(request: HttpRequest):
         alg1_id = int(request.POST.get("algorithm1"))
         alg2_id = int(request.POST.get("algorithm2"))
 
-        alg1 = algorithm_provider.get_algorithm_by_id(
-            alg1_id,
-        )
-        alg2 = algorithm_provider.get_algorithm_by_id(alg2_id)
+        # alg1 = algorithm_provider.get_algorithm_by_id(
+        #     alg1_id,
+        # )
+        # alg2 = algorithm_provider.get_algorithm_by_id(alg2_id)
+        alg1 = Algorithm.objects.get(pk=alg1_id)
+        alg2 = Algorithm.objects.get(pk=alg2_id)
 
         list1 = []
         list2 = []
@@ -331,7 +323,8 @@ def post_algorithm_comparisons(request: HttpRequest):
         passages: list[Passage] = passage_provider.get_easiest_passages(count)
 
         for passage in passages:
-            for i, config in enumerate([alg1.configuration, alg2.configuration]):
+            passage: Passage
+            for i, config in enumerate([alg1.as_config(), alg2.as_config()]):
                 score, penalties = alg.get_passage_weight_x(config, passage)
                 [list1, list2][i].append((passage.to_dict(), score))
         for list in [list1, list2]:
@@ -346,7 +339,7 @@ def post_algorithm_comparisons(request: HttpRequest):
             }
         )
     except Exception as e:
-        print(e)
+        traceback.print_exc()
         pass
 
     return render(request, "passage_comparison.html", context)
@@ -364,6 +357,18 @@ def delete_words(request: HttpRequest) -> HttpResponseRedirect:
 def delete_passages(request: HttpRequest) -> HttpResponseRedirect:
     passage_provider.delete_all_passages()
     return redirect("settings")  # Redirect to the settings page
+
+
+@require_POST
+@csrf_exempt  # Only use this if you are sure about the CSRF implications
+def delete_algorithm(request: HttpRequest):
+    algorithm_id = int(request.POST.get("id"))
+    algorithm = get_object_or_404(Algorithm, pk=algorithm_id)
+    algorithm.delete()
+
+    return JsonResponse(
+        {"status": "success", "message": f"Deleted: ${algorithm.as_config(True)}"}
+    )
 
 
 # @csrf_exempt
