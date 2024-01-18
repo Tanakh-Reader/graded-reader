@@ -1,13 +1,14 @@
 import * as constants from "./constants.js";
 import * as events from "./events.js";
 
-function getHebrewText(passageId) {
+function getHebrewText(passageId, as_widget = false) {
 	return new Promise((resolve, reject) => {
 		$.ajax({
 			url: constants.GET_HEBREW_TEXT_API,
-			method: "GET",
+			method: "POST",
 			data: {
-				ref: passageId,
+				passage_id: passageId,
+				as_widget: as_widget,
 			},
 			success: function (response) {
 				resolve(response.html); // Resolve the promise with the response
@@ -29,7 +30,11 @@ function getAlgorithmForm() {
 				// 'ref': passageId
 			},
 			success: function (response) {
-				$(".algorithm-form-container").html(response.html);
+				// console.log(response.html);
+				// var formDiv = $("<div>").html(response.html);
+				// console.log(formDiv);
+				// $("body").append(formDiv);
+				$("#algorithm-form-container").html(response.html);
 
 				// Ensure that the DOM has finished updating
 				setTimeout(() => {
@@ -174,6 +179,29 @@ function postAlgorithm(configuration, task, text = null) {
 	});
 }
 
+function compareAlgorithms(body) {
+	return new Promise((resolve, reject) => {
+		$.ajax({
+			url: constants.COMPARE_ALGORITHMS_API,
+			method: "POST",
+			data: body,
+			success: function (response) {
+				console.log(response);
+				$("#passage-penalty-comparisons").html(response.html);
+
+				// Ensure that the DOM has finished updating
+				setTimeout(() => {
+					events.publish(constants.PASSAGE_COMPARISON_EVENT);
+				}, 0);
+
+				resolve();
+			},
+			error: function (error) {
+				reject(error); // Reject the promise if there's an error
+			},
+		});
+	});
+}
 export default {
 	getHebrewText,
 	getAllBooks,
@@ -183,4 +211,5 @@ export default {
 	submitForm,
 	postAlgorithm,
 	deleteAlgorithm,
+	compareAlgorithms,
 };

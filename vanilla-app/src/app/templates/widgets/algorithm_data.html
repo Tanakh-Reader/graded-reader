@@ -3,16 +3,36 @@
 
 {% load static %}
 
-<div class="frequencies hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
+{% block styles %}
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+
+{% endblock styles %}
+
+<div class="data-summary flex flex-col gap-2">
+    <div class="frequencies hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
+    </div>
+    <div class="frequency-extras grid grid-cols-2 gap-2"></div>
+    <div class="verbs hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
+    </div>
+    <div class="verb-extras"></div>
+    <div class="nouns hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
+    </div>
+    <div class="clauses hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
+    </div>
+    <div class="phrases hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
+    </div>
+    <div class="config-extras"></div>
 </div>
-<div class="frequency-extras grid grid-cols-2 gap-2"></div>
-<div class="verbs hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
-</div>
-<div class="verb-extras"></div>
-<div class="nouns hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
-</div>
-<div class="clauses hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
-</div>
-<div class="phrases hidden flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm">
-</div>
-<div class="config-extras"></div>
+
+{% with item_classes="grid-item flex-col rounded border border-slate-300 bg-slate-50 px-2 text-sm mb-2 p-2" %}
+    <div class="data-summary-masonry hidden">
+        <div class="frequencies {{ item_classes }}"></div>
+        <div class="frequency-extras grid-item mb-2 grid grid-cols-2 gap-2"></div>
+        <div class="verbs {{ item_classes }}"></div>
+        <div class="verb-extras grid-item mb-2"></div>
+        <div class="nouns {{ item_classes }}"></div>
+        <div class="clauses {{ item_classes }}"></div>
+        <div class="phrases {{ item_classes }}"></div>
+        <div class="config-extras grid-item"></div>
+    </div>
+{% endwith %}

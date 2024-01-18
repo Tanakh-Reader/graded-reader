@@ -5,71 +5,63 @@
 {% block title %}Passages Page{% endblock %}
 
 {% block styles %}
-    <link rel="stylesheet"
-          href="{% static 'css/passages_compare.css' %}">
+    <style>
+        .comparison-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+        }
+    </style>
 
 {% endblock %}
 
 {% block content %}
 
-    <div class="container mx-auto px-4">
-        <div class="comparisons-header mb-6 ml-4 space-y-3">
-            {% include 'widgets/word_highlights_dropdown.html' %}
-            <button class="toggle-form-button">
-                <span class="material-icons md-42">precision_manufacturing</span>
-            </button>
-            <div id="alg">...</div>
-            <button class="add-widget add-btn float-right">+</button>
+    <div class="flex flex-col">
+        <div>
+            <button class="btn my-5 ml-4" id="compare-mode"></button>
+        </div>
+        <div class="" id="compare-widgets-mode">
+            <div class="comparisons-header mb-6 ml-4 space-y-3">
+                {% include 'widgets/word_highlights_dropdown.html' %}
+                <button class="toggle-form-button">
+                    <span class="material-icons md-42">precision_manufacturing</span>
+                </button>
+            </div>
 
+            <div id="alg">...</div>
+            <div class="mt-8">
+                <button class="add-widget add-btn float-right">+</button>
+                <div class="comparison-container">
+                    {% for passage in passages %}
+                        <div class="passage-widget" data-id="{{ passage.id }}"></div>
+                    {% endfor %}
+                </div>
+            </div>
         </div>
 
-        <div class="comparison-container gap-4">
-
-            {% for text_passage in text_passages %}
-                <div class="passage-container mx-1 flex flex-col px-4 py-3">
-                    <!-- Header section -->
-                    <div class="passage-header my-4 flex flex-row items-center justify-center space-x-4">
-                        <div class="flex flex-col gap-2">
-                            <!-- Remove button -->
-                            <button class="remove-widget del-btn">-</button>
-                            <!-- Hyperlinks -->
-                            {% include 'widgets/hyperlinks.html' with book=text_passage.book chapter=text_passage.start_chapter %}
-                        </div>
-
-                        <!-- Passage selection dropdown -->
-                        <div class="flex w-2/3 justify-center">
-                            <button class="btn reference-button"
-                                    onclick="showDropdown(this)"
-                                    data-id="{{ text_passage.id }}">
-                                {{ text_passage.reference_abbr }}
-                            </button>
-                        </div>
-
-                        {% include 'widgets/passage_selector.html' %}
-
-                        <h3 class="passage-penalty">{{ text_passage.penalty }}</h3>
-                    </div>
-
-                    <!-- Text section - USED by the API CALL -->
-                    <div class="passage-text"
-                         data-id="{{ text_passage.id }}"></div>
+        <div class="" id="compare-lists-mode">
+            {% include 'widgets/compare_algorithms_form.html' %}
+            <div class="mt-8">
+                <div class="comparison-container">
+                    <div class="passage-widget"></div>
+                    <div class="passage-widget"></div>
                 </div>
-            {% endfor %}
+            </div>
+            <div id="passage-penalty-comparisons"></div>
         </div>
     </div>
+
     <!-- Selected word data -->
     {% include 'widgets/selected_word.html' %}
-
-    <!--  USED by the API CALL -->
-    <div class="algorithm-form-container"></div>
+    {% include 'widgets/algorithm_form.html' %}
 
     <script type="module"
             src="{% static 'js/widgets/hebrew_text.js' %}"></script>
+    <script type="module"
+            src="{% static 'js/passage_lists.js' %}"></script>
     <!-- For some reason the color goes away on the left without the above import. Why?? -->
-    <script type="module"
-            src="{% static 'js/widgets/algorithm_form.js' %}"></script>
-    <script type="module"
-            src="{% static 'js/passages_compare.js' %}"></script>
+    {% comment %} <script type="module" src="{% static 'js/passages_compare.js' %}"></script> {% endcomment %}
     <script type="module"
             src="{% static 'js/widgets/passage_selector.js' %}"></script>
 

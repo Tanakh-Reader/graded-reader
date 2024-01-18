@@ -12,10 +12,13 @@ export const POST_ALGORITHM_API = "/api/algorithm";
 export const DELETE_WORDS_API = "/api/delete-words";
 export const DELETE_PASSAGES_API = "/api/delete-passages";
 export const DELETE_ALGORITHM_API = "/api/delete-algorithm";
+export const COMPARE_ALGORITHMS_API = "/api/compare-algorithms";
 
 // PUB / SUB EVENTS
 export const TEXT_LOADED_EVENT = "hebrewTextLoaded";
+export const TEXT_ROW_LOADED_EVENT = "xmlll";
 export const ALG_FORM_LOADED_EVENT = "algorithmFormLoaded";
+export const PASSAGE_COMPARISON_EVENT = "passagePenaltyComparisonsLoaded";
 
 // WORD ATTRIBUTES
 export const W_ID = "id";

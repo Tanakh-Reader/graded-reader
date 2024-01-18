@@ -377,7 +377,6 @@ class Frequency(Category):
                 pass
         # Iterate over the frequency definitions.
         for _def in self.config.frequencies:
-            _def: FrequencyDefinition
             if _def.check_condition(word):
                 self.current_definition = _def
                 # Give a custom penalty for proper nouns.
@@ -490,7 +489,6 @@ class SyntaxUnit(Category):
 
 # TEST: http://127.0.0.1:8000/passages/compare?id=1473&id=1511
 def init_categories(config: AlgorithmConfig) -> list[Category]:
-    print(vars(config))
     categories: list[Category] = []
 
     if config.verbs:

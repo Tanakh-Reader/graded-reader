@@ -31,7 +31,7 @@ class PassageProvider:
             return self.__passages_to_json(passages)
         return passages
 
-    def get_easiest_passages(self, count=50, as_json=False):
+    def get_easiest_passages(self, count=50, as_json=False) -> list[Passage]:
         passages = Passage.objects.all().order_by("penalty")[:count]
         if as_json:
             return self.__passages_to_json(passages)

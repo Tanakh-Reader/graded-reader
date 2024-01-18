@@ -15,4 +15,14 @@ $(document).ready(function () {
 		var algorithmId = $(this).data("id");
 		apis.deleteAlgorithm(algorithmId);
 	});
+
+	var masonryGrid = document.querySelector('.masonry-grid');
+         var msnry = new Masonry(masonryGrid, {
+             itemSelector: '.algorithm-definition', // specify the grid item selector here
+             columnWidth: '.grid-sizer', // use an element with this class or a pixel value
+             percentPosition: true
+         });
+		 window.addEventListener('resize', function() {
+             msnry.layout();
+         });
 });

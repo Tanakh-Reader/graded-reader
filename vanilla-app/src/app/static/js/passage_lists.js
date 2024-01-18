@@ -3,7 +3,7 @@ import apis from "./utils/api.js";
 import * as events from "./utils/events.js";
 import * as constants from "./utils/constants.js";
 import * as alg from "./utils/algorithms.js";
-
+import * as compare from "./passages_compare.js";
 // https://anseki.github.io/leader-line/
 
 const colors = [
@@ -19,14 +19,18 @@ const colors = [
 	"#4C51BF",
 ];
 
-const lineReferences = {};
-const passageObjects = {};
-const col1Items = document.querySelectorAll("#column-1 .passage-item");
-const passageIndeces = document.querySelectorAll(".passage-index");
-const hoverTextDiv = document.getElementById("hover-text");
+let lineReferences = {};
+let passageObjects = {};
 const topDiffsCount = 5;
 const dropdowns = $(document).find("select").toArray();
 const maxLines = 75;
+const widgetContainer = document.querySelector(
+	"#compare-lists-mode .comparison-container",
+);
+
+var col1Items = null;
+var passageIndeces = null;
+var hoverTextDiv = null;
 
 var allLines = true;
 var diffsAdded = 0;
@@ -40,7 +44,7 @@ function getDiffInnerHTML(color, diff, index1, index2) {
 
 function showHoverText(div) {
 	// Get the text
-	const passageId = div.getAttribute("data-id");
+	const passageId = div.dataset.id;
 	let startIndex = null;
 	let endIndex = null;
 
@@ -69,10 +73,7 @@ function showHoverText(div) {
 
 function handlePassageClicked(div) {
 	const currentSelection = document.querySelector(".selected-passage");
-	if (
-		currentSelection &&
-		div.getAttribute("data-id") === currentSelection.getAttribute("data-id")
-	) {
+	if (currentSelection && div.dataset.id === currentSelection.dataset.id) {
 		// Clicking the same passage again: unselect and reset highlight
 		highlightPassageAndLine(currentSelection, null, true); // Reset the highlight
 		currentSelection.classList.remove("selected-passage");
@@ -87,12 +88,15 @@ function handlePassageClicked(div) {
 		div.classList.add("selected-passage");
 		highlightPassageAndLine(div, "#242423"); // Highlight with new color
 	}
-	const passageId = div.getAttribute("data-id");
-	getHebrewText(passageId, document.getElementById("passage-text"));
+
+	const textDivs = widgetContainer.querySelectorAll(".passage-widget");
+	let i = div.classList.contains("col-1") ? 0 : 1;
+	x(div.dataset.id, textDivs[i]);
+	widgetContainer.scrollIntoView();
 }
 
 function highlightPassageAndLine(div, color = null, reset = false) {
-	const passageId = div.getAttribute("data-id");
+	const passageId = div.dataset.id;
 	const lineSize = reset ? 1 : 4;
 	const borderWidth = reset ? "" : "2px";
 	color = color || passageObjects[passageId].color;
@@ -167,6 +171,10 @@ function buildDiffSummaryDiv() {
 }
 
 function drawLine(passageObj) {
+	let currentLine = lineReferences[passageObj.id];
+	if (currentLine) {
+		currentLine.remove();
+	}
 	var line = new LeaderLine(passageObj.col1, passageObj.col2, {
 		size: 1,
 		color: passageObj.color,
@@ -188,19 +196,17 @@ function collectPassagesData() {
 	if (col1Items.length > 0) {
 		// Populate dictionaries and draw lines between passages.
 		col1Items.forEach((item, index) => {
-			// const passage = item.getAttribute("data-passage");
-			// const match = document.querySelector(
-			// 	`#column-2 .passage-item[data-passage='${passage}']`,
-			// );
-			const passage = utils.contextToJson(item.getAttribute("data-passage"));
+			const passage = utils.contextToJson(item.dataset.passage);
 			const match = document.querySelector(
 				`#column-2 .passage-item[data-id='${passage.id}']`,
 			);
 			const color = colors[index % colors.length];
 			// TODO : look into setting null if there is not a match.
 			// Get index difference.
-			const itemIndex = item.getAttribute("data-index");
-			const matchingIndex = match.getAttribute("data-index");
+			const itemIndex =
+				item.parentNode.querySelector(".passage-index").dataset.index;
+			const matchingIndex =
+				match.parentNode.querySelector(".passage-index").dataset.index;
 			const diff = Math.abs(itemIndex - matchingIndex);
 			diffsAdded += diff;
 			if (diff > maxDiff) {
@@ -229,16 +235,21 @@ function collectPassagesData() {
 
 		passageIndeces.forEach((passageIndex) => {
 			passageIndex.addEventListener("click", () => {
-				const passage = utils.contextToJson(
-					passageIndex.getAttribute("data-passage"),
-				);
-				utils.submitPassageSelection(
-					passage.book,
-					passage.start_chapter,
-					passage.start_verse,
-					passage.end_chapter,
-					passage.end_verse,
-				);
+				// const passage = utils.contextToJson(
+				// 	passageIndex.getAttribute("data-passage"),
+				// );
+				// utils.submitPassageSelection(
+				// 	passage.book,
+				// 	passage.start_chapter,
+				// 	passage.start_verse,
+				// 	passage.end_chapter,
+				// 	passage.end_verse,
+				// );
+				// document.querySelectorAll(".passage-text").forEach((div) => {
+				// 	const id = div.getAttribute("data-id");
+
+				// });
+				loadMatchingIndexTexts(passageIndex);
 			});
 		});
 
@@ -246,18 +257,34 @@ function collectPassagesData() {
 	}
 }
 
-function getHebrewText(passageId, div) {
+function x(a, b, c = false) {
 	apis
-		.getHebrewText(passageId)
+		.getHebrewText(a, true)
 		.then((response) => {
-			$(div).html(response);
+			$(b).html(response);
 			// Dispatch a event for text updates.
-			events.publish(constants.TEXT_LOADED_EVENT, div);
-			div.style.display = "flex";
+			if (c) {
+				events.publish(constants.TEXT_ROW_LOADED_EVENT, b);
+			}
 		})
 		.catch((error) => {
 			console.error(error);
 		});
+}
+
+function loadMatchingIndexTexts(index) {
+	const indexA = index || passageIndeces[0];
+	const indexB = document.querySelector(
+		`#column-2 .index-${indexA.dataset.index}`,
+	);
+	const textDivs = widgetContainer.querySelectorAll(".passage-widget");
+	console.log(textDivs);
+	x(indexA.parentNode.querySelector(".passage-item").dataset.id, textDivs[0]);
+	x(
+		indexB.parentNode.querySelector(".passage-item").dataset.id,
+		textDivs[1],
+		true,
+	);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -265,19 +292,50 @@ document.addEventListener("DOMContentLoaded", function () {
 		const currentSelection = dropdown.selectedOptions[0];
 		const currentDef = utils.contextToJson(currentSelection.dataset.definition);
 		if (currentDef) {
-			alg.buildAlgorithmDisplay(currentDef, currentSelection.dataset.index);
+			alg.buildAlgorithmDisplay(
+				currentDef,
+				currentSelection.dataset.index,
+				true,
+			);
 		}
 
 		dropdown.addEventListener("change", (event) => {
 			const selectedOption = event.target.selectedOptions[0];
 			const definition = utils.contextToJson(selectedOption.dataset.definition);
-			alg.buildAlgorithmDisplay(definition, selectedOption.dataset.index);
+			alg.buildAlgorithmDisplay(definition, selectedOption.dataset.index, true);
 		});
 	});
 
+	// Get the form element
+	var form = document.querySelector("#compare-algorithms-form");
+
+	// Add submit event listener
+	form.addEventListener("submit", function (e) {
+		// Prevent the form from submitting
+		e.preventDefault();
+
+		// Create an object to store the data
+		var formData = {
+			alg1: form.querySelector('select[name="algorithm1"]').value,
+			alg2: form.querySelector('select[name="algorithm2"]').value,
+			count: form.querySelector('input[name="count"]').value,
+		};
+
+		apis.compareAlgorithms(formData);
+	});
+});
+
+events.subscribe(constants.PASSAGE_COMPARISON_EVENT, function () {
+	col1Items = document.querySelectorAll("#column-1 .passage-item");
+	passageIndeces = document.querySelectorAll("#column-1 .passage-index");
+	lineReferences = {};
+	passageObjects = {};
+
+	hoverTextDiv = document.getElementById("hover-text");
 	if (collectPassagesData()) {
 		document.getElementById("comparisons").style.display = "flex";
 		buildDiffSummaryDiv();
+		loadMatchingIndexTexts();
 		if (col1Items.length > maxLines) {
 			allLines = false;
 			drawLines();
@@ -285,4 +343,9 @@ document.addEventListener("DOMContentLoaded", function () {
 			drawLines();
 		}
 	}
+});
+
+events.subscribe(constants.TEXT_ROW_LOADED_EVENT, (event) => {
+	widgetContainer.scrollIntoView();
+	drawLines();
 });

@@ -2,8 +2,15 @@ import * as constants from "./constants.js";
 import * as utils from "./utils.js";
 import apis from "./api.js";
 
-export function buildAlgorithmDisplay(algJSON, id) {
+export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 	const pillClasses = "bg-yellow-50 rounded px-2 border border-yellow-300";
+
+	let containerSelector = `#algorithm-${id} .data-summary`;
+	if (asMasonry) {
+		document.querySelector(containerSelector).style.display = "none";
+		containerSelector += "-masonry";
+		document.querySelector(containerSelector).style.display = "flex";
+	}
 
 	const freqs = algJSON.frequencies;
 	const verbs = algJSON.verbs;
@@ -11,23 +18,25 @@ export function buildAlgorithmDisplay(algJSON, id) {
 	const clauses = algJSON.clauses;
 	const phrases = algJSON.phrases;
 
-	const freqsDiv = document.querySelector(`#algorithm-${id} .frequencies`);
-	const verbsDiv = document.querySelector(`#algorithm-${id} .verbs`);
-	const nounsDiv = document.querySelector(`#algorithm-${id} .nouns`);
-	const clausesDiv = document.querySelector(`#algorithm-${id} .clauses`);
-	const phrasesDiv = document.querySelector(`#algorithm-${id} .phrases`);
+	const freqsDiv = document.querySelector(`${containerSelector} .frequencies`);
+	const verbsDiv = document.querySelector(`${containerSelector} .verbs`);
+	const nounsDiv = document.querySelector(`${containerSelector} .nouns`);
+	const clausesDiv = document.querySelector(`${containerSelector} .clauses`);
+	const phrasesDiv = document.querySelector(`${containerSelector} .phrases`);
 
-	[freqsDiv, verbsDiv, nounsDiv, clausesDiv].forEach((div) => {
+	[freqsDiv, verbsDiv, nounsDiv, clausesDiv, phrasesDiv].forEach((div) => {
 		div.innerHTML = "";
 		div.style.display = "none";
 	});
 
 	const freqExtrasDiv = document.querySelector(
-		`#algorithm-${id} .frequency-extras`,
+		`${containerSelector} .frequency-extras`,
 	);
-	const verbExtrasDiv = document.querySelector(`#algorithm-${id} .verb-extras`);
+	const verbExtrasDiv = document.querySelector(
+		`${containerSelector} .verb-extras`,
+	);
 	const configExtrasDiv = document.querySelector(
-		`#algorithm-${id} .config-extras`,
+		`${containerSelector} .config-extras`,
 	);
 
 	if (freqs.length > 0) {
@@ -46,10 +55,10 @@ export function buildAlgorithmDisplay(algJSON, id) {
 	}
 
 	freqExtrasDiv.innerHTML = `
-	<div class="${pillClasses}">Filler words: <span class="font-bold text-red-500">${algJSON.include_stop_words}</span></div>
+	<div class="${pillClasses}">את: <span class="font-bold text-red-500">${algJSON.include_stop_words}</span></div>
 	<div class="${pillClasses}"><span class="font-bold text-red-500">-${algJSON.taper_discount}</span> / occ.</div>
-	<div class="${pillClasses}">Proper nouns ÷ <span class="font-bold text-red-500">${algJSON.proper_noun_divisor}</span></div>
-	<div class="${pillClasses}"><span class="font-bold text-red-500">${algJSON.qere_penalty}</span>: Qere/Ketiv</div>
+	<div class="${pillClasses}">PN ÷ <span class="font-bold text-red-500">${algJSON.proper_noun_divisor}</span></div>
+	<div class="${pillClasses}"><span class="font-bold text-red-500">${algJSON.qere_penalty}</span>: Q/K</div>
 	`;
 
 	if (verbs.length > 0) {
@@ -80,7 +89,7 @@ export function buildAlgorithmDisplay(algJSON, id) {
 	}
 
 	verbExtrasDiv.innerHTML = `
-	<div class="${pillClasses}">Penalize stems: <span class="font-bold text-red-500">${algJSON.penalize_by_verb_stem}</span></div>
+	<div class="${pillClasses}">Stems: <span class="font-bold text-red-500">${algJSON.penalize_by_verb_stem}</span></div>
 	`;
 
 	if (nouns.length > 0) {
@@ -123,9 +132,22 @@ export function buildAlgorithmDisplay(algJSON, id) {
 		phrasesDiv.style.display = "flex";
 	}
 
+	const divisor = {
+		WORDS: "W",
+		LEXEMES: "L",
+	}[algJSON.total_penalty_divisor];
+
 	configExtrasDiv.innerHTML = `
-	<div class="${pillClasses}">Total penalty ÷ <span class="font-bold text-red-500">${algJSON.total_penalty_divisor}</span></div>
+	<div class="${pillClasses}">T ÷ <span class="font-bold text-red-500">${divisor}</span></div>
 	`;
 
 	document.querySelector(`#algorithm-${id}`).style.display = "flex";
+
+	if (asMasonry) {
+		var masonryGrid = document.querySelector(containerSelector);
+		new Masonry(masonryGrid, {
+			itemSelector: ".grid-item",
+			columnWidth: masonryGrid.offsetWidth / 2,
+		});
+	}
 }

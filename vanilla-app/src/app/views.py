@@ -88,11 +88,17 @@ def passages_compare(request: HttpRequest) -> HttpResponse:
     passage_ids = request.GET.getlist("id", default_ids)
     if not (2 <= len(passage_ids) <= 4):
         passage_ids = default_ids
-    text_passages = passage_provider.get_passages_by_ids(passage_ids, as_json=True)
+    passages = passage_provider.get_passages_by_ids(passage_ids, as_json=True)
     all_passages = passage_provider.get_all_passages(as_json=True)
 
-    context = {"text_passages": text_passages, "passages": all_passages}
+    context = {"passages": passages}
 
+    algorithms = algorithm_provider.get_configs(as_json=True)
+    context = context | {
+        "algorithms": algorithms,
+        "saved_algorithms": algorithms,
+        "algorithm_templates": algorithm_provider.get_default_configurations(),
+    }
     return render(request, "passages_compare.html", context)
 
 
@@ -118,10 +124,8 @@ def algorithms2(request: HttpRequest) -> HttpResponse:
 
 @csrf_exempt  # TEMPORARY TODO
 def algorithms(request: HttpRequest) -> HttpResponse:
-    algorithms = Algorithm.objects.all()
-
     context = {
-        "algorithms": [a.as_config(True) for a in algorithms],
+        "algorithms": algorithm_provider.get_configs(as_json=True),
     }
     return render(request, "algorithms.html", context)
 
@@ -143,21 +147,19 @@ def settings(request: HttpRequest) -> HttpResponse:
 # --------------------------------
 
 
+@require_POST
+@csrf_exempt  # TEMPORARY TODO
 def get_hebrew_text(request: HttpRequest) -> JsonResponse:
-    pId = request.GET.get("ref")
-    passage = passage_provider.get_passages_by_ids([pId])[0]
+    p_id = request.POST.get("passage_id")
+    as_widget = request.POST.get("as_widget")
+    passage = passage_provider.get_passages_by_ids([p_id])[0]
     words = word_provider.get_words_from_passage(passage, as_json=True)
-    # temp = []
-    # for w in words:
-    #     word = []
-    #     for k in 'text speech state verb_tense verb_stem person gender number lex_frequency'.split(' '):
-    #         if w[k]:
-    #             word.append(word_provider.get_value_definition(k, w[k]))
-    #     temp.append(word)
-    # print(f"\n\n{pId} {temp}\n\n")
-
     context = {"words": words}
-    text_html = render_to_string("widgets/hebrew_text.html", context)
+    template = "hebrew_text"
+    if as_widget:
+        context.update({"passage": passage.to_dict()})
+        template = "passage_text_widget"
+    text_html = render_to_string(f"widgets/{template}.html", context)
     return JsonResponse({"html": text_html})
 
 
@@ -187,7 +189,7 @@ def run(request: HttpRequest, algorithm: Algorithm):
 @csrf_exempt  # TEMPORARY TODO
 def algorithm_form(request: HttpRequest) -> JsonResponse:
     algorithm_templates = algorithm_provider.get_default_configurations()
-    saved_algorithms = [a.as_config(True) for a in Algorithm.objects.all()]
+    saved_algorithms = algorithm_provider.get_configs(as_json=True)
     passages = passage_provider.get_all_passages(as_json=True)
 
     form = AlgorithmForm(request)
@@ -195,7 +197,7 @@ def algorithm_form(request: HttpRequest) -> JsonResponse:
     context = {
         "algorithm_templates": algorithm_templates,
         "saved_algorithms": saved_algorithms,
-        "passages": passages,
+        # "passages": passages,
     } | form.get_context()
 
     exception = None
@@ -257,7 +259,7 @@ def get_books(request: HttpRequest) -> JsonResponse:
 
 
 def get_algorithms(request: HttpRequest) -> JsonResponse:
-    algorithms = algorithm_provider.get_all_configs(as_json=True)
+    algorithms = algorithm_provider.get_configs(as_json=True)
     return JsonResponse({"algorithms": algorithms})
 
 
@@ -301,56 +303,71 @@ def post_algorithm(request: HttpRequest) -> JsonResponse:
     return JsonResponse(response)
 
 
+@require_POST
+@csrf_exempt  # TEMPORARY TODO
+def run_algorithm(request: HttpRequest) -> JsonResponse:
+    passage_ids = request.POST.get("passage_ids")
+    alg_id = request.POST.get("algorithm_id")
+    if passage_ids and type(passage_ids) == list:
+        try:
+            passages = passage_provider.get_passages_by_ids(passage_ids)
+            config = algorithm_provider.get_configs(ids=[alg_id])[0]
+            response = {}
+            for passage in passages:
+                text_data = {}
+                score, penalties = alg.get_passage_weight_x(config, passage)
+                text_data["id"] = passage.get_reference(abbreviation=True)
+                text_data["score"] = score
+                text_data["penalties"] = penalties
+            return JsonResponse({"status": "success", "data": response})
+
+        except Exception as e:
+            traceback.print_exc()
+            return JsonResponse({"status": "error", "message": str(e)})
+    return JsonResponse(
+        {"status": "error", "message": "invalid data " + request.POST.dict()}
+    )
+
+
+@require_POST
+@csrf_exempt  # TEMPORARY TODO
 def post_algorithm_comparisons(request: HttpRequest):
-    # algorithms = algorithm_provider.get_all_algorithms(configs_only=True)
-    # algorithms = algorithm_provider.get_saved_algorithms(configs_only=True)
-    algorithms = [a.as_config(True) for a in Algorithm.objects.all()]
-    context = {
-        "algorithms": algorithms,
-        "saved_algorithms": algorithms,
-        "algorithm_templates": algorithm_provider.get_default_configurations(),
-    }
+    context = {}
     try:
         count = int(request.POST.get("count"))
-        alg1_id = int(request.POST.get("algorithm1"))
-        alg2_id = int(request.POST.get("algorithm2"))
+        alg1_id = int(request.POST.get("alg1"))
+        alg2_id = int(request.POST.get("alg2"))
 
-        # alg1 = algorithm_provider.get_algorithm_by_id(
-        #     alg1_id,
-        # )
-        # alg2 = algorithm_provider.get_algorithm_by_id(alg2_id)
-        alg1 = Algorithm.objects.get(pk=alg1_id)
-        alg2 = Algorithm.objects.get(pk=alg2_id)
+        alg1, alg2 = algorithm_provider.get_configs(ids=[alg1_id, alg2_id])
 
         list1 = []
         list2 = []
 
-        passages: list[Passage] = passage_provider.get_easiest_passages(count)
+        passages = passage_provider.get_easiest_passages(count)
 
         for passage in passages:
-            passage: Passage
-            for i, config in enumerate([alg1.as_config(), alg2.as_config()]):
+            for i, config in enumerate([alg1, alg2]):
                 score, penalties = alg.get_passage_weight_x(config, passage)
                 # print(penalties)
                 [list1, list2][i].append((passage.to_dict(), score))
         for list in [list1, list2]:
             list.sort(key=lambda x: x[1])
+
         context.update(
             {
                 "listA": list1,
                 "listB": list2,
-                "algA": alg1_id,
-                "algB": alg2_id,
-                "count": count,
             }
         )
+
     except Exception as e:
         traceback.print_exc()
-        pass
+        return JsonResponse({"status": "error", "message": str(e)})
 
-    return render(request, "passage_comparison.html", context)
-
-    # return JsonResponse(context)
+    comparisons_html = render_to_string(
+        "widgets/passage_penalty_comparisons.html", context
+    )
+    return JsonResponse({"status": "success", "html": comparisons_html})
 
 
 @require_POST

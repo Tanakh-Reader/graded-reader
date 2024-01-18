@@ -136,14 +136,31 @@ class AlgorithmProvider:
         #     return self.__algorithms_to_json(passages)
         return algorithms
 
-    def get_all_configs(self, as_json=False):
-        algorithms = self.get_all_algorithms()
+    def get_algorithms_by_ids(self, ids, as_json=False):
+        ids = [int(id) for id in ids]
+        algorithms = Algorithm.objects.filter(id__in=ids)
+        return algorithms
+
+    def get_configs(self, ids=None, as_json=False):
+        algorithms = None
+        if ids:
+            algorithms = self.get_algorithms_by_ids(ids)
+        else:
+            algorithms = self.get_all_algorithms()
         return [a.as_config(as_json) for a in algorithms]
 
     def delete_algorithm(self, id):
         algorithm = get_object_or_404(Algorithm, pk=id)
         algorithm.delete()
         return algorithm
+
+    def get_default_configurations(self, configs_only=True):
+        algorithms = []
+        all_ranks = ranks.LexRanks.all_ranks
+        for rank in all_ranks:
+            config = {"name": rank.name, "frequencies": rank.get_rank_array()}
+            algorithms.append(config)
+        return algorithms
 
     def __algorithms_to_json(self, algorithms: list[Algorithm]):
         return []

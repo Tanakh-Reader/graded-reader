@@ -1,0 +1,80 @@
+{% load static %}
+
+{% load widget_tweaks %}
+{% load list_extras %}
+{% load json %}
+
+<div class="flex items-center justify-center">
+    <div class="mt-16 flex max-w-3xl flex-col items-center justify-center">
+        <div class="flex flex-row gap-10">
+            <h1 class="text-2xl font-bold">Compare Algorithms</h1>
+            <button class="toggle-form-button">
+                <span class="material-icons md-36">precision_manufacturing</span>
+            </button>
+        </div>
+        <form id="compare-algorithms-form"
+              class="my-6"
+              method="post">
+            {% csrf_token %}
+            <div class="flex flex-row justify-between gap-10 rounded-md border bg-white p-3 shadow">
+                <!-- Saved algorithms -->
+                <div class="dropdown-container">
+                    <select name="algorithm1" class="rounded border px-2">
+                        <option disabled selected value="">ALGORITHM A</option>
+                        <!-- Default option -->
+                        {% for obj in algorithms %}
+                            {% comment %} {% if obj.id == algA %}
+                            <option selected value="{{ obj.id }}" data-definition="{{ obj|to_json }}" data-index="1">{{ obj.name }}</option>
+                        {% else %} {% endcomment %}
+                            <option value="{{ obj.id }}"
+                                    data-definition="{{ obj|to_json }}"
+                                    data-index="1">{{ obj.name }}</option>
+                            {% comment %} {% endif %} {% endcomment %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="dropdown-container">
+                    <select name="algorithm2" class="rounded border px-2">
+                        <option disabled selected value="">ALGORITHM B</option>
+                        <!-- Default option -->
+                        {% for obj in algorithms %}
+                            {% comment %} {% if obj.id == algB %}
+                            <option selected value="{{ obj.id }}" data-definition="{{ obj|to_json }}" data-index="2">{{ obj.name }}</option>
+                        {% else %} {% endcomment %}
+                            <option value="{{ obj.id }}"
+                                    data-definition="{{ obj|to_json }}"
+                                    data-index="2">{{ obj.name }}</option>
+                            {% comment %} {% endif %} {% endcomment %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    Top
+                    <input type="number"
+                           name="count"
+                           value="25"
+                           min="0"
+                           class="w-14 rounded border px-1"
+                           id="passage-count">
+                    passages
+                </div>
+                <div>
+                    <button class="rounded bg-green-300 px-1" type="submit">Run</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Display algorithms -->
+
+        <div id="algorithm-definitions"
+             class="flex space-x-12">
+            {% for i in "12" %}
+                <div id="algorithm-{{ i }}"
+                     class="hidden w-96 flex-col gap-2 rounded border bg-white p-3 px-3 text-sm shadow">
+                    <div class="mb-2 font-bold">Algorithm {{ i }}</div>
+                    {% include 'widgets/algorithm_data.html' %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

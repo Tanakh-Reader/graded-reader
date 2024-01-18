@@ -130,7 +130,7 @@ function showWordSummary(wordSpan) {
 		morphSpan.innerText = attributes;
 
 		const book = await utils.getBookByNumber(wordJSON[constants.W_BOOK]);
-		refSpan.innerText = `${book.name} ${wordJSON[constants.W_BOOK]}:${
+		refSpan.innerText = `${book.name} ${wordJSON[constants.W_CHAPTER]}:${
 			wordJSON[constants.W_VERSE]
 		}`;
 
