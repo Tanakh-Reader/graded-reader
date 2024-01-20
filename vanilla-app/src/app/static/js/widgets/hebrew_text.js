@@ -6,7 +6,7 @@ import { selectedDivId } from "../models/word.js";
 export function colorWords(div = null, penalties = null) {
 	utils.getWords(div).forEach((word) => {
 		const penalty = penalties ? penalties[word.id] : word.penalty;
-		word.setDefaultColor(true, penalty);
+		word.setDefaultTextColor(true, penalty);
 	});
 }
 
@@ -15,7 +15,6 @@ $(window).on("load", () => {
 	$(`${selectedDivId} .dismiss-btn`).on("click", () => {
 		$(selectedDivId).hide();
 	});
-	utils.getWords();
 	colorWords();
 });
 

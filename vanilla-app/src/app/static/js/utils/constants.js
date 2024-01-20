@@ -20,10 +20,21 @@ export const TEXT_ROW_LOADED_EVENT = "xmlll";
 export const ALG_FORM_LOADED_EVENT = "algorithmFormLoaded";
 export const PASSAGE_COMPARISON_EVENT = "passagePenaltyComparisonsLoaded";
 
-export const COLORS = {
-	HIGHLIGHT: "#ffe880",
-	PROPER_NOUN: "#A9A9A9"
-};
+// PASSAGE ATTRIBUTES
+export const P_ID = "id";
+export const P_START_WORD = "start_word";
+export const P_END_WORD = "end_word";
+export const P_BOOK = "book";
+export const P_START_CHAPTER = "start_chapter";
+export const P_END_CHAPTER = "end_chapter";
+export const P_START_VERSE = "start_verse";
+export const P_END_VERSE = "end_verse";
+export const P_WORD_COUNT = "word_count";
+export const P_PENALTY = "penalty";
+export const P_TAGS = "tags";
+export const P_REFERENCE = "reference";
+export const P_REFERENCE_ABBR = "reference_abbr";
+export const P_PENALTY_DATA = "penalty_data";
 
 // WORD ATTRIBUTES
 export const W_ID = "id";

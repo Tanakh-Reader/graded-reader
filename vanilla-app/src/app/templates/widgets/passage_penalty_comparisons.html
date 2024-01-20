@@ -5,7 +5,7 @@
 {% load json %}
 
 <div class="flex items-center justify-center">
-    <div id="comparisons"
+    <div id="list-comparisons"
          class="hidden max-w-3xl flex-col items-center">
 
         <!-- Summary div -->
@@ -29,13 +29,13 @@
                 <!-- Column 1 Items -->
                 {% for item in listA %}
                     <div class="flex flex-row gap-4">
-                        <div class="passage-index hover:cursor-pointer hover:font-bold hover:text-blue-500 index-{{ forloop.counter }}"
-                             data-index="{{ forloop.counter }}">
+                        <div class="passage-index hover:cursor-pointer hover:font-bold hover:text-blue-500 index-{{ forloop.counter }}" data-index="{{ forloop.counter }}">
                             {{ forloop.counter }}
                         </div>
                         <div class="col-1 passage-item flex w-60 overflow-hidden rounded-md border border-black"
-                             data-passage="{{ item.0|to_json }}"
-                             data-id="{{ item.0.id }}">
+                             data-definition="{{ item.0|to_json }}"
+                             data-id="{{ item.0.id }}"
+                             data-index="{{ forloop.counter }}">
                             <div class="w-1/3 bg-red-100 px-2">{{ item.1 }}</div>
                             <div class="w-2/3 bg-gray-100 px-2 text-right">
                                 {{ item.0.reference_abbr }}
@@ -52,13 +52,13 @@
                 {% for item in listB %}
                     <div class="flex flex-row gap-4">
                         <div class="col-2 passage-item flex w-60 overflow-hidden rounded-md border border-black"
-                             data-passage="{{ item.0|to_json }}"
-                             data-id="{{ item.0.id }}">
+                             data-definition="{{ item.0|to_json }}"
+                             data-id="{{ item.0.id }}"
+                             data-index="{{ forloop.counter }}">
                             <div class="w-2/3 bg-gray-100 px-2">{{ item.0.reference_abbr }}</div>
                             <div class="w-1/3 bg-red-100 px-2">{{ item.1 }}</div>
                         </div>
-                        <div class="passage-index index-{{ forloop.counter }}"
-                             data-index="{{ forloop.counter }}">
+                        <div class="passage-index index-{{ forloop.counter }}">
                             {{ forloop.counter }}
                         </div>
                     </div>

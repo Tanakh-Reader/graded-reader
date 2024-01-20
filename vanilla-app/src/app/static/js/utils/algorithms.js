@@ -1,6 +1,7 @@
 import * as constants from "./constants.js";
 import * as utils from "./utils.js";
 import apis from "./api.js";
+import { PenaltyData } from "../models/penalty.js";
 
 export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 	const pillClasses = "bg-yellow-50 rounded px-2 border border-yellow-300";
@@ -163,6 +164,9 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 }
 
 
+/**
+ * @param {PenaltyData} [penaltyData]
+ */
 export function buildAlgorithmDisplayButtons(penaltyData) {
 	// const freqs = displayDiv.querySelectorAll(`.frequencies div`);
 	// console.log(freqsDiv);
@@ -179,12 +183,12 @@ export function buildAlgorithmDisplayButtons(penaltyData) {
 			// conditionDiv.classList = buttonClasses;
 			buttonClasses.split(' ').forEach(c => conditionDiv.classList.add(c));
 
-
 			conditionDiv.addEventListener("click", () => {
-				penaltyData.apply(condition, conditionDiv);
+				penaltyData.apply(condition, $(conditionDiv));
 			});
 		} else {
 			buttonClasses.split(' ').forEach(c => conditionDiv.classList.remove(c));
+			// penaltyData.remove(condition, conditionDiv)
 		}
 	});
 	

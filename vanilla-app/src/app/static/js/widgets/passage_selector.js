@@ -1,102 +1,111 @@
-/* See passages_compare.js for an example of how to override this.
-
-```
-document.querySelectorAll('.passage-dropdown-item').forEach(item => {
-        item.addEventListener('click', event => selectPassage(event.target));
-    });
-```
-*/
-
 import * as utils from "../utils/utils.js";
 import * as constants from "../utils/constants.js";
 import * as events from "../utils/events.js";
 import { getBackgroundColorByPenalty } from "../passages.js";
 
-window.currentButton = null;
+class PassageSelectorDropdown {
+	constuctor() {}
 
-// Scroll to current passage.
-function scrollToSelectedPassage() {
-	let reference = currentButton.textContent.trim();
-	let dropdownList = passagesDropdownMenu.querySelector("ul");
-	let passageItems = dropdownList.querySelectorAll(".passage-dropdown-item");
-	for (let passageItem of passageItems) {
-		if (passageItem.getAttribute("data-ref").trim() === reference) {
-			passageItem.style.fontWeight = "bold";
-			dropdownList.scrollTop = passageItem.offsetTop - dropdownList.offsetTop;
-		} else {
-			passageItem.style.fontWeight = "";
-		}
+	init() {
+		this.passagesDropdownMenu = $(".passage-dropdown");
+		this.dropdownList = this.passagesDropdownMenu.find("ul");
+		this.passageItems = this.dropdownList.find(".passage-dropdown-item");
+		this.addListeners();
+		console.log("INIT");
 	}
-}
 
-function showDropdown(button) {
-	// Get positioning.
-	let rect = button.getBoundingClientRect();
-	passagesDropdownMenu.style.top =
-		rect.top + window.scrollY + button.offsetHeight + "px";
-	passagesDropdownMenu.style.left = rect.left + window.scrollX + "px";
+	addListeners() {
+		events.addListeners(
+			["DOMContentLoaded", constants.ALG_FORM_LOADED_EVENT],
+			(event) => {
+				this.passageItems.each((i, item) => {
+					this.colorPassageItem(item);
+					item.addEventListener("click", this.selectPassage);
+				});
 
-	if (button.classList.contains("selected")) {
-		// Button was clicked while dropdown was open.
-		passagesDropdownMenu.style.display = "none";
-		button.classList.remove("selected");
-	} else {
-		// Button was clicked while dropdown was closed.
-		passagesDropdownMenu.style.display = "block";
-		button.classList.add("selected");
-		currentButton = button;
-		scrollToSelectedPassage();
+				$(".searchInput").each((i, input) => {
+					$(input).on("input", this.filterDropdown);
+				});
+
+				$(".passage-dropdown-btn").each((index, input) => {
+					console.log("init, btn");
+					$(input).on("click", this.showDropdown);
+				});
+			},
+		);
 	}
-}
 
-// Search a passage via a reference.
-function filterDropdown() {
-	const searchTerm = $("#searchInput").val();
-	const dropdownItems = $(".passage-dropdown-item");
-	dropdownItems.each(function () {
-		const ref = $(this).data("ref");
-		const isRefMatch = utils.isReferenceMatch(searchTerm, ref);
-
-		if (isRefMatch) {
-			$(this).css("display", "block");
-		} else {
-			$(this).css("display", "none");
-		}
-	});
-}
-
-function colorPassageItem(passage) {
-	const wordCount = passage.getAttribute("data-word-count");
-	const penalty = passage.getAttribute("data-penalty");
-	const color = getBackgroundColorByPenalty(penalty);
-
-	const gradientPercentage = Math.min(wordCount / 500, 1) * 100;
-
-	passage.style.background = `linear-gradient(90deg, ${color} ${gradientPercentage}%, white ${gradientPercentage}%)`;
-}
-
-function selectPassage(passage) {
-	let selectedReference = $(passage).data("ref-abbr");
-	// Update the button text.
-	$(currentButton).text(selectedReference);
-	$(currentButton).attr("data-id", $(passage).data("id"));
-	currentButton.classList.remove("selected");
-	// Dismiss the dropdown.
-	passagesDropdownMenu.style.display = "none";
-}
-
-events.addListeners(
-	["DOMContentLoaded", constants.ALG_FORM_LOADED_EVENT],
-	(event) => {
-		document.querySelectorAll(".passage-dropdown-item").forEach((item) => {
-			colorPassageItem(item);
-			item.addEventListener("click", (event) => selectPassage(event.target));
+	// Scroll in the dropdown to the current passage.
+	scrollToSelectedPassage(reference) {
+		this.passageItems.each((i, passageItem) => {
+			if (passageItem.getAttribute("data-ref").trim() === reference) {
+				passageItem.style.fontWeight = "bold";
+				this.dropdownList[0].scrollTop =
+					passageItem.offsetTop - this.dropdownList[0].offsetTop;
+			} else {
+				passageItem.style.fontWeight = "";
+			}
 		});
+	}
 
-		window.showDropdown = showDropdown;
-		window.filterDropdown = filterDropdown;
+	showDropdown(event) {
+		console.log(event);
+		// Get the button that triggered the event and its position.
+		let button = event.target;
+		let rect = button.getBoundingClientRect();
 
-		// Needs to be here for the algorithm page, for some reason.
-		window.passagesDropdownMenu = document.querySelector(".passage-dropdown");
-	},
-);
+		// Set the position of the dropdown menu.
+		this.passagesDropdownMenu[0].style.top =
+			rect.top + window.scrollY + button.offsetHeight + "px";
+		this.passagesDropdownMenu[0].style.left = rect.left + window.scrollX + "px";
+
+		// Toggle the dropdown menu and button class.
+		if ($(button).hasClass("selected")) {
+			// If the dropdown is already open (button has 'selected' class), hide it.
+			this.passagesDropdownMenu.hide();
+			$(button).removeClass("selected");
+		} else {
+			// If the dropdown is closed, show it and mark the button as 'selected'.
+			this.passagesDropdownMenu.show();
+			$(button).addClass("selected");
+			this.scrollToSelectedPassage(); // Ensure the selected passage is in view.
+		}
+	}
+
+	filterDropdown() {
+		const searchTerm = $(".searchInput").val();
+		this.passageItems.each(function () {
+			const ref = $(this).data("ref");
+			if (utils.isReferenceMatch(searchTerm, ref)) {
+				$(this).show();
+			} else {
+				$(this).hide();
+			}
+		});
+	}
+
+	colorPassageItem(passage) {
+		const wordCount = passage.getAttribute("data-word-count");
+		const penalty = passage.getAttribute("data-penalty");
+		const color = getBackgroundColorByPenalty(penalty);
+
+		const gradientPercentage = Math.min(wordCount / 500, 1) * 100;
+
+		passage.style.background = `linear-gradient(90deg, ${color} ${gradientPercentage}%, white ${gradientPercentage}%)`;
+	}
+
+	selectPassage(passage) {
+		let selectedReference = $(passage).data("ref-abbr");
+		// Update the button text.
+		let selectedBtn = $(".passage-dropdown-btn .selected");
+		selectedBtn.text(selectedReference);
+		selectedBtn.attr("data-id", $(passage).data("id"));
+		selectedBtn.removeClass("selected");
+		// Dismiss the dropdown.
+		this.passagesDropdownMenu.hide();
+	}
+}
+
+console.log("SELECTOR");
+const passageSelectorDropdown = new PassageSelectorDropdown();
+passageSelectorDropdown.init();

@@ -1,7 +1,9 @@
 import * as constants from "./utils/constants.js";
 import * as utils from "./utils/utils.js";
 import * as events from "./utils/events.js";
+import * as passageLists from "./passage_lists.js"
 import apis from "./utils/api.js";
+import { colorWords } from "./widgets/hebrew_text.js";
 
 const MODE = {
 	LISTS: "Lists",
@@ -9,6 +11,7 @@ const MODE = {
 };
 
 let compareMode = MODE.LISTS;
+
 const compareModeBtn = document.querySelector("#compare-mode");
 const compareListsContent = document.querySelector("#compare-lists-mode");
 const compareWidgetsContent = document.querySelector("#compare-widgets-mode");
@@ -22,6 +25,8 @@ function updateCompareMode(toggle = true) {
 	}
 	compareModeBtn.textContent = compareMode;
 	if (toggle) {
+		console.log("GETTING WORDS");
+		colorWords(document);
 		compareListsContent.classList.toggle("hidden");
 		compareWidgetsContent.classList.toggle("hidden");
 	}
@@ -86,8 +91,7 @@ function addRemoveWidgetListeners() {
 
 export function addTextWidget(div = null) {
 	const container =
-		div ||
-		compareWidgetsContent.querySelector(".comparison-container");
+		div || compareWidgetsContent.querySelector(".comparison-container");
 	var widgets = container.querySelectorAll(".passage-widget");
 
 	// Only clone widget if there are less than 4
@@ -104,14 +108,15 @@ export function addTextWidget(div = null) {
 	}
 }
 
-// Add event listener to "add" button
-document.querySelector(".add-widget").addEventListener("click", function () {
-	addTextWidget();
-});
 
-window.addEventListener("DOMContentLoaded", (event) => {
+$(window).on("load", (event) => {
 	compareModeBtn.textContent = MODE.WIDGETS;
 	compareModeBtn.addEventListener("click", updateCompareMode);
+
+		// Add event listener to "add" button
+	$(".add-widget").on("click", function () {
+		addTextWidget();
+	});
 
 	const passageWidgets =
 		compareWidgetsContent.querySelectorAll(".passage-widget");
@@ -125,8 +130,8 @@ window.addEventListener("DOMContentLoaded", (event) => {
 		compareMode = MODE.WIDGETS;
 		compareListsContent.classList.toggle("hidden");
 	} else {
-    // Only one passage, default to the list compare.
-    passageWidgets.forEach((div) => {
+		// Only one passage, default to the list compare.
+		passageWidgets.forEach((div) => {
 			const id = div.getAttribute("data-id");
 			getHebrewText(id, div);
 		});
@@ -134,11 +139,15 @@ window.addEventListener("DOMContentLoaded", (event) => {
 		compareMode = MODE.LISTS;
 	}
 	updateCompareMode(false);
+
+	// TODO more organization
+	passageLists.setUpComparisonForm();
+
 });
 
 events.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
 	addRemoveWidgetListeners();
-	sortPassages();
+	// sortPassages();
 	document
 		.querySelectorAll(".passage-widget .passage-dropdown-item")
 		.forEach((item) => {
@@ -146,127 +155,14 @@ events.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
 		});
 });
 
-// export class PenaltyData {
-// 	constructor(data) {
-// 		this.frequencies = {};
-//     this.verbs = {};
-//     for (const [condition, value] of Object.entries(data.frequencies)) {
-//       this.frequencies[condition] = new Category(value)
-//     }
-// 		for (const [condition, value] of Object.entries(data.verbs)) {
-//       this.frequencies[condition] = new Category(value)
-//     }
-//     for (const [condition, value] of Object.entries(data.nouns)) {
-//       this.frequencies[condition] = new Category(value)
-//     }
-//     for (const [condition, value] of Object.entries(data.clauses)) {
-//       this.frequencies[condition] = new Category(value)
-//     }
-//     console.log(this);
-// 		// this.nouns = data.nouns.map(k => Category(k));
-// 		// this.clauses = data.clauses.map(k => Category(k));
-// 		// this.phrases = data.phrases.map(k => Category(k));
-// 	}
 
-// 	check(condition) {
-// 		return this.frequencies[condition];
-// 	}
+events.subscribe(constants.PASSAGE_COMPARISON_EVENT, function () {
+	passageLists.passageListsComparison.init();
+	passageLists.passageListsComparison.loadMatchingIndexTexts();
+	passageLists.passageListsComparison.drawLines();
+	$("#list-comparisons").css("display", "flex");
+});
 
-// 	apply(condition) {
-// 		this.frequencies[condition].wordMatches();
-// 	}
-// }
-
-export class PenaltyData {
-    constructor(data) {
-        this.currentCondition = null; // Track the current active condition
-        this.frequencies = {};
-        for (const [condition, value] of Object.entries(data.frequencies)) {
-          this.frequencies[condition] = new Category(value)
-        }
-        for (const [condition, value] of Object.entries(data.verbs)) {
-          this.frequencies[condition] = new Category(value)
-        }
-        for (const [condition, value] of Object.entries(data.nouns)) {
-          this.frequencies[condition] = new Category(value)
-        }
-        for (const [condition, value] of Object.entries(data.clauses)) {
-          this.frequencies[condition] = new Category(value)
-        }
-        for (const [condition, value] of Object.entries(data.phrases)) {
-          this.frequencies[condition] = new Category(value)
-        }
-        for (const [condition, value] of Object.entries(data.constants)) {
-          this.frequencies[condition] = new Category(value)
-        }
-    }
-
-    apply(condition, btn) {
-      const btnColor = "bg-orange-300";
-        if (this.currentCondition === condition) {
-            // If the same condition is clicked again, unhighlight all
-            btn.classList.remove(btnColor);
-            this.unhighlightAll();
-            this.currentCondition = null;
-        } else {
-            // Unhighlight current, highlight new condition's words, and update current condition
-            btn.classList.add(btnColor);
-            this.unhighlightAll();
-            this.frequencies[condition].wordMatches();
-            this.currentCondition = condition;
-        }
-    }
-
-    check(condition) {
-      return this.frequencies[condition];
-    }
-
-    unhighlightAll() {
-        // Implement logic to remove highlights from all words
-        Object.values(this.frequencies).forEach(category => {
-            category.words.forEach(wordId => {
-                let word = document.getElementById(wordId);
-                if (word) {
-                    word.style.backgroundColor = ""; // Reset styles
-                    // word.style.color = ""; // Reset color
-                }
-            });
-        });
-    }
-}
-
-
-export class Category {
-	constructor(category) {
-		this.words = category.words || category;
-		this.penalties = category.penalties || [];
-	}
-
-	wordMatches() {
-		this.words.forEach((wordId, i) => {
-			let word = document.getElementById(wordId);
-			word.style.backgroundColor = "orange";
-			// word.style.color = getGradientColor(this.penalties[i]);
-		});
-	}
-
-  wordColors() {
-    this.words.forEach((wordId, i) => {
-			let word = document.getElementById(wordId);
-			word.style.backgroundColor = "orange";
-			word.style.color = getGradientColor(this.penalties[i]);
-		});
-  }
-}
-
-function getGradientColor(penalty) {
-	const green = [0, 0, 0];
-	const red = [255, 0, 0];
-	const ratio = penalty / 10;
-
-	const r = green[0] + ratio * (red[0] - green[0]);
-	const g = green[1] + ratio * (red[1] - green[1]);
-	const b = green[2] + ratio * (red[2] - green[2]);
-
-	return `rgb(${r}, ${g}, ${b})`;
-}
+events.subscribe(constants.TEXT_ROW_LOADED_EVENT, (event) => {
+	passageLists.widgetContainer.scrollIntoView();
+});

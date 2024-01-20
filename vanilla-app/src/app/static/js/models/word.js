@@ -1,4 +1,5 @@
 import * as constants from "../utils/constants.js";
+import { COLORS } from "../utils/theme.js";
 import * as utils from "../utils/utils.js";
 
 const summaryDivId = "#hovered-word-widget";
@@ -101,11 +102,11 @@ export class Word {
 	 * @param {Boolean} [markProperNouns]
 	 * @param {Number} [penalty]
 	 */
-	setDefaultColor(markProperNouns = true, penalty = null) {
+	setDefaultTextColor(markProperNouns = true, penalty = null) {
 		penalty = penalty || this.penalty;
 		let attr = "color";
 		if (markProperNouns && this.isProperNoun()) {
-			this.setColor(attr, constants.COLORS.PROPER_NOUN);
+			this.setColor(attr, COLORS.PROPER_NOUN);
 		} else {
 			let color = utils.getGradientColor(penalty);
 			this.setColor(attr, color);
@@ -121,12 +122,20 @@ export class Word {
 	}
 
 	/**
+	 * @param {String} [color]
+	 */
+	setConditionHighlight(color) {
+		this.highlightColor = color;
+		this.highlight();
+	}
+
+	/**
 	 * @param {Boolean} [resetHighlights]
 	 */
 	highlightMatchingLexemes(resetHighlights = false) {
 		utils.getWords().forEach((word) => {
 			if (this.lexId === word.lexId && !resetHighlights) {
-				word.highlight(constants.COLORS.HIGHLIGHT);
+				word.highlight(COLORS.HIGHLIGHT);
 			} else {
 				word.highlight();
 			}

@@ -193,9 +193,8 @@
         {% if passages %}
             {{ passages }}
             <div>
-                <button class="psg rounded border bg-white px-2"
-                        type="button"
-                        onclick="showDropdown(this)">Passage</button>
+                <button class="passage-dropdown-btn rounded border bg-white px-2"
+                        type="button">Passage</button>
             </div>
             {% include 'widgets/passage_selector.html' %}
         {% endif %}

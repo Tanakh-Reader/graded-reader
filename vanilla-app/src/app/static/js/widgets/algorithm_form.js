@@ -500,7 +500,7 @@ function setupFormSubmission() {
 						})
 						.filter((id) => id != null);
 				} else {
-					let passageId = $(".psg").attr("data-id");
+					let passageId = $(".passage-dropdown-btn").attr("data-id");
 					console.log(passageId);
 					console.log($(".psg"));
 					if (passageId) {

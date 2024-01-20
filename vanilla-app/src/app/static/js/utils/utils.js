@@ -1,17 +1,18 @@
 import * as constants from "./constants.js";
 import api from "./api.js";
 import { Word } from "../models/word.js";
+import { Passage } from "../models/passage.js";
 
-let cached_books = null;
-let cached_algorithms = null;
-let cached_words = null;
+let cachedBooks = null;
+let cachedAlgorithms = null;
+let cachedWords = {};
 
 export async function getBooks() {
-	if (cached_books === null) {
+	if (cachedBooks === null) {
 		console.log("HITTING API - BOOKS");
-		cached_books = await api.getAllBooks();
+		cachedBooks = await api.getAllBooks();
 	}
-	return cached_books;
+	return cachedBooks;
 }
 
 export async function getBookByNumber(number) {
@@ -30,11 +31,11 @@ export async function getBookByName(name) {
 }
 
 export async function getAlgorithms() {
-	if (cached_algorithms === null) {
+	if (cachedAlgorithms === null) {
 		console.log("HITTING API - ALGORITHMS");
-		cached_algorithms = await api.getAllAlgorithms();
+		cachedAlgorithms = await api.getAllAlgorithms();
 	}
-	return cached_algorithms;
+	return cachedAlgorithms;
 }
 
 export async function getAlgorithmById(id) {
@@ -88,8 +89,23 @@ export async function openHyperlink(hyperlinkKey, bookNumber, chapter) {
 	window.open(uri, "_blank");
 }
 
-// Submit a passage to render on the read screen.
-export function submitPassageSelection(
+/**
+ * Submit a passage to render on the read screen.
+ *
+ * @param {Passage} [passage]
+ */
+export function submitPasssageSelection(passage) {
+	submitTextSelection(
+		passage.book,
+		passage.startChapter,
+		passage.startVerse,
+		passage.endChapter,
+		passage.endVerse,
+	);
+}
+
+// Submit text to render on the read screen.
+export function submitTextSelection(
 	bookNumber,
 	startChapter,
 	startVerse,
@@ -129,10 +145,10 @@ export function showToast(message, duration) {
  * get all .word spans in <div> and return as <Word> objects
  *
  * @param {HTMLElement} [div=null]
- * @returns {Array<Word>}
+ * @returns {Object<Number, Word>}
  */
-export function getWords(div = null) {
-	if (cached_words === null || div != null) {
+export function getWords(div = null, asArray = true) {
+	if (Object.keys(cachedWords).length < 1 || div != null) {
 		let _div = div || document;
 		let wordSpans = $(_div).find(".word");
 		// Map wordDivs' data into <Word> objects
@@ -141,13 +157,25 @@ export function getWords(div = null) {
 				return new Word(wordSpan);
 			})
 			.get();
-		// Don't cache words if we're only fetching a div's worth.
-		if (div != null) {
-			return words;
-		}
-		cached_words = words;
+		words.forEach((word) => {
+			cachedWords[word.id.toString()] = word;
+		});
 	}
-	return cached_words;
+	if (asArray) {
+		return Object.values(cachedWords);
+	}
+	return cachedWords;
+}
+
+/**
+ * get all .word spans in <div> and return as <Word> objects
+ *
+ * @param {Number} [id]
+ * @returns {Word}
+ */
+export function getWordById(id) {
+	// TODO -- change cached_words to a dict ?
+	return getWords(null, false)[id.toString()];
 }
 
 export function getGradientColor(penalty) {

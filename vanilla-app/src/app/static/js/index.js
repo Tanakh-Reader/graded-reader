@@ -10,5 +10,5 @@ form.addEventListener('submit', (event) => {
     const endChapter = document.querySelector('#end_chapter').value;
     const endVerse = document.querySelector('#end_verse').value;
 
-    utils.submitPassageSelection(bookNumber, startChapter, startVerse, endChapter, endVerse);
+    utils.submitTextSelection(bookNumber, startChapter, startVerse, endChapter, endVerse);
 });
