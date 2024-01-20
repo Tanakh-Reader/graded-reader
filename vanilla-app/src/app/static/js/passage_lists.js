@@ -4,6 +4,7 @@ import * as events from "./utils/events.js";
 import * as constants from "./utils/constants.js";
 import * as alg from "./utils/algorithms.js";
 import * as compare from "./passages_compare.js";
+import { colorWords } from "./widgets/hebrew_text.js";
 // https://anseki.github.io/leader-line/
 
 const colors = [
@@ -91,8 +92,10 @@ function handlePassageClicked(div) {
 
 	const textDivs = widgetContainer.querySelectorAll(".passage-widget");
 	let i = div.classList.contains("col-1") ? 0 : 1;
-	x(div.dataset.id, textDivs[i]);
-	widgetContainer.scrollIntoView();
+	if (i === 0 || div.classList.contains("col-2")) {
+		x(div, textDivs[i]);
+		widgetContainer.scrollIntoView();
+	}
 }
 
 function highlightPassageAndLine(div, color = null, reset = false) {
@@ -257,15 +260,23 @@ function collectPassagesData() {
 	}
 }
 
-function x(a, b, c = false) {
+function x(passageDiv, div, publishEvent = false) {
 	apis
-		.getHebrewText(a, true)
+		.getHebrewText(passageDiv.dataset.id, true)
 		.then((response) => {
-			$(b).html(response);
+			$(div).html(response);
 			// Dispatch a event for text updates.
-			if (c) {
-				events.publish(constants.TEXT_ROW_LOADED_EVENT, b);
+			if (publishEvent) {
+				events.publish(constants.TEXT_ROW_LOADED_EVENT, div);
 			}
+			let data = utils.contextToJson(passageDiv.dataset.passage).penalty_data;
+			console.log(data);
+			data = new compare.PenaltyData(data);
+			
+			alg.buildAlgorithmDisplayButtons(data);
+
+			colorWords(data.penalties);
+			drawLines();
 		})
 		.catch((error) => {
 			console.error(error);
@@ -279,12 +290,8 @@ function loadMatchingIndexTexts(index) {
 	);
 	const textDivs = widgetContainer.querySelectorAll(".passage-widget");
 	console.log(textDivs);
-	x(indexA.parentNode.querySelector(".passage-item").dataset.id, textDivs[0]);
-	x(
-		indexB.parentNode.querySelector(".passage-item").dataset.id,
-		textDivs[1],
-		true,
-	);
+	x(indexA.parentNode.querySelector(".passage-item"), textDivs[0]);
+	x(indexB.parentNode.querySelector(".passage-item"), textDivs[1], true);
 }
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -347,5 +354,4 @@ events.subscribe(constants.PASSAGE_COMPARISON_EVENT, function () {
 
 events.subscribe(constants.TEXT_ROW_LOADED_EVENT, (event) => {
 	widgetContainer.scrollIntoView();
-	drawLines();
 });

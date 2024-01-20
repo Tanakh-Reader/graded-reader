@@ -58,8 +58,12 @@ class FrequencyDefinition:
         self.penalty = definition[2]
         self.range = [self.min_occ, self.max_occ]
 
-    def check_condition(self, word):
-        return self.min_occ <= hdp.lex_frequency(word) < self.max_occ
+    def check_condition(self, word=None, extra=None):
+        occ = extra if extra else hdp.lex_frequency(word)
+        return self.min_occ <= occ < self.max_occ
+
+    def name(self):
+        return f"{self.min_occ}-{self.max_occ}"
 
     def definition_obj(self):
         return {"condition": self.range, "penalty": self.penalty}
@@ -101,6 +105,13 @@ class VerbDefinition:
         self.conditions_met = 0
         return conditions_met == len(self.conditions)
 
+    def name(self):
+        name = ""
+        for i, condition in enumerate(self.conditions):
+            name += f"{self.value(i)}-"
+
+        return name[:-1]
+
     def definition_obj(self):
         return {
             "condition": self.conditions,
@@ -116,6 +127,9 @@ class ConstructNounDefinition:
 
     def check_condition(self, chain_length):
         return chain_length >= self.chain_length
+
+    def name(self):
+        return self.chain_length
 
     def definition_obj(self):
         return {"condition": self.chain_length, "penalty": self.penalty}
@@ -134,6 +148,9 @@ class ClauseDefinition:
             x_type = hdp.phrase_type(word)
         return x_type == self.clause_type
 
+    def name(self):
+        return f"{self.clause_type}"
+
     def definition_obj(self):
         return {"condition": self.clause_type, "penalty": self.penalty}
 
@@ -147,5 +164,61 @@ class PhraseDefinition:
     def check_condition(self, word):
         return hdp.phrase_function(word) == self.phrase_function
 
+    def name(self):
+        return f"{self.phrase_function}"
+
     def definition_obj(self):
         return {"condition": self.phrase_function, "penalty": self.penalty}
+
+
+class AlgorithmResult:
+    def __init__(self):
+        self.score = 0
+        self.penalties: dict[int, Numeric] = {}
+        self.frequencies = ConditionPenaltyData()
+        self.verbs = ConditionPenaltyData()
+        self.nouns = ConditionPenaltyData()
+        self.clauses = ConditionPenaltyData()
+        self.phrases = ConditionPenaltyData()
+
+        self.constants = ConstantPenaltyData()
+
+    def add_penalty(self, word, penalty):
+        self.penalties[hdp.id(word)] = penalty
+
+    def as_json(self):
+        return {
+            "penalties": self.penalties,
+            "frequencies": self.frequencies.data,
+            "verbs": self.verbs.data,
+            "nouns": self.nouns.data,
+            "clauses": self.clauses.data,
+            "phrases": self.phrases.data,
+        } | {"constants": self.constants.data}
+
+
+class ConditionPenaltyData:
+    def __init__(self):
+        self.data: dict[str, dict[str, list[Numeric]]] = {}
+
+    def add_value(self, condition, word, penalty):
+        word_id = hdp.id(word)
+        if condition not in self.data:
+            self.data[condition] = {"words": [word_id], "penalties": [penalty]}
+        else:
+            self.data[condition]["words"].append(word_id)
+            self.data[condition]["penalties"].append(penalty)
+
+
+class ConstantPenaltyData:
+    def __init__(self):
+        self.data: dict[str, list[int]] = {
+            "fillers": [],
+            "qere": [],
+            "proper_nouns": [],
+            "repeats": [],
+            "stems": [],
+        }
+
+    def add_value(self, condition, word, penalty):
+        self.data[condition].append(hdp.id(word))

@@ -75,6 +75,8 @@ class Passage(models.Model):
         self.verb_types_present = set()
         self.verb_stems_present = set()
         self.verses = []
+        from .algorithm.models import AlgorithmResult
+        self.penalty_data = AlgorithmResult()
 
     def to_dict(self):
         self.penalty = str(self.penalty)
@@ -83,6 +85,7 @@ class Passage(models.Model):
         passage_dict["reference"] = self.get_reference()
         passage_dict["reference_abbr"] = self.get_reference(abbreviation=True)
         passage_dict["id"] = self.id
+        passage_dict["penalty_data"] = self.penalty_data.as_json()
         return passage_dict
 
     def get_vs_words(self, verse):

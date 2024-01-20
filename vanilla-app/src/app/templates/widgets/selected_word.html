@@ -1,45 +1,18 @@
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/hebrew_text.css' %}">
+<link rel="stylesheet"
+      href="{% static 'css/hebrew_text.css' %}">
 
-<style>
-    #selected-word-widget {
-        position: fixed; /* Fixes the div to the viewport */
-        bottom: 10px;
-        right: 10px; /* Adjust as per need */
-        z-index: 10;
-        display: none; /* Initially hidden */
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: .25rem;
-        padding: .75rem;
-        max-width: 300px; /* Adjust as per need */
-        font-size: .875rem;
-    }
-    #hovered-word-widget {
-        position: fixed; /* Fixes the div to the viewport */
-        bottom: 10px;
-        left: 10px; /* Adjust as per need */
-        z-index: 10;
-        display: none; /* Initially hidden */
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        border-radius: .25rem;
-        padding: .75rem;
-        max-width: 500px; /* Adjust as per need */
-        font-size: .875rem;
-    }
-</style>
-
-<div id="selected-word-widget">
-    <button class="dismiss-btn" onclick="dismissWordWidget()">x</button>
+<div id="selected-word-widget"
+     class="fixed bottom-2.5 right-2.5 z-10 hidden max-w-xs rounded border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm">
+    <button class="dismiss-btn">x</button>
     <div id="word-attributes"></div>
 </div>
 
-<div id="hovered-word-widget">
+<div id="hovered-word-widget"
+     class="fixed bottom-2.5 left-2.5 z-10 hidden max-w-md rounded border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm">
     <b><span id="english"></span> (<span id="text"></span>)</b>
     <div id="speech"></div>
     <div id="morph"></div>
     <span id="ref"></span> - <span id="lex-freq"></span>
-    
 </div>

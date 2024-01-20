@@ -46,6 +46,7 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 			const minOcc = freq[0];
 			const maxOcc = freq[1];
 			const penalty = freq[2];
+			freqDiv.dataset.condition = `${minOcc}-${maxOcc}`;
 			freqDiv.innerHTML = `
             <span class="font-bold text-red-500">${penalty}</span>: ${minOcc} - ${maxOcc} occ.
             `;
@@ -55,10 +56,10 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 	}
 
 	freqExtrasDiv.innerHTML = `
-	<div class="${pillClasses}">את: <span class="font-bold text-red-500">${algJSON.include_stop_words}</span></div>
-	<div class="${pillClasses}"><span class="font-bold text-red-500">-${algJSON.taper_discount}</span> / occ.</div>
-	<div class="${pillClasses}">PN ÷ <span class="font-bold text-red-500">${algJSON.proper_noun_divisor}</span></div>
-	<div class="${pillClasses}"><span class="font-bold text-red-500">${algJSON.qere_penalty}</span>: Q/K</div>
+	<div class="${pillClasses}" data-condition="fillers">את: <span class="font-bold text-red-500">${algJSON.include_stop_words}</span></div>
+	<div class="${pillClasses}" data-condition="repeats"><span class="font-bold text-red-500">-${algJSON.taper_discount}</span> / occ.</div>
+	<div class="${pillClasses}" data-condition="proper_nouns">PN ÷ <span class="font-bold text-red-500">${algJSON.proper_noun_divisor}</span></div>
+	<div class="${pillClasses}" data-condition="qere"><span class="font-bold text-red-500">${algJSON.qere_penalty}</span>: Q/K</div>
 	`;
 
 	if (verbs.length > 0) {
@@ -68,6 +69,7 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 			const morphConditions = morph[0];
 			const penalty = morph[1];
 			let text = "";
+			let conditionText = "";
 			morphConditions.forEach((morphCondition) => {
 				// TODO : update with constants
 				const feature = {
@@ -75,8 +77,13 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 					verb_stem: "vs",
 					pronominal_suffix: "ps",
 				}[morphCondition.feature];
+				conditionText += `${morphCondition.value}-`;
 				text += ` <span class="font-bold">${feature}</span>=${morphCondition.value} &`;
 			});
+			morphDiv.dataset.condition = conditionText.substring(
+				0,
+				conditionText.length - 1,
+			);
 			morphDiv.innerHTML = `
             <span class="font-bold text-red-500">${penalty}</span>: ${text.substring(
 							0,
@@ -89,7 +96,7 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 	}
 
 	verbExtrasDiv.innerHTML = `
-	<div class="${pillClasses}">Stems: <span class="font-bold text-red-500">${algJSON.penalize_by_verb_stem}</span></div>
+	<div class="${pillClasses}" data-condition="stems">Stems: <span class="font-bold text-red-500">${algJSON.penalize_by_verb_stem}</span></div>
 	`;
 
 	if (nouns.length > 0) {
@@ -98,6 +105,7 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 			const nounDiv = document.createElement("div");
 			const chainLength = noun[0];
 			const penalty = noun[1];
+			nounDiv.dataset.condition = chainLength;
 			nounDiv.innerHTML = `
             <span class="font-bold text-red-500">${penalty}</span>: ${chainLength}-noun chain
             `;
@@ -112,6 +120,7 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 			const clauseDiv = document.createElement("div");
 			const clauseType = clause[0];
 			const penalty = clause[1];
+			clauseDiv.dataset.condition = clauseType;
 			clauseDiv.innerHTML = `
             <span class="font-bold text-red-500">${penalty}</span>: ${clauseType}`;
 			clausesDiv.appendChild(clauseDiv);
@@ -125,6 +134,7 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 			const phraseDiv = document.createElement("div");
 			const phraseFunction = phrase[0];
 			const penalty = phrase[1];
+			phraseDiv.dataset.condition = phraseFunction;
 			phraseDiv.innerHTML = `
             <span class="font-bold text-red-500">${penalty}</span>: ${phraseFunction}`;
 			phrasesDiv.appendChild(phraseDiv);
@@ -150,4 +160,53 @@ export function buildAlgorithmDisplay(algJSON, id, asMasonry = false) {
 			columnWidth: masonryGrid.offsetWidth / 2,
 		});
 	}
+}
+
+
+export function buildAlgorithmDisplayButtons(penaltyData) {
+	// const freqs = displayDiv.querySelectorAll(`.frequencies div`);
+	// console.log(freqsDiv);
+	// const verbs = document.querySelectorAll(`.verbs div`);
+	// const nouns = document.querySelectorAll(`.nouns div`);
+	// const clauses = document.querySelectorAll(`.clauses div`);
+	// const phrases = document.querySelectorAll(`.phrases div`);
+	let buttonClasses = "hover:cursor-pointer hover:opacity-70 bg-green-100 border border-green-300 rounded";
+	const conditions = document.querySelectorAll(`[data-condition]`);
+	conditions.forEach((conditionDiv) => {
+		let condition = conditionDiv.dataset.condition;
+		console.log(condition);
+		if (penaltyData.check(condition)) {
+			// conditionDiv.classList = buttonClasses;
+			buttonClasses.split(' ').forEach(c => conditionDiv.classList.add(c));
+
+
+			conditionDiv.addEventListener("click", () => {
+				penaltyData.apply(condition, conditionDiv);
+			});
+		} else {
+			buttonClasses.split(' ').forEach(c => conditionDiv.classList.remove(c));
+		}
+	});
+	
+	// msnry.reloadItems();
+	// msnry.layout();
+	setTimeout(() => {
+		var masonryGrid = conditions[0].closest(".data-summary-masonry");
+		new Masonry(masonryGrid, {
+			itemSelector: ".grid-item",
+			columnWidth: masonryGrid.offsetWidth / 2,
+		});
+	}, 400);
+}
+
+function getGradientColor(penalty) {
+	const green = [0, 0, 0];
+	const red = [255, 0, 0];
+	const ratio = penalty / 10;
+
+	const r = green[0] + ratio * (red[0] - green[0]);
+	const g = green[1] + ratio * (red[1] - green[1]);
+	const b = green[2] + ratio * (red[2] - green[2]);
+
+	return `rgb(${r}, ${g}, ${b})`;
 }

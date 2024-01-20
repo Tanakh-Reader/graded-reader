@@ -1,15 +1,17 @@
 import * as constants from "./constants.js";
 import api from "./api.js";
+import { Word } from "../models/word.js";
 
-let books = null;
-let algorithms = null;
+let cached_books = null;
+let cached_algorithms = null;
+let cached_words = null;
 
 export async function getBooks() {
-	if (books === null) {
+	if (cached_books === null) {
 		console.log("HITTING API - BOOKS");
-		books = await api.getAllBooks();
+		cached_books = await api.getAllBooks();
 	}
-	return books;
+	return cached_books;
 }
 
 export async function getBookByNumber(number) {
@@ -28,11 +30,11 @@ export async function getBookByName(name) {
 }
 
 export async function getAlgorithms() {
-	if (algorithms === null) {
+	if (cached_algorithms === null) {
 		console.log("HITTING API - ALGORITHMS");
-		algorithms = await api.getAllAlgorithms();
+		cached_algorithms = await api.getAllAlgorithms();
 	}
-	return algorithms;
+	return cached_algorithms;
 }
 
 export async function getAlgorithmById(id) {
@@ -121,6 +123,44 @@ export function showToast(message, duration) {
 	setTimeout(() => {
 		document.body.removeChild(toast);
 	}, duration);
+}
+
+/**
+ * get all .word spans in <div> and return as <Word> objects
+ *
+ * @param {HTMLElement} [div=null]
+ * @returns {Array<Word>}
+ */
+export function getWords(div = null) {
+	if (cached_words === null || div != null) {
+		let _div = div || document;
+		let wordSpans = $(_div).find(".word");
+		// Map wordDivs' data into <Word> objects
+		let words = wordSpans
+			.map((i, wordSpan) => {
+				return new Word(wordSpan);
+			})
+			.get();
+		// Don't cache words if we're only fetching a div's worth.
+		if (div != null) {
+			return words;
+		}
+		cached_words = words;
+	}
+	return cached_words;
+}
+
+export function getGradientColor(penalty) {
+	penalty = parseFloat(penalty);
+	const green = [0, 0, 0];
+	const red = [255, 0, 0];
+	const ratio = penalty / 10;
+
+	const r = green[0] + ratio * (red[0] - green[0]);
+	const g = green[1] + ratio * (red[1] - green[1]);
+	const b = green[2] + ratio * (red[2] - green[2]);
+
+	return `rgb(${r}, ${g}, ${b})`;
 }
 
 // export default {

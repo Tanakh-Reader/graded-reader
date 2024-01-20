@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import traceback
 import math
 from abc import ABC, abstractmethod
 from typing import Any
@@ -199,42 +199,50 @@ def get_passage_weight_4(
 
 # Decrease penalty for each occurance.
 def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
-    categories = init_categories(configuration)
+    categories: list[Category] = init_categories(configuration, passage)
     lexemes = set()
     # Loop over words from the database, where the word is not a stop word.
     for word in passage.words():
-        if configuration.include_stop_words:
+        penalty = 0
+        try:
+            filler_word = hdp.lex_stripped(word) in Classify().stop_words
+            if configuration.include_stop_words:
+                for category in categories:
+                    penalty += category.check_condition(word)
+            elif not filler_word:
+                for category in categories:
+                    penalty += category.check_condition(word)
+
             lexemes.add(hdp.lex_id(word))
-            for category in categories:
-                category.check_condition(word)
-        elif hdp.lex_stripped(word) not in Classify().stop_words:
-            lexemes.add(hdp.lex_id(word))
-            for category in categories:
-                category.check_condition(word)
+            if filler_word:
+                passage.penalty_data.constants.add_value(
+                    "fillers",
+                    word,
+                    None,
+                )
+
+        except Exception as e:
+            traceback.print_exc()
+
+        passage.penalty_data.add_penalty(word, penalty)
     # for category in categories:
     #     for k, v in category.penalties.items():
     #         print(k, v, "\n")
     # print(category.name, category.penalties)
-    total_penalty = sum([cat.total_penalty() for cat in categories])
+    total_penalty = sum(passage.penalty_data.penalties)
     score = configuration.passage_penalty(passage, len(lexemes), total_penalty)
+    passage.penalty_data.score = score
     penalties = {category.name: category.get_penalty_data() for category in categories}
     return score, penalties
 
-    # Compare using all words as denominator vs. unique words.
-    # TODO !! would the unique word route only be taken for frequencies, or other items as well?
-    # TODO !! should verbs be / len verbs, or total words?
-    # if div_all:
-    #     total_weight = total_weight / len(passage.words()) + (
-    #         verb_weight / len(passage.words())
-    #     )
-    # else:
-    #     total_weight /= len(word_weights)
-
 
 class Category(ABC):
-    def __init__(self, name="", config: AlgorithmConfig = None):
+    def __init__(
+        self, name="", config: AlgorithmConfig = None, passage: Passage = None
+    ):
         self.name = name
         self.config = config
+        self.passage = passage
         # Maps each word_id to a condition and penalty.
         self.instances: dict[int, dict[str, Any]] = {}
         # Maps each condition to a list of tuples [word_id, penalty].
@@ -243,45 +251,45 @@ class Category(ABC):
 
     def total_penalty(self):
         total = 0
-        # for word_id, data in self.instances.items():
-        #     total += data.get("penalty")
-        for penalties in self.penalties.values():
-            for pair in penalties:
-                total += pair[1]
+        for word_id, data in self.instances.items():
+            total += data.get("penalty")
+        # for penalties in self.penalties.values():
+        #     for pair in penalties:ƒ.
+        #         total += pair[1]
         return total
 
     def add_penalty(self, condition, word_id, penalty):
         condition = str(condition)
-        # if condition not in self.penalties:
-        #     self.penalties[condition] = {"words": [word_id], "penalties": [penalty]}
-        # else:
-        #     self.penalties[condition]["words"].append(word_id)
-        #     self.penalties[condition]["penalties"].append(penalty)
-        if condition not in self.penalties.keys():
-            self.penalties[condition] = [(word_id, penalty)]
+        if condition not in self.penalties:
+            self.penalties[condition] = {"words": [word_id], "penalties": [penalty]}
         else:
-            self.penalties[condition].append((word_id, penalty))
+            self.penalties[condition]["words"].append(word_id)
+            self.penalties[condition]["penalties"].append(penalty)
+        # if condition not in self.penalties.keys():
+        #     self.penalties[condition] = [(word_id, penalty)]
+        # else:
+        #     self.penalties[condition].append((word_id, penalty))
 
     def get_penalty_data(self):
         penalty_data = []
         for condition, data in self.penalties.items():
-            # penalty_data.append(
-            #     {
-            #         "condition": condition,
-            #         "words": data.get("words"),
-            #         "penalties": data.get("penalties"),
-            #     }
-            # )
             penalty_data.append(
                 {
                     "condition": condition,
-                    "penalties": data,
+                    "words": data.get("words"),
+                    "penalties": data.get("penalties"),
                 }
             )
+            # penalty_data.append(
+            #     {
+            #         "condition": condition,
+            #         "penalties": data,
+            #     }
+            # )
         return penalty_data
 
     @abstractmethod
-    def check_condition(self, word):
+    def check_condition(self, word) -> Numeric:
         pass
 
 
@@ -300,12 +308,8 @@ class Category(ABC):
 
 
 class Frequency(Category):
-    def __init__(
-        self,
-        name,
-        config,
-    ):
-        super().__init__(name, config)  # calling the parent's __init__ method
+    def __init__(self, name, config, passage):
+        super().__init__(name, config, passage)  # calling the parent's __init__ method
         self.word_occurences: dict[int, dict[str, Numeric]] = {}
         self.current_penalty = 0
         self.current_definition: FrequencyDefinition = None
@@ -313,6 +317,42 @@ class Frequency(Category):
     # TODO : alternate logic without word_occurences when not using a taper.
     def check_condition(self, word) -> None:
         lex_id = hdp.lex_id(word)
+
+        if hdp.ketiv_qere(word) and self.config.qere_penalty != 0:
+            # TODO : have impliment logic such that:
+            # return max(qere_penalty, occ_penalty, stem_penalty)
+            penalty = self.config.qere_penalty
+            self.instances[hdp.id(word)] = "Qere"
+            self.add_penalty("Qere", hdp.id(word), penalty)
+            self.passage.penalty_data.constants.add_value(
+                "qere",
+                word,
+                penalty,
+            )
+            return penalty
+
+        elif self.config.penalize_by_verb_stem and hdp.speech(word) == "verb":
+            verb_stem = hdp.verb_stem(word)
+            try:
+                stem_freq = VERB_STEMS.get(str(lex_id)).get(verb_stem)
+                penalty = self.find_occ_range_stem(stem_freq)
+                # if a lexeme occurs more than 100x and the stem occurs more than 100x, penalize according to stem occurrence
+                # If a lexeme occurs fewer than 100x, penalize according to stem occurrence
+                # If a lexeme occurs more than 100x and the stem occurs fewer than 100x, give half of the stem-occurence penalty
+                if hdp.lex_frequency(word) >= UNCOMMON_WORD_FREQUENCY:
+                    if stem_freq < UNCOMMON_WORD_FREQUENCY:
+                        penalty = self.find_occ_range_stem(stem_freq) / 2
+                self.instances[hdp.id(word)] = "vs_" + verb_stem
+                self.add_penalty("vs_" + verb_stem, hdp.id(word), penalty)
+                self.passage.penalty_data.constants.add_value(
+                    "stems",
+                    word,
+                    penalty,
+                )
+                return penalty
+            except AttributeError:
+                pass
+
         # If taper, gradually reduce the penalty per lex occurence.
         if lex_id in self.word_occurences.keys():
             count = self.update_count(lex_id)
@@ -328,6 +368,11 @@ class Frequency(Category):
                     else MIN_RARE_WORD_PENALTY
                 )
                 self.current_penalty = updated_penalty
+                self.passage.penalty_data.constants.add_value(
+                    "repeats",
+                    word,
+                    self.current_penalty,
+                )
             else:
                 self.current_penalty = penalty
         # Add full penalty for the first occurance.
@@ -341,9 +386,7 @@ class Frequency(Category):
 
             self.find_occ_range(word)
             self.word_occurences[lex_id]["penalty"] = self.current_penalty
-            self.word_occurences[lex_id][
-                "definition"
-            ] = self.current_definition.definition
+            self.word_occurences[lex_id]["definition"] = self.current_definition.name()
 
         self.instances[hdp.id(word)] = self.current_definition.definition_obj()
         self.add_penalty(
@@ -351,30 +394,16 @@ class Frequency(Category):
             hdp.id(word),
             self.current_penalty,
         )
+        # TODO : add stems and qere
+        self.passage.penalty_data.frequencies.add_value(
+            self.word_occurences[lex_id].get("definition"),
+            word,
+            self.current_penalty,
+        )
+        return self.current_penalty
 
     # Find the occurrence range for the current word.
     def find_occ_range(self, word):
-        if hdp.ketiv_qere(word) and self.config.qere_penalty != 0:
-            self.instances[hdp.id(word)] = "Qere"
-            self.add_penalty("Qere", hdp.id(word), self.config.qere_penalty)
-            return
-        # TODO : rethink this.
-        elif self.config.penalize_by_verb_stem and hdp.speech(word) == "verb":
-            verb_stem = hdp.verb_stem(word)
-            lex_id = str(hdp.lex_id(word))
-            try:
-                freq = VERB_STEMS.get(lex_id).get(verb_stem)
-                penalty = 0
-                if 20 < freq < 45:
-                    penalty = 3
-                elif freq <= 20:
-                    penalty = 7
-                if penalty > 0:
-                    self.instances[hdp.id(word)] = "vs_" + verb_stem
-                    self.add_penalty("vs_" + verb_stem, hdp.id(word), penalty)
-                    return
-            except AttributeError:
-                pass
         # Iterate over the frequency definitions.
         for _def in self.config.frequencies:
             if _def.check_condition(word):
@@ -384,11 +413,23 @@ class Frequency(Category):
                     self.current_penalty = int(
                         math.ceil(_def.penalty / self.config.proper_noun_divisor)
                     )
+                    self.passage.penalty_data.constants.add_value(
+                        "proper_nouns",
+                        word,
+                        self.current_penalty,
+                    )
                 # Give a full penalty for other word types.
                 else:
                     self.current_penalty = _def.penalty
 
                 return True
+
+    # Find the occurrence range for the current word.
+    def find_occ_range_stem(self, stem):
+        # Iterate over the frequency definitions.
+        for _def in self.config.frequencies:
+            if _def.check_condition(extra=stem):
+                return _def.penalty
 
     def update_count(self, lex_id: int):
         self.word_occurences[lex_id]["count"] += 1
@@ -396,16 +437,12 @@ class Frequency(Category):
 
 
 class Verb(Category):
-    def __init__(
-        self,
-        name,
-        config,
-    ):
-        super().__init__(name, config)  # calling the parent's __init__ method
+    def __init__(self, name, config, passage):
+        super().__init__(name, config, passage)  # calling the parent's __init__ method
 
     def check_condition(self, word):
         if hdp.speech(word) != "verb":
-            return
+            return 0
         for _def in self.config.verbs:
             for i in _def.conditions_range:
                 # Get the method from HebrewDataProvider using the 'feature' key from the condition
@@ -419,16 +456,19 @@ class Verb(Category):
             # if all conditions are met, add to instances
             if _def.all_conditions_met():
                 self.instances[hdp.id(word)] = _def.definition_obj()
-                self.add_penalty(_def.definition, hdp.id(word), _def.penalty)
+                self.add_penalty(_def.name(), hdp.id(word), _def.penalty)
+                self.passage.penalty_data.verbs.add_value(
+                    _def.name(),
+                    word,
+                    _def.penalty,
+                )
+                return _def.penalty
+        return 0
 
 
 class ConstructNoun(Category):
-    def __init__(
-        self,
-        name,
-        config,
-    ):
-        super().__init__(name, config)  # calling the parent's __init__ method
+    def __init__(self, name, config, passage):
+        super().__init__(name, config, passage)  # calling the parent's __init__ method
         # Sort in reverse to check chain-length condition and exit properly.
         self.config.construct_nouns.sort(key=lambda x: x.chain_length, reverse=True)
         self.current_chain_length: int = 0
@@ -442,18 +482,21 @@ class ConstructNoun(Category):
                 for _def in self.config.construct_nouns:
                     if _def.check_condition(self.current_chain_length):
                         self.instances[hdp.id(word)] = _def.definition_obj()
-                        self.add_penalty(_def.definition, hdp.id(word), _def.penalty)
+                        self.add_penalty(_def.name(), hdp.id(word), _def.penalty)
+                        self.passage.penalty_data.nouns.add_value(
+                            _def.name(),
+                            word,
+                            _def.penalty,
+                        )
+                        return _def.penalty
                         break
                 self.current_chain_length = 0
+        return 0
 
 
 class SyntaxUnit(Category):
-    def __init__(
-        self,
-        name,
-        config,
-    ):
-        super().__init__(name, config)  # calling the parent's __init__ method
+    def __init__(self, name, config, passage):
+        super().__init__(name, config, passage)  # calling the parent's __init__ method
         self.current_unit: int = 0
 
     def check_condition(self, word):
@@ -469,9 +512,23 @@ class SyntaxUnit(Category):
             for _def in definitions:
                 if _def.check_condition(word):
                     self.instances[hdp.id(word)] = _def.definition_obj()
-                    self.add_penalty(_def.definition, hdp.id(word), _def.penalty)
-                    break
+                    self.add_penalty(_def.name(), hdp.id(word), _def.penalty)
+                    # TODO : handle phrases as well
+                    if self.name == "clauses":
+                        self.passage.penalty_data.clauses.add_value(
+                            _def.name(),
+                            word,
+                            _def.penalty,
+                        )
+                    else:
+                        self.passage.penalty_data.phrases.add_value(
+                            _def.name(),
+                            word,
+                            _def.penalty,
+                        )
+                    return _def.penalty
         self.current_unit = unit_id
+        return 0
 
 
 # [
@@ -488,22 +545,22 @@ class SyntaxUnit(Category):
 
 
 # TEST: http://127.0.0.1:8000/passages/compare?id=1473&id=1511
-def init_categories(config: AlgorithmConfig) -> list[Category]:
+def init_categories(config: AlgorithmConfig, passage: Passage) -> list[Category]:
     categories: list[Category] = []
 
     if config.verbs:
-        categories.append(Verb("verbs", config))
+        categories.append(Verb("verbs", config, passage))
 
     if config.frequencies:
-        categories.append(Frequency("frequencies", config))
+        categories.append(Frequency("frequencies", config, passage))
 
     if config.construct_nouns:
-        categories.append(ConstructNoun("construct_nouns", config))
+        categories.append(ConstructNoun("nouns", config, passage))
 
     if config.clauses:
-        categories.append(SyntaxUnit("clauses", config))
+        categories.append(SyntaxUnit("clauses", config, passage))
 
     if config.phrases:
-        categories.append(SyntaxUnit("phrases", config))
+        categories.append(SyntaxUnit("phrases", config, passage))
 
     return categories

@@ -20,6 +20,11 @@ export const TEXT_ROW_LOADED_EVENT = "xmlll";
 export const ALG_FORM_LOADED_EVENT = "algorithmFormLoaded";
 export const PASSAGE_COMPARISON_EVENT = "passagePenaltyComparisonsLoaded";
 
+export const COLORS = {
+	HIGHLIGHT: "#ffe880",
+	PROPER_NOUN: "#A9A9A9"
+};
+
 // WORD ATTRIBUTES
 export const W_ID = "id";
 export const W_BOOK = "book";

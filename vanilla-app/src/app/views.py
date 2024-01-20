@@ -84,7 +84,7 @@ def passages(request: HttpRequest) -> HttpResponse:
 
 
 def passages_compare(request: HttpRequest) -> HttpResponse:
-    default_ids = [1, 2]
+    default_ids = [1]
     passage_ids = request.GET.getlist("id", default_ids)
     if not (2 <= len(passage_ids) <= 4):
         passage_ids = default_ids
@@ -349,7 +349,7 @@ def post_algorithm_comparisons(request: HttpRequest):
             for i, config in enumerate([alg1, alg2]):
                 score, penalties = alg.get_passage_weight_x(config, passage)
                 # print(penalties)
-                [list1, list2][i].append((passage.to_dict(), score))
+                [list1, list2][i].append((passage.to_dict(), score, penalties))
         for list in [list1, list2]:
             list.sort(key=lambda x: x[1])
 
