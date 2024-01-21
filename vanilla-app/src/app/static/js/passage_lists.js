@@ -7,6 +7,7 @@ import * as compare from "./passages_compare.js";
 import { colorWords } from "./widgets/hebrew_text.js";
 import { Passage } from "./models/passage.js";
 import { PenaltyData } from "./models/penalty.js";
+import { Algorithm } from "./models/algorithm.js";
 // https://anseki.github.io/leader-line/
 
 // CONSTANTS
@@ -33,10 +34,11 @@ const colors = [
 ];
 
 const topDiffsCount = 5;
-export const widgetContainer = document.querySelector(
-	"#compare-lists-mode .comparison-container",
-);
-const textDivs = widgetContainer.querySelectorAll(".passage-widget");
+
+const compareListsDiv = $("#compare-lists-mode")[0];
+const widgetsContainer = compareListsDiv.querySelector(".comparison-container");
+const textDivs = widgetsContainer.querySelectorAll(".passage-widget");
+const compareAlgorithmsForm = $("#compare-algorithms-form");
 
 function getDiffInnerHTML(color, diff, index1, index2) {
 	return `<span class="font-bold ${color}">${diff}</span>: ${index1}→${index2}`;
@@ -76,16 +78,11 @@ class PassageComparisonObject {
 export class PassageListsComparison {
 	init() {
 		// Remove any existing lines.
-		if (this.lineReferences) {
-			Object.entries(this.lineReferences).forEach(
-				([passageId, line], index) => {
-					line.remove();
-				},
-			);
-		}
+		this.deleteLines();
 		this.passageItems = $("#column-1 .passage-item");
 		this.passageIndeces = $("#column-1 .passage-index");
 		this.hoverTextDiv = $("#hover-text")[0];
+		this.contentDiv = $("#list-comparisons");
 		/** @type {Object<string, PassageComparisonObject>} */
 		this.passageObjects = {};
 		this.lineReferences = {};
@@ -94,6 +91,20 @@ export class PassageListsComparison {
 		this.minDiff = 1000;
 		this.collectPassageData();
 		this.buildDiffSummaryDiv();
+	}
+
+	deleteLines() {
+		if (this.lineReferences && Object.keys(this.lineReferences).length > 0) {
+			Object.entries(this.lineReferences).forEach(
+				([passageId, line], index) => {
+					line.remove();
+				},
+			);
+		}
+	}
+
+	show() {
+		this.contentDiv.css("display", "flex");
 	}
 
 	collectPassageData() {
@@ -164,6 +175,7 @@ export class PassageListsComparison {
 	 * @param {JQuery<HTMLElement>} [passageDiv]
 	 */
 	addPassageEventListeners(passageDiv) {
+		passageDiv.off();
 		passageDiv.on("mouseenter", () => {
 			if (!passageDiv.hasClass("selected-passage")) {
 				this.highlightPassageAndLine(passageDiv, "gray");
@@ -202,7 +214,7 @@ export class PassageListsComparison {
 		let i = div.hasClass("col-1") ? 0 : 1;
 		if (i === 0 || div.hasClass("col-2")) {
 			getPassageText(div[0], textDivs[i]);
-			widgetContainer.scrollIntoView();
+			widgetsContainer.scrollIntoView();
 		}
 	}
 
@@ -221,12 +233,10 @@ export class PassageListsComparison {
 			size: lineSize,
 		});
 		// Highlight passages
-		document
-			.querySelectorAll(`#list-comparisons [data-id="${passageId}"]`)
-			.forEach((passageDiv) => {
-				passageDiv.style.borderColor = color;
-				passageDiv.style.borderWidth = borderWidth;
-			});
+		this.contentDiv.find(`[data-id="${passageId}"]`).each((i, passageDiv) => {
+			passageDiv.style.borderColor = color;
+			passageDiv.style.borderWidth = borderWidth;
+		});
 		this.showHoverText(div);
 		if (reset) {
 			$(this.hoverTextDiv).hide();
@@ -253,6 +263,7 @@ export class PassageListsComparison {
 	}
 
 	drawLines() {
+		if (this.lineReferences && Object.keys(this.lineReferences).length > 0) {
 		Object.entries(this.passageObjects).forEach(
 			([passageId, passageObj], index) => {
 				if (passageObj.matchingDiv) {
@@ -260,6 +271,7 @@ export class PassageListsComparison {
 				}
 			},
 		);
+		}
 	}
 
 	buildDiffSummaryDiv() {
@@ -340,7 +352,7 @@ export class PassageListsComparison {
 		const indexB = document.querySelector(
 			`#column-2 .index-${indexA.dataset.index}`,
 		);
-		const textDivs = widgetContainer.querySelectorAll(".passage-widget");
+		const textDivs = widgetsContainer.querySelectorAll(".passage-widget");
 		getPassageText(
 			indexA.parentNode.querySelector(".passage-item"),
 			textDivs[0],
@@ -353,7 +365,74 @@ export class PassageListsComparison {
 	}
 }
 
-export const passageListsComparison = new PassageListsComparison();
+export class CompareListsMode {
+	init() {
+		this.listComparison = new PassageListsComparison();
+		this.setUpComparisonForm();
+		this.setListeners();
+	}
+
+	show() {
+		$(compareListsDiv).show();
+		// this.listComparison.init();
+		// this.listComparison.drawLines();
+	}
+
+	hide() {
+		$(compareListsDiv).hide();
+		// this.listComparison.deleteLines();
+	}
+
+	setListeners() {
+		events.subscribe(
+			constants.PASSAGE_LISTS_PENALTY_COMPARISON_EVENT,
+			(event) => {
+				this.listComparison.init();
+				this.listComparison.show();
+				this.listComparison.loadMatchingIndexTexts();
+				this.listComparison.drawLines();
+			},
+		);
+
+		events.subscribe(constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, (event) => {
+			widgetsContainer.scrollIntoView();
+			this.listComparison.drawLines();
+		});
+	}
+
+	setUpComparisonForm() {
+		const algorithmDropdowns = compareAlgorithmsForm.find("select");
+
+		algorithmDropdowns.each((i, dropdown) => {
+			dropdown.addEventListener("change", async (event) => {
+				const selectedOption = event.target.selectedOptions[0];
+				let algorithm = new Algorithm(
+					utils.contextToJson(selectedOption.dataset.definition),
+				);
+				alg.buildAlgorithmDisplay(
+					algorithm,
+					selectedOption.dataset.index,
+					true,
+				);
+			});
+		});
+
+		// Add submit event listener
+		compareAlgorithmsForm.on("submit", (e) => {
+			// Prevent the form from submitting
+			e.preventDefault();
+
+			// Create an object to store the data
+			var formData = {
+				alg1: compareAlgorithmsForm.find('select[name="algorithm1"]').val(),
+				alg2: compareAlgorithmsForm.find('select[name="algorithm2"]').val(),
+				count: compareAlgorithmsForm.find('input[name="count"]').val(),
+			};
+
+			apis.compareAlgorithms(formData);
+		});
+	}
+}
 
 /**
  * @param {HTMLElement} [passageDiv]
@@ -364,10 +443,13 @@ function getPassageText(passageDiv, textDiv, publishEvent = false) {
 	apis
 		.getHebrewText(passageDiv.dataset.id, true)
 		.then((response) => {
+			
 			$(textDiv).html(response);
+			// Remove del buttons for passage list case
+			$(compareListsDiv).find(".remove-widget.del-btn").remove();
 			// Dispatch an event for text updates.
 			if (publishEvent) {
-				events.publish(constants.TEXT_ROW_LOADED_EVENT, textDiv);
+				events.publish(constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, textDiv);
 			}
 			let passage = new Passage(
 				utils.contextToJson(passageDiv.dataset.definition),
@@ -378,49 +460,8 @@ function getPassageText(passageDiv, textDiv, publishEvent = false) {
 			alg.buildAlgorithmDisplayButtons(data);
 
 			colorWords(document, data.frequencies);
-			passageListsComparison.drawLines();
 		})
 		.catch((error) => {
 			console.error(error);
 		});
-}
-
-export function setUpComparisonForm() {
-	const dropdowns = $(document).find("select").toArray();
-
-	dropdowns.forEach((dropdown) => {
-		const currentSelection = dropdown.selectedOptions[0];
-		const currentDef = utils.contextToJson(currentSelection.dataset.definition);
-		if (currentDef) {
-			alg.buildAlgorithmDisplay(
-				currentDef,
-				currentSelection.dataset.index,
-				true,
-			);
-		}
-
-		dropdown.addEventListener("change", (event) => {
-			const selectedOption = event.target.selectedOptions[0];
-			const definition = utils.contextToJson(selectedOption.dataset.definition);
-			alg.buildAlgorithmDisplay(definition, selectedOption.dataset.index, true);
-		});
-	});
-
-	// Get the form element
-	var form = document.querySelector("#compare-algorithms-form");
-
-	// Add submit event listener
-	form.addEventListener("submit", function (e) {
-		// Prevent the form from submitting
-		e.preventDefault();
-
-		// Create an object to store the data
-		var formData = {
-			alg1: form.querySelector('select[name="algorithm1"]').value,
-			alg2: form.querySelector('select[name="algorithm2"]').value,
-			count: form.querySelector('input[name="count"]').value,
-		};
-
-		apis.compareAlgorithms(formData);
-	});
 }

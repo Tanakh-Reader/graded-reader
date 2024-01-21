@@ -29,7 +29,8 @@
                 <!-- Column 1 Items -->
                 {% for item in listA %}
                     <div class="flex flex-row gap-4">
-                        <div class="passage-index hover:cursor-pointer hover:font-bold hover:text-blue-500 index-{{ forloop.counter }}" data-index="{{ forloop.counter }}">
+                        <div class="passage-index hover:cursor-pointer hover:font-bold hover:text-blue-500 index-{{ forloop.counter }}"
+                             data-index="{{ forloop.counter }}">
                             {{ forloop.counter }}
                         </div>
                         <div class="col-1 passage-item flex w-60 overflow-hidden rounded-md border border-black"

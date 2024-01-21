@@ -79,7 +79,7 @@ const conditions = [
 	new Condition({
 		checkboxId: "qere",
 		title: "Qere / Ketiv",
-		color: HIGHLIGHT_COLORS.LIGHT_GOLDENROD_YELLOW,
+		color: HIGHLIGHT_COLORS.POWDER_BLUE,
 		conditionFunc: (/** @type {Word} */ word) => has_data(word.qere),
 	}),
 	new Condition({
@@ -142,7 +142,10 @@ $(window).on("load", () => {
 	refreshDropdown();
 });
 
-events.subscribe(constants.TEXT_LOADED_EVENT, () => {
-	refreshDropdown();
-	conditions.forEach((condition) => condition.fire());
+events.subscribe(constants.TEXT_FETCHED_COMPLETED_EVENT, () => {
+	// Give time for the words to be fetched.
+	setTimeout(() => {
+		refreshDropdown();
+		conditions.forEach((condition) => condition.fire());
+	}, 500);
 });

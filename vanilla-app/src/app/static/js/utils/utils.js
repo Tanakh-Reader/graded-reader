@@ -2,15 +2,26 @@ import * as constants from "./constants.js";
 import api from "./api.js";
 import { Word } from "../models/word.js";
 import { Passage } from "../models/passage.js";
+import { Algorithm } from "../models/algorithm.js";
 
 let cachedBooks = null;
-let cachedAlgorithms = null;
+let cachedAlgorithms = {};
+let cachedPassages = {};
 let cachedWords = {};
+
+// ----------------------------------------------------------------
+// GET
+// DATA
+// ----------------------------------------------------------------
+
+// GET BOOKS
+// ----------------------------------------------------------------
 
 export async function getBooks() {
 	if (cachedBooks === null) {
 		console.log("HITTING API - BOOKS");
-		cachedBooks = await api.getAllBooks();
+		let result = await api.getAllBooks();
+		cachedBooks = result;
 	}
 	return cachedBooks;
 }
@@ -30,20 +41,114 @@ export async function getBookByName(name) {
 	return book;
 }
 
-export async function getAlgorithms() {
-	if (cachedAlgorithms === null) {
+// GET ALGORITHMS
+// ----------------------------------------------------------------
+
+/**
+ * get all algorithms from DB
+ *
+ * @param {Boolean} [asArray=true]
+ * @returns {Promise<Object<String, Object>>}
+ */
+export async function getAlgorithms(asArray = true) {
+	if (Object.keys(cachedAlgorithms).length < 1) {
 		console.log("HITTING API - ALGORITHMS");
-		cachedAlgorithms = await api.getAllAlgorithms();
+		let result = await api.getAllAlgorithms();
+		result.forEach((algObj) => {
+			let algorithm = new Algorithm(algObj);
+			cachedAlgorithms[algorithm.id.toString()] = algorithm;
+		});
+	}
+	if (asArray) {
+		return Object.values(cachedAlgorithms);
 	}
 	return cachedAlgorithms;
 }
 
-export async function getAlgorithmById(id) {
-	let _algorithms = await getAlgorithms();
-	const algIndex = _algorithms.findIndex((alg) => alg.id === id);
-	const algorithm = _algorithms[algIndex];
-	return algorithm;
+/**
+ * get all .word spans in <div> and return as <Word> objects
+ *
+ * @param {any} [id]
+ * @returns {Algorithm}
+ */
+export function getAlgorithmById(id) {
+	return getAlgorithms(false)[id.toString()];
 }
+
+// GET PASSAGES
+// ----------------------------------------------------------------
+
+/**
+ * get all passages from DB
+ *
+ * @param {Boolean} [asArray=true]
+ * @returns {Promise<Object<String, Passage>>}
+ */
+export async function getPassages(asArray = true) {
+	if (Object.keys(cachedPassages).length < 1) {
+		console.log("HITTING API - PASSAGES");
+		let result = await api.getAllPassages();
+		result.forEach((passageObj) => {
+			let passage = new Passage(passageObj);
+			cachedPassages[passage.id.toString()] = passage;
+		});
+	}
+	if (asArray) {
+		return Object.values(cachedPassages);
+	}
+	return cachedPassages;
+}
+
+/**
+ * get all .word spans in <div> and return as <Word> objects
+ *
+ * @param {any} [id]
+ * @returns {Passage}
+ */
+export function getPassageById(id) {
+	return getPassages(false)[id.toString()];
+}
+
+// GET WORDS
+// ----------------------------------------------------------------
+
+/**
+ * get all .word spans in <div> and return as <Word> objects
+ *
+ * @param {HTMLElement} [div=null]
+ * @param {Boolean} [asArray=true]
+ * @returns {Object<String, Word>}
+ */
+export function getWords(div = null, asArray = true) {
+	if (Object.keys(cachedWords).length < 1 || div != null) {
+		console.log("FETCHING - WORDS");
+		let _div = div || document;
+		let wordSpans = $(_div).find(".word");
+		// Map wordDivs' data into <Word> objects
+		wordSpans.each(function () {
+			let word = new Word(this);
+			cachedWords[word.id.toString()] = word;
+		});
+	}
+	if (asArray) {
+		return Object.values(cachedWords);
+	}
+	return cachedWords;
+}
+
+/**
+ * get all .word spans in <div> and return as <Word> objects
+ *
+ * @param {any} [id]
+ * @returns {Word}
+ */
+export function getWordById(id) {
+	return getWords(null, false)[id.toString()];
+}
+
+// ----------------------------------------------------------------
+// OTHER
+// ----------------------------------------------------------------
 
 // Make sure a query param is valid
 export function setParamIfValid(queryParams, key, value) {
@@ -141,43 +246,6 @@ export function showToast(message, duration) {
 	}, duration);
 }
 
-/**
- * get all .word spans in <div> and return as <Word> objects
- *
- * @param {HTMLElement} [div=null]
- * @returns {Object<Number, Word>}
- */
-export function getWords(div = null, asArray = true) {
-	if (Object.keys(cachedWords).length < 1 || div != null) {
-		let _div = div || document;
-		let wordSpans = $(_div).find(".word");
-		// Map wordDivs' data into <Word> objects
-		let words = wordSpans
-			.map((i, wordSpan) => {
-				return new Word(wordSpan);
-			})
-			.get();
-		words.forEach((word) => {
-			cachedWords[word.id.toString()] = word;
-		});
-	}
-	if (asArray) {
-		return Object.values(cachedWords);
-	}
-	return cachedWords;
-}
-
-/**
- * get all .word spans in <div> and return as <Word> objects
- *
- * @param {Number} [id]
- * @returns {Word}
- */
-export function getWordById(id) {
-	// TODO -- change cached_words to a dict ?
-	return getWords(null, false)[id.toString()];
-}
-
 export function getGradientColor(penalty) {
 	penalty = parseFloat(penalty);
 	const green = [0, 0, 0];
@@ -190,12 +258,3 @@ export function getGradientColor(penalty) {
 
 	return `rgb(${r}, ${g}, ${b})`;
 }
-
-// export default {
-//   setParamIfValid,
-//   isReferenceMatch,
-//   contextToJson,
-//   getBookByName,
-//   getBookByNumber,
-//   submitPassageSelection
-// }

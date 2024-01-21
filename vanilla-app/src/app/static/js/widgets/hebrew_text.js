@@ -19,6 +19,6 @@ $(window).on("load", () => {
 });
 
 // For Words generated from API call
-events.subscribe(constants.TEXT_LOADED_EVENT, (event) => {
+events.subscribe(constants.TEXT_FETCHED_COMPLETED_EVENT, (event) => {
 	colorWords(event.detail);
 });

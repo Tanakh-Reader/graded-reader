@@ -89,12 +89,9 @@ def passages_compare(request: HttpRequest) -> HttpResponse:
     if not (2 <= len(passage_ids) <= 4):
         passage_ids = default_ids
     passages = passage_provider.get_passages_by_ids(passage_ids, as_json=True)
-    all_passages = passage_provider.get_all_passages(as_json=True)
-
-    context = {"passages": passages}
-
     algorithms = algorithm_provider.get_configs(as_json=True)
-    context = context | {
+    context ={
+        "passages": passages,
         "algorithms": algorithms,
         "saved_algorithms": algorithms,
         "algorithm_templates": algorithm_provider.get_default_configurations(),
@@ -261,6 +258,11 @@ def get_books(request: HttpRequest) -> JsonResponse:
 def get_algorithms(request: HttpRequest) -> JsonResponse:
     algorithms = algorithm_provider.get_configs(as_json=True)
     return JsonResponse({"algorithms": algorithms})
+
+
+def get_passages(request: HttpRequest) -> JsonResponse:
+    algorithms = passage_provider.get_all_passages(as_json=True)
+    return JsonResponse({"passages": algorithms})
 
 
 def check_data_ready(request: HttpRequest) -> JsonResponse:

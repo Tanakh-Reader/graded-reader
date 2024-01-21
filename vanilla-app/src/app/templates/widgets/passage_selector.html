@@ -3,18 +3,13 @@
 <!-- Dropdown menu for search passages -->
 <div class="passage-dropdown">
     <input type="text"
-           class="searchInput w-full border-b p-2"
+           class="search-input w-full border-b p-2"
            placeholder="Search...">
     <ul class="max-h-72 list-none overflow-auto p-0">
-        {% for passage in passages %}
-            <li class="passage-dropdown-item cursor-pointer p-2 hover:bg-gray-200"
-                data-ref="{{ passage.reference }}"
-                data-ref-abbr="{{ passage.reference_abbr }}"
-                data-id="{{ passage.id }}"
-                data-word-count="{{ passage.word_count }}"
-                data-penalty="{{ passage.penalty }}">
-                {{ passage.reference }}
-            </li>
-        {% endfor %}
+        <li class="passage-dropdown-item cursor-pointer p-2 hover:bg-gray-200">
+        </li>
     </ul>
 </div>
+
+<script type="module"
+            src="{% static 'js/widgets/passage_selector.js' %}"></script>

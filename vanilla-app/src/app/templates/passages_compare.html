@@ -18,10 +18,17 @@
 {% block content %}
 
     <div class="flex flex-col">
-        <div>
-            <button class="btn my-5 ml-4" id="compare-mode"></button>
+        <div class="mb-24 ml-4 mt-10 flex w-screen flex-row items-center">
+            <div>
+                <button class="rounded bg-orange-600 px-4 py-2 font-bold text-white hover:bg-orange-700"
+                        id="compare-mode-btn"></button>
+            </div>
+            <div class="w-2/3">
+                <h1 id="compare-mode-title"
+                    class="text-center text-3xl"></h1>
+            </div>
         </div>
-        <div class="" id="compare-widgets-mode">
+        <div class="hidden" id="compare-widgets-mode">
             <div class="comparisons-header mb-6 ml-4 space-y-3">
                 {% include 'widgets/word_highlights_dropdown.html' %}
                 <button class="toggle-form-button">
@@ -40,17 +47,7 @@
             </div>
         </div>
 
-        <!-- Passage selection dropdown -->
-        <div class="flex w-2/3 justify-center">
-            <button class="btn passage-dropdown-btn reference-button"
-                    data-id="{{ passage.id }}">
-                {{ passage.reference_abbr }}
-            </button>
-        </div>
-
-        {% include 'widgets/passage_selector.html' %}
-
-        <div class="" id="compare-lists-mode">
+        <div class="hidden" id="compare-lists-mode">
             {% include 'widgets/compare_algorithms_form.html' %}
             <div class="mt-8">
                 <div class="comparison-container">
@@ -62,10 +59,15 @@
         </div>
     </div>
 
+    <!-- Required import to maintain unique id with multiple text widgets -->
     {% include 'widgets/algorithm_form.html' %}
+    <!-- Required import to maintain unique id with multiple text widgets -->
+    {% include 'widgets/passage_selector.html' %}
     <!-- Required import to maintain unique id with multiple text widgets -->
     {% include 'widgets/selected_word.html' %}
 
     <script type="module"
             src="{% static 'js/passages_compare.js' %}"></script>
+    <script type="module"
+            src="{% static 'js/widgets/passage_selector.js' %}"></script>
 {% endblock %}

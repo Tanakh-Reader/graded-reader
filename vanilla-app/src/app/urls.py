@@ -19,6 +19,7 @@ urlpatterns = [
     # path("api/render-chapter", views.render_chapter, name="render_chapter"),
     path("api/get-books", views.get_books, name="get_books"),
     path("api/get-algorithms", views.get_algorithms, name="get_algorithms"),
+    path("api/get-passages", views.get_passages, name="get_passages"),
     path("api/check-data-ready", views.check_data_ready, name="check_data_ready"),
     # POST
     path("api/algorithm", views.post_algorithm, name="post_algorithm"),

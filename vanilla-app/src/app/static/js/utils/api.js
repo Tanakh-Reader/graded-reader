@@ -106,6 +106,21 @@ function getAllAlgorithms() {
 	});
 }
 
+function getAllPassages() {
+	return new Promise((resolve, reject) => {
+		$.ajax({
+			url: constants.GET_PASSAGES_API,
+			method: "GET",
+			success: function (response) {
+				resolve(response.passages); // Resolve the promise with the response
+			},
+			error: function (error) {
+				reject(error); // Reject the promise if there's an error
+			},
+		});
+	});
+}
+
 function deleteAlgorithm(id) {
 	return new Promise((resolve, reject) => {
 		$.ajax({
@@ -191,7 +206,7 @@ function compareAlgorithms(body) {
 
 				// Ensure that the DOM has finished updating
 				setTimeout(() => {
-					events.publish(constants.PASSAGE_COMPARISON_EVENT);
+					events.publish(constants.PASSAGE_LISTS_PENALTY_COMPARISON_EVENT);
 				}, 0);
 
 				resolve();
@@ -206,6 +221,7 @@ export default {
 	getHebrewText,
 	getAllBooks,
 	getAllAlgorithms,
+	getAllPassages,
 	checkDataReady,
 	getAlgorithmForm,
 	submitForm,

@@ -3,24 +3,55 @@ export const PASSAGES_PAGE = "/passages";
 export const COMPARE_PAGE = "/passages/compare";
 
 // API ENDPOINTS
+// ----------------------------------------------------------------
+
 export const DATA_LOADED_API = "/api/check-data-ready";
 export const GET_HEBREW_TEXT_API = "/api/hebrew-text";
 export const GET_ALGORITHM_FORM_API = "/api/algorithm-form";
 export const GET_BOOKS_API = "/api/get-books";
 export const GET_ALGORITHMS_API = "/api/get-algorithms";
+export const GET_PASSAGES_API = "/api/get-passages";
 export const POST_ALGORITHM_API = "/api/algorithm";
 export const DELETE_WORDS_API = "/api/delete-words";
 export const DELETE_PASSAGES_API = "/api/delete-passages";
 export const DELETE_ALGORITHM_API = "/api/delete-algorithm";
 export const COMPARE_ALGORITHMS_API = "/api/compare-algorithms";
 
-// PUB / SUB EVENTS
-export const TEXT_LOADED_EVENT = "hebrewTextLoaded";
-export const TEXT_ROW_LOADED_EVENT = "xmlll";
+// PUBLISH & SUBSCRIBE EVENTS
+// ----------------------------------------------------------------
+
+export const TEXT_FETCHED_COMPLETED_EVENT = "textFetchedComplete";
+export const PASSAGE_WIDGET_ADDED_EVENT = "passageWidgetAdded";
+export const TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT = "textSubmittedByPassageSelector";
 export const ALG_FORM_LOADED_EVENT = "algorithmFormLoaded";
-export const PASSAGE_COMPARISON_EVENT = "passagePenaltyComparisonsLoaded";
+export const PASSAGE_LISTS_TEXT_COMPARISON_EVENT = "passageListsTextComparison";
+export const PASSAGE_LISTS_PENALTY_COMPARISON_EVENT = "passageListsPenaltyComparison";
+
+// Feature matching rules
+export const EQUALS = "EQUALS";
+export const EXISTS = "EXISTS";
+
+// API Tasks
+export const TASKS = {
+	RUN_ALGORITHM: "RUN_ALGORITHM",
+	SAVE: "SAVE",
+};
+
+// Form values
+export const FIELD_NULL_VALUE = "na";
+export const FIELD_NULL_NAME = "N/A";
+
+
+//----------------------------------------------------------------
+// DATA
+// MODEL
+// ATTRIBUTES
+//----------------------------------------------------------------
+
 
 // PASSAGE ATTRIBUTES
+//----------------------------------------------------------------
+
 export const P_ID = "id";
 export const P_START_WORD = "start_word";
 export const P_END_WORD = "end_word";
@@ -37,6 +68,8 @@ export const P_REFERENCE_ABBR = "reference_abbr";
 export const P_PENALTY_DATA = "penalty_data";
 
 // WORD ATTRIBUTES
+// ----------------------------------------------------------------
+
 export const W_ID = "id";
 export const W_BOOK = "book";
 export const W_CHAPTER = "chapter";
@@ -75,19 +108,28 @@ export const W_UNIVALENT_FINAL = "univalent_final";
 export const W_VERBAL_ENDING = "verbal_ending";
 export const W_ROOT_FORMATION = "root_formation";
 
-// Feature matching rules
-export const EQUALS = "EQUALS";
-export const EXISTS = "EXISTS";
+// ALGORITHM ATTRIBUTES
+// ----------------------------------------------------------------
 
-// API Tasks
-export const TASKS = {
-	RUN_ALGORITHM: "RUN_ALGORITHM",
-	SAVE: "SAVE",
-};
+export const A_ID = "id";
+export const A_NAME = "name";
+export const A_FREQUENCIES = "frequencies";
+export const A_VERBS = "verbs";
+export const A_CONSTRUCT_NOUNS = "construct_nouns";
+export const A_CLAUSES = "clauses";
+export const A_PHRASES = "phrases";
+export const A_QERE_PENALTY = "qere_penalty";
+export const A_PENALIZE_BY_VERB_STEM = "penalize_by_verb_stem";
+export const A_TAPER_DISCOUNT = "taper_discount";
+export const A_PROPER_NOUN_DIVISOR = "proper_noun_divisor";
+export const A_INCLUDE_STOP_WORDS = "include_stop_words";
+export const A_TOTAL_PENALTY_DIVISOR = "total_penalty_divisor";
 
-// Form values
-export const FIELD_NULL_VALUE = "na";
-export const FIELD_NULL_NAME = "N/A";
+
+// ----------------------------------------------------------------
+// HYPERLINK
+// DATA
+// ----------------------------------------------------------------
 
 // Hyperlinks for other Bible resources
 export const HYPERLINKS = {
