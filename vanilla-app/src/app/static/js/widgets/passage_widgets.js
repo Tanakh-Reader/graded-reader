@@ -1,9 +1,7 @@
-import * as constants from "./utils/constants.js";
-import * as utils from "./utils/utils.js";
-import * as events from "./utils/events.js";
-import * as passageLists from "./passage_lists.js";
-import apis from "./utils/api.js";
-import { colorWords } from "./widgets/hebrew_text.js";
+import * as constants from "../utils/constants.js";
+import * as utils from "../utils/utils.js";
+import * as events from "../utils/events.js";
+import apis from "../utils/api.js";
 
 const compareWidgetsDiv = $("#compare-widgets-mode")[0];
 const widgetsContainer = compareWidgetsDiv.querySelector(
@@ -29,7 +27,7 @@ export class CompareWidgetsMode {
 	fetchTextWidgets() {
 		this.passageWidgets().each((i, div) => {
 			const id = div.getAttribute("data-id");
-			getHebrewText(id, div);
+			this.fetchText(id, div);
 		});
 	}
 
@@ -103,17 +101,21 @@ export class CompareWidgetsMode {
 			utils.showToast(`Maximum of ${maxTextWidgets} text widgets.`, 2000);
 		}
 	}
-}
 
-function getHebrewText(passageId, div) {
-	apis
-		.getHebrewText(passageId, true)
-		.then((response) => {
-			$(div).html(response);
-			// Dispatch a event for text updates.
-			events.publish(constants.TEXT_FETCHED_COMPLETED_EVENT, div);
-		})
-		.catch((error) => {
-			console.error(error);
-		});
+	/**
+	 * @param {any} [passageId]
+	 * @param {HTMLElement} [textDiv]
+	 */
+	fetchText(passageId, textDiv) {
+		apis
+			.getHebrewText(passageId, true)
+			.then((response) => {
+				$(textDiv).html(response);
+				// Dispatch a event for text updates.
+				events.publish(constants.TEXT_FETCHED_COMPLETED_EVENT, textDiv);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
 }

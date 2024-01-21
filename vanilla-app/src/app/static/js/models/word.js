@@ -222,7 +222,6 @@ export class Word {
 		$("#ref").text(`${book.name} ${this.chapter}:${this.verse}`);
 
 		$("#lex-freq").text(this.lexFrequency + " occ");
-
 		$(summaryDivId).show();
 	}
 }

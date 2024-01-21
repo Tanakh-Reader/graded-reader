@@ -180,7 +180,7 @@ export function buildAlgorithmDisplayButtons(penaltyData) {
 	const conditions = document.querySelectorAll(`[data-condition]`);
 	conditions.forEach((conditionDiv) => {
 		let condition = conditionDiv.dataset.condition;
-		console.log(condition);
+		// console.log(condition);
 		if (penaltyData.check(condition)) {
 			// conditionDiv.classList = buttonClasses;
 			buttonClasses.split(" ").forEach((c) => conditionDiv.classList.add(c));

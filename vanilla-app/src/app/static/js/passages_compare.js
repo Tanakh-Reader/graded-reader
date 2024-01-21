@@ -1,11 +1,9 @@
 import * as constants from "./utils/constants.js";
 import * as utils from "./utils/utils.js";
 import * as events from "./utils/events.js";
-import * as passageLists from "./passage_lists.js";
 import apis from "./utils/api.js";
-import { colorWords } from "./widgets/hebrew_text.js";
-import { CompareListsMode } from "./passage_lists.js";
-import { CompareWidgetsMode } from "./passage_widgets.js";
+import { CompareListsMode } from "./widgets/passage_lists.js";
+import { CompareWidgetsMode } from "./widgets/passage_widgets.js";
 
 const MODE = {
 	LISTS: "Lists",
@@ -21,7 +19,6 @@ class ComparePassages {
 		this.currentMode = defaultMode;
 		this.compareListsContent = new CompareListsMode();
 		this.compareWidgetsContent = new CompareWidgetsMode();
-		this.init();
 	}
 
 	init() {
@@ -66,26 +63,18 @@ class ComparePassages {
 	}
 }
 
+const comparePassages = new ComparePassages();
+
 $(window).on("load", (event) => {
-	const comparePassages = new ComparePassages();
+	comparePassages.init();
 });
 
 events.subscribe(
 	constants.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT,
 	(event) => {
-		getHebrewText(event.detail.passageId, event.detail.div);
+		comparePassages.compareWidgetsContent.fetchText(
+			event.detail.passageId,
+			event.detail.div,
+		);
 	},
 );
-
-function getHebrewText(passageId, div) {
-	apis
-		.getHebrewText(passageId, true)
-		.then((response) => {
-			$(div).html(response);
-			// Dispatch a event for text updates.
-			events.publish(constants.TEXT_FETCHED_COMPLETED_EVENT, div);
-		})
-		.catch((error) => {
-			console.error(error);
-		});
-}

@@ -23,13 +23,13 @@ class Condition {
 	 * @param {Word} [word]
 	 */
 	actionFunc(word) {
-		// setTimeout(() => {
-		if (this.getCheckbox(true)) {
-			word.setConditionHighlight(this.color);
-		} else {
-			word.setConditionHighlight("");
-		}
-		// }, 0);
+		setTimeout(() => {
+			if (this.getCheckbox(true)) {
+				word.setConditionHighlight(this.color);
+			} else {
+				word.setConditionHighlight("");
+			}
+		}, 0);
 	}
 
 	fire() {

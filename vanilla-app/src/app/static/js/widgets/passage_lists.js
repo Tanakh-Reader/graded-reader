@@ -1,13 +1,11 @@
-import * as utils from "./utils/utils.js";
-import apis from "./utils/api.js";
-import * as events from "./utils/events.js";
-import * as constants from "./utils/constants.js";
-import * as alg from "./utils/algorithms.js";
-import * as compare from "./passages_compare.js";
-import { colorWords } from "./widgets/hebrew_text.js";
-import { Passage } from "./models/passage.js";
-import { PenaltyData } from "./models/penalty.js";
-import { Algorithm } from "./models/algorithm.js";
+import * as utils from "../utils/utils.js";
+import apis from "../utils/api.js";
+import * as events from "../utils/events.js";
+import * as constants from "../utils/constants.js";
+import * as alg from "../utils/algorithms.js";
+import { Passage } from "../models/passage.js";
+import { PenaltyData } from "../models/penalty.js";
+import { Algorithm } from "../models/algorithm.js";
 // https://anseki.github.io/leader-line/
 
 // CONSTANTS
@@ -91,16 +89,6 @@ export class PassageListsComparison {
 		this.minDiff = 1000;
 		this.collectPassageData();
 		this.buildDiffSummaryDiv();
-	}
-
-	deleteLines() {
-		if (this.lineReferences && Object.keys(this.lineReferences).length > 0) {
-			Object.entries(this.lineReferences).forEach(
-				([passageId, line], index) => {
-					line.remove();
-				},
-			);
-		}
 	}
 
 	show() {
@@ -213,7 +201,7 @@ export class PassageListsComparison {
 		// Fetch the text for the clicked on passage.
 		let i = div.hasClass("col-1") ? 0 : 1;
 		if (i === 0 || div.hasClass("col-2")) {
-			getPassageText(div[0], textDivs[i]);
+			getPassageText(div[0], textDivs[i], true);
 			widgetsContainer.scrollIntoView();
 		}
 	}
@@ -248,7 +236,6 @@ export class PassageListsComparison {
 	 */
 	drawLine(passageObj) {
 		let currentLine = this.lineReferences[passageObj.passage.id];
-		// TODO is this needed?
 		if (currentLine) {
 			currentLine.remove();
 		}
@@ -263,16 +250,29 @@ export class PassageListsComparison {
 	}
 
 	drawLines() {
-		if (this.lineReferences && Object.keys(this.lineReferences).length > 0) {
-		Object.entries(this.passageObjects).forEach(
-			([passageId, passageObj], index) => {
-				if (passageObj.matchingDiv) {
-					this.drawLine(passageObj);
-				}
-			},
-		);
+		if (this.lineReferences && this.passageObjects) {
+			setTimeout(() => {
+				Object.entries(this.passageObjects).forEach(
+					([passageId, passageObj], index) => {
+						if (passageObj && passageObj.matchingDiv) {
+						this.drawLine(passageObj);
+					}
+				});
+			}, 150);
 		}
 	}
+
+	deleteLines() {
+		if (this.lineReferences && Object.keys(this.lineReferences).length > 0) {
+			Object.entries(this.lineReferences).forEach(
+				([passageId, line], index) => {
+					line.remove();
+				},
+			);
+			this.lineReferences = {}
+		}
+	}
+
 
 	buildDiffSummaryDiv() {
 		// Sort the entries in reverse order by the absolute difference
@@ -375,28 +375,39 @@ export class CompareListsMode {
 	show() {
 		$(compareListsDiv).show();
 		// this.listComparison.init();
-		// this.listComparison.drawLines();
+		this.listComparison.drawLines();
 	}
 
 	hide() {
+		this.listComparison.deleteLines();
 		$(compareListsDiv).hide();
 		// this.listComparison.deleteLines();
 	}
 
 	setListeners() {
+		// form submitted
 		events.subscribe(
 			constants.PASSAGE_LISTS_PENALTY_COMPARISON_EVENT,
 			(event) => {
 				this.listComparison.init();
 				this.listComparison.show();
 				this.listComparison.loadMatchingIndexTexts();
-				this.listComparison.drawLines();
 			},
 		);
 
+		// text fetched
 		events.subscribe(constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, (event) => {
 			widgetsContainer.scrollIntoView();
 			this.listComparison.drawLines();
+		});
+
+		// text fetched via selector
+		events.subscribe(constants.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT, (event) => {
+			setTimeout(() => {
+				this.listComparison.drawLines();
+				// Remove del buttons for passage list case
+				$(compareListsDiv).find(".remove-widget.del-btn").remove();
+			}, 300);
 		});
 	}
 
@@ -428,8 +439,19 @@ export class CompareListsMode {
 				alg2: compareAlgorithmsForm.find('select[name="algorithm2"]').val(),
 				count: compareAlgorithmsForm.find('input[name="count"]').val(),
 			};
-
-			apis.compareAlgorithms(formData);
+			const invalidValues = ["0", "", null, undefined];
+			if (
+				invalidValues.includes(formData.count)
+				|| invalidValues.includes(formData.alg1)
+				|| invalidValues.includes(formData.alg2)
+				|| formData.alg1 === formData.alg2
+			) {
+				const message = "Choose: {count > 0} and {2 unique algorithms}";
+				utils.showToast(message, 2500);
+				return false;
+			} else {
+				apis.compareAlgorithms(formData);
+			}
 		});
 	}
 }
@@ -439,7 +461,7 @@ export class CompareListsMode {
  * @param {HTMLElement} [textDiv]
  * @param {Boolean} [publishEvent]
  */
-function getPassageText(passageDiv, textDiv, publishEvent = false) {
+function getPassageText(passageDiv, textDiv, publishEvent = true) {
 	apis
 		.getHebrewText(passageDiv.dataset.id, true)
 		.then((response) => {
@@ -447,19 +469,22 @@ function getPassageText(passageDiv, textDiv, publishEvent = false) {
 			$(textDiv).html(response);
 			// Remove del buttons for passage list case
 			$(compareListsDiv).find(".remove-widget.del-btn").remove();
-			// Dispatch an event for text updates.
-			if (publishEvent) {
-				events.publish(constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, textDiv);
-			}
 			let passage = new Passage(
 				utils.contextToJson(passageDiv.dataset.definition),
 			);
 			let data = new PenaltyData(passage.penaltyData);
-			console.log(data);
-
 			alg.buildAlgorithmDisplayButtons(data);
-
-			colorWords(document, data.frequencies);
+			// Dispatch an event for text updates.
+			if (publishEvent) {
+				events.publish(
+					constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, 
+					{
+						div: textDiv,
+						penalties: passage.penaltyData.penalties
+					}
+				);
+				console.log("Comparison passage", passage);
+			}
 		})
 		.catch((error) => {
 			console.error(error);

@@ -33,6 +33,7 @@ class PassageSelectorDropdown {
 			[
 				constants.PASSAGE_WIDGET_ADDED_EVENT,
 				constants.TEXT_FETCHED_COMPLETED_EVENT,
+				constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT
 			],
 			() => {
 				this.addButtonListener(); // Call the method directly

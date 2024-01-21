@@ -3,14 +3,14 @@
 <link rel="stylesheet"
       href="{% static 'css/hebrew_text.css' %}">
 
-<div
-     class="selected-word-widget fixed bottom-2.5 right-2.5 z-10 hidden max-w-xs rounded border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm">
+<div id="selected-word-widget"
+     class="fixed bottom-2.5 right-2.5 z-10 hidden max-w-xs rounded border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm">
     <button class="dismiss-btn">x</button>
-    <div class="word-attributes"></div>
+    <div id="word-attributes"></div>
 </div>
 
-<div
-     class="hovered-word-widget fixed bottom-2.5 left-2.5 z-10 hidden max-w-md rounded border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm">
+<div id="hovered-word-widget"
+     class="fixed bottom-2.5 left-2.5 z-10 hidden max-w-md rounded border border-gray-300 bg-gray-100 px-3 py-2.5 text-sm">
     <b><span id="english"></span> (<span id="text"></span>)</b>
     <div id="speech"></div>
     <div id="morph"></div>
