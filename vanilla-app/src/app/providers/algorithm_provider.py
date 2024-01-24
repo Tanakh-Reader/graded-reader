@@ -2,15 +2,17 @@ import datetime
 import os
 
 from django.conf import settings
+from django.shortcuts import get_object_or_404
 
 from ..data import ranks
+from ..models import Algorithm
 from ..utils.io import *
 
 DATA_PATH = os.path.join(settings.BASE_DIR, "app/data/algorithms")
 ID_FILE = os.path.join(DATA_PATH, "id.txt")
 
 
-class Algorithm:
+class Algorithm2:
     def __init__(self, id, config):
         self.id = id
         self.configuration = config
@@ -48,7 +50,7 @@ class Algorithm:
         return self
 
 
-class AlgorithmProvider:
+class AlgorithmProvider2:
     def config_to_algorithm(self, config):
         pass
 
@@ -63,7 +65,7 @@ class AlgorithmProvider:
 
     def get_algorithm_by_id(self, id):
         path = os.path.join(DATA_PATH, str(id))
-        algorithm: Algorithm = load_pickle_data(path)
+        algorithm: Algorithm2 = load_pickle_data(path)
         return algorithm
 
     # Save an algorithm and return the <Algorithm> instance.
@@ -77,11 +79,11 @@ class AlgorithmProvider:
             return algorithm.save()
         # Save new algorithm
         else:
-            algorithm = Algorithm(self.get_id(), config)
+            algorithm = Algorithm2(self.get_id(), config)
             return algorithm.save()
 
     def get_saved_algorithms(self, configs_only=False):
-        algorithms: list[Algorithm] = []
+        algorithms: list[Algorithm2] = []
         # Use id file to get all algorithms
         max_id = self.get_id(increment=False)
         for id in range(1, max_id):
@@ -95,18 +97,20 @@ class AlgorithmProvider:
         return algorithms
 
     def get_default_configurations(self, configs_only=True):
-        algorithms: list[Algorithm] = []
+        algorithms: list[Algorithm2] = []
         all_ranks = ranks.LexRanks.all_ranks
         for rank in all_ranks:
-            config = {"name": rank.name, "data": {"frequencies": rank.get_rank_array()}}
-            algorithm = Algorithm(None, config)
-            algorithms.append(algorithm)
+            config = {"name": rank.name, "frequencies": rank.get_rank_array()}
+            # algorithm = Algorithm(None, config)
+            # algorithms.append(algorithm)
+            algorithms.append(config)
         if configs_only:
-            return [alg.configuration for alg in algorithms]
+            # return [alg.configuration for alg in algorithms]
+            return algorithms
         return algorithms
 
     def get_all_algorithms(self, configs_only=False):
-        algorithms: list[Algorithm] = []
+        algorithms: list[Algorithm2] = []
         # Use id file to get all algorithms
         max_id = self.get_id(increment=False)
         for alg in self.get_default_configurations(configs_only=False):
@@ -120,6 +124,46 @@ class AlgorithmProvider:
         if configs_only:
             return [alg.configuration for alg in algorithms]
         return algorithms
+
+
+class AlgorithmProvider:
+    def config_to_algorithm(self, config):
+        pass
+
+    def get_all_algorithms(self):
+        algorithms = Algorithm.objects.all()
+        # if as_json:
+        #     return self.__algorithms_to_json(passages)
+        return algorithms
+
+    def get_algorithms_by_ids(self, ids, as_json=False):
+        ids = [int(id) for id in ids]
+        algorithms = Algorithm.objects.filter(id__in=ids)
+        return algorithms
+
+    def get_configs(self, ids=None, as_json=False):
+        algorithms = None
+        if ids:
+            algorithms = self.get_algorithms_by_ids(ids)
+        else:
+            algorithms = self.get_all_algorithms()
+        return [a.as_config(as_json) for a in algorithms]
+
+    def delete_algorithm(self, id):
+        algorithm = get_object_or_404(Algorithm, pk=id)
+        algorithm.delete()
+        return algorithm
+
+    def get_default_configurations(self, configs_only=True):
+        algorithms = []
+        all_ranks = ranks.LexRanks.all_ranks
+        for rank in all_ranks:
+            config = {"name": rank.name, "frequencies": rank.get_rank_array()}
+            algorithms.append(config)
+        return algorithms
+
+    def __algorithms_to_json(self, algorithms: list[Algorithm]):
+        return []
 
 
 algorithm_provider = AlgorithmProvider()

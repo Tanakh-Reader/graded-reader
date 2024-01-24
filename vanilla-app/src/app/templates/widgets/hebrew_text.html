@@ -3,23 +3,23 @@
 
 {% load static %}
 
-<link rel="stylesheet" href="{% static 'css/hebrew_text.css' %}">
+<link rel="stylesheet"
+      href="{% static 'css/hebrew_text.css' %}">
 
 {% spaceless %}
-<div id="paragraph" dir="rtl">
-    {% for word in words %}
-    {% with previous_word=words|prev:forloop.counter0 %}
-    {% if forloop.first or word.verse != previous_word.verse %}
-    <span class="verse-number"> {{ word.verse }} </span>
-    {% endif %}
-    {% endwith %}
-    <span id="{{ word.id }}" class="word" data-dict="{{ word|to_json }}"
-        onclick="showWordAttributes(this)" onmouseover="showWordSummary(this)"
-        onmouseout="clearTimer()"
-        >{{ word.text }}{{ word.trailer }}</span>
-    {% endfor %}
-</div>
+    <div id="paragraph" dir="rtl">
+        {% for word in words %}
+            {% with previous_word=words|prev:forloop.counter0 %}
+                {% if forloop.first or word.verse != previous_word.verse %}
+                    <span class="verse-number">{{ word.verse }}</span>
+                {% endif %}
+            {% endwith %}
+            <span id="word-{{ word.id }}"
+                  class="word"
+                  data-definition="{{ word|to_json }}">{{ word.text }}{{ word.trailer }}</span>
+        {% endfor %}
+    </div>
 {% endspaceless %}
 
-<script type="module" src="{% static 'js/widgets/hebrew_text.js' %}"></script>
-
+<script type="module"
+        src="{% static 'js/widgets/hebrew_text.js' %}"></script>

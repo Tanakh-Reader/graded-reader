@@ -2,398 +2,581 @@ import * as constants from "../utils/constants.js";
 import * as utils from "../utils/utils.js";
 import apis from "../utils/api.js";
 import * as events from "../utils/events.js";
+import { Algorithm } from "../models/algorithm.js";
 
-await apis.getAlgorithmForm();
-
-const verbClassName = "verb";
-const frequencyClassName = "freq";
-
-const formsetNames = [verbClassName, frequencyClassName];
-
-var currentConfiguration = {};
-// Lets you still add when all the entries have been deleted.
-const formsToClone = {
-	verb: document.querySelector(`.${verbClassName}-form`),
-	freq: document.querySelector(`.${frequencyClassName}-form`),
+// Object to store the initial clones of each formset
+const formsetClasses = ["frequency", "verb", "noun", "clause", "phrase"];
+const defaultValues = {
+	algorithmName: "",
+	algorithmId: "",
+	includeStopWords: false,
+	penalizeByVerbStem: true,
+	taperDiscount: 1,
+	properNounDivisor: 2,
+	qerePenalty: 7,
+	totalPenaltyDivisor: "WORDS",
 };
 
-const dataDiv = document.querySelector(`#data`).dataset;
-var verbCount = dataDiv.verbCount;
-var freqCount = dataDiv.freqCount;
-
-// Dictionary to track form indexes
-var formCount = {
-	verb: verbCount,
-	freq: freqCount,
-};
-
-var savedAlgorithms = $(document).find(".dropdown-container select").toArray();
-
-function updateRemoveButtons(type) {
-	// If there's only one form of this type, hide the 'remove' button
-	var formDocument = document.querySelector(`.${type}-form`);
-	if (formCount[type] > 0) {
-		// Update event listeners for the 'remove' buttons
-		formDocument.querySelectorAll(`.remove-button`).forEach(function (button) {
-			// First, remove any existing event listener
-			var newButton = button.cloneNode(true);
-			button.parentNode.replaceChild(newButton, button);
-
-			// Then, add the new event listener
-			newButton.addEventListener("click", function (event) {
-				event.target.parentNode.parentNode.remove(); // Note the additional parentNode reference here
-				formCount[type]--;
-
-				// Update the 'remove' buttons again after removing a form
-				updateRemoveButtons(type);
-			});
-		});
-	}
-}
-
-function addForm(type) {
-	// Select the first form of this type to clone
-	var formToClone = formsToClone[type];
-
-	// Create a new form div and replace __prefix__ in its HTML
-	var newForm = formToClone.cloneNode(true);
-	newForm.innerHTML = newForm.innerHTML.replace(/__prefix__/g, formCount[type]);
-
-	// Increase the form count
-	formCount[type]++;
-
-	// Insert the new form before the '+' button
-	document.querySelector(`#add-${type}-button`).before(newForm);
-
-	// Update the 'remove' buttons after adding a new form
-	updateRemoveButtons(type);
-
-	return newForm;
-}
-
-// ****************************************************************
-// FUNCTIONS TO POPULATE THE FORM WITH EXISTING ALGORITHM DATA
-// ****************************************************************
-
-function getValue(data, feature) {
-	const item = data.find((item) => item.feature === feature);
-	return item ? item.value : null;
-}
-
-function removeForms(formType) {
-	const formset = document.querySelector(`.${formType}-formset`);
-	let forms = formset.querySelectorAll(`.${formType}-form`);
-
-	// Keep the first form and remove the rest
-	for (let i = 1; i < forms.length; i++) {
-		forms[i].remove();
-	}
-}
-
-function populateFormset(formType, data, populateForm) {
-	if (!data || data.length === 0) {
-		console.log("No data for ", formType);
-		return null;
+class AlgorithmFormManager {
+	constructor() {
+		this.formsetClones = {};
+		utils.getAlgorithms();
+		apis.getAlgorithmForm();
 	}
 
-	removeForms(formType);
+	init() {
+		this.form = $(".algorithm-form");
+		this.savedAlgorithmSelectors = this.form.find(".saved-algorithms select");
+		this.algorithmNameInput = this.form.find("input[name$=name]");
+		this.algorithmIdInput = this.form.find("input[name$='algorithm-id']");
+		this.stopWordsCheckbox = this.form.find(
+			"input[name$='include_stop_words']",
+		);
+		this.taperDiscountInput = this.form.find("input[name$='taper_discount']");
+		this.properNounInput = this.form.find("input[name$='proper_noun_divisor']");
+		this.qereInput = this.form.find("input[name$='qere_penalty']");
+		this.verbStemCheckbox = this.form.find(
+			"input[name$='penalize_by_verb_stem']",
+		);
+		this.penaltyDivisorSelect = this.form.find(
+			"select[name$='total_penalty_divisor']",
+		);
+		this.submitType = $("input[name$=submit-action]");
 
-	const formset = document.querySelector(`.${formType}-formset`);
-	let forms = formset.querySelectorAll(`.${formType}-form`);
-	console.log(formType, forms);
-	if (forms.length === 0) {
-		var firstForm = addForm(formType);
-	} else {
-		firstForm = forms[0];
+		formsetClasses.forEach(this.setupFormsetHandlers.bind(this));
+		this.setListeners();
 	}
-	populateForm(firstForm, data[0]);
 
-	for (let i = 1; i < data.length; i++) {
-		let newForm = addForm(formType);
-
-		// After adding the form, it should be the last one in the formset
-		// let newF3orm = forms[forms.length - 1];
-		populateForm(newForm, data[i]);
-	}
-
-	const totalFormsInput = formset.querySelector("input[name$=TOTAL_FORMS]");
-	totalFormsInput.value = data.length;
-}
-
-function populateFrequencyForm(form, data) {
-	const startField = form.querySelector("input[name$=start]");
-	const endField = form.querySelector("input[name$=end]");
-	const penaltyField = form.querySelector("input[name$=penalty]");
-
-	startField.value = data[0];
-	endField.value = data[1];
-	penaltyField.value = data[2];
-}
-
-function populateVerbForm(form, data) {
-	const verbTenseField = form.querySelector("select[name$=verb_tense]");
-	const verbStemField = form.querySelector("select[name$=verb_stem]");
-	const suffixField = form.querySelector("select[name$=suffix]");
-	const penaltyField = form.querySelector("input[name$=penalty]");
-
-	verbTenseField.value =
-		getValue(data[0], constants.W_VERB_TENSE) || constants.FIELD_NULL_VALUE;
-	verbStemField.value =
-		getValue(data[0], constants.W_VERB_STEM) || constants.FIELD_NULL_VALUE;
-	suffixField.value =
-		getValue(data[0], constants.W_PRONOMINAL_SUFFIX) ||
-		constants.FIELD_NULL_VALUE;
-	penaltyField.value = data[1];
-}
-
-function populateAlgorithmForm(algorithmConfig) {
-	const algorithmData = algorithmConfig.data;
-	populateFormset(
-		frequencyClassName,
-		algorithmData.frequencies,
-		populateFrequencyForm,
-	);
-	populateFormset(verbClassName, algorithmData.verbs, populateVerbForm);
-	document.querySelector("#alg-name").value = algorithmConfig.name;
-
-	// Set the config for when posting.
-	currentConfiguration = algorithmConfig;
-}
-
-// ****************************************************************
-// FUNCTIONS TO SUBMIT THE FORM
-// ****************************************************************
-
-function getConfiguration() {
-	var config = currentConfiguration;
-	var data = {};
-	// Get verb data
-	var verbForms = document.querySelectorAll(`.${verbClassName}-form`);
-	data.verbs = Array.from(verbForms)
-		.map((form) => {
-			var inputsAndSelects = form.querySelectorAll("input, select"); // include select
-			// TODO check for not null or N/A ? Or handle on the backend?
-			var verb_tense = {
-				feature: constants.W_VERB_TENSE,
-				rule: constants.EQUALS,
-				value: inputsAndSelects[0].value,
-			};
-			var verb_stem = {
-				feature: constants.W_VERB_STEM,
-				rule: constants.EQUALS,
-				value: inputsAndSelects[1].value,
-			};
-			var suffix = {
-				feature: constants.W_PRONOMINAL_SUFFIX,
-				rule: constants.EXISTS,
-				value: inputsAndSelects[2].value,
-			};
-			let verb_data = [];
-			// Only push items that have been selected by the user.
-			[verb_tense, verb_stem, suffix].forEach((item) => {
-				if (item.value !== constants.FIELD_NULL_VALUE) {
-					verb_data.push(item);
-				}
-			});
-			let penalty = parseFloat(inputsAndSelects[3].value);
-			return [verb_data, penalty];
-		})
-		.filter((value) => value != null && value.length > 1); // filter out empty arrays
-
-	// Get frequency data
-	var frequencyForms = document.querySelectorAll(`.${frequencyClassName}-form`);
-	data.frequencies = Array.from(frequencyForms).map((form) => {
-		var inputsAndSelects = form.querySelectorAll("input, select"); // include select
-		return [
-			parseInt(inputsAndSelects[0].value),
-			parseInt(inputsAndSelects[1].value),
-			parseFloat(inputsAndSelects[2].value),
-		];
-	});
-
-	// Set name
-	config.name = document.querySelector("#alg-name").value;
-
-	config.data = data;
-	return config;
-}
-
-function runAlgorithm(config, text) {
-	console.log("RUN ALG");
-	apis
-		.postAlgorithm(config, constants.TASKS.RUN_ALGORITHM, text)
-		.then((response) => {
-			const textResponse = response.text;
-			const score = response.score;
-			const penalties = response.penalties;
-			const items = textResponse.sort(function (a, b) {
-				return a.score - b.score;
-			});
-
-			let text = "";
-			for (let item of items) {
-				text =
-					text +
-					item.id +
-					`<span class='text-red-500'> ${item.score}</span><br>`; // + JSON.stringify(item.penalties, undefined, 2) + '<br>';
+	currentAlgorithm(div = null) {
+		let currentAlgId = div ? $(div).val() : $("#dropdown2").val();
+		let currentAlgorithm = currentAlgId
+			? utils.getAlgorithmById(currentAlgId)
+			: null;
+		if (currentAlgorithm) {
+			return currentAlgorithm;
+		} else {
+			// A rank template, which has not id and is not in the DB.
+			// Make sure `to_json` is applied to the data in the html template.
+			let currentConfig = $(`#${div.id} :selected`).data("definition");
+			// Building from scratch -- no algorithm selected.
+			if (!currentConfig) {
+				return null;
 			}
-			$("#alg").html(text);
-			console.log(response);
-		})
-		.catch((error) => {
-			console.error(error);
+			currentConfig.id = null;
+			return new Algorithm(currentConfig);
+		}
+	}
+
+	setListeners() {
+		// Saved algorithm configuration dropdowns
+		this.savedAlgorithmSelectors.on("change", (event) => {
+			let algorithm = this.currentAlgorithm(event.target);
+			this.populateAlgorithmForm(algorithm);
 		});
-	dismissAlgorithmForm();
-}
 
-function saveAlgorithm(config) {
-	console.log("SAVE ALG");
-	apis
-		.postAlgorithm(config, constants.TASKS.SAVE)
-		.then((response) => {
-			// TODO Also add to the dropdown if applicable.
-			const savedConfig = response.configuration;
-			currentConfiguration = savedConfig;
-			utils.showToast(
-				`Algorithm ${savedConfig.name} saved successfully.`,
-				3000,
-			);
-			console.log(response);
-		})
-		.catch((error) => {
-			console.error(error);
-		});
-}
+		// Buttons to dismiss and reset the form
+		$("#algorithm-form-dismiss-btn").on("click", this.hide.bind(this));
+		$("#algorithm-form-reset-btn").on(
+			"click",
+			this.resetAlgorithmForm.bind(this),
+		);
 
-function setupFormSubmission() {
-	// TODO Will need a forAll here if multiple.
-	document
-		.querySelector(".algorithm-form")
-		.addEventListener("submit", function (event) {
-			event.preventDefault(); // prevent the form from submitting
-
-			var formData = new FormData(event.target);
-
-			// apis.submitForm(formData, constants.GET_ALGORITHM_FORM_API);
-
-			let isValidForm = true;
-			document
-				.querySelectorAll('input[type="number"]')
-				.forEach(function (input) {
-					if (input.value.trim() === "") {
-						console.log(input);
-						isValidForm = false;
-					}
-				});
-			if (!isValidForm) {
-				alert("Please fill all the fields.");
+		// All buttons used to open the algorithm in a page.
+		$(".toggle-form-button").on("click", (event) => {
+			if (this.form.css("display") == "none") {
+				this.show(event.currentTarget);
+				this.checkEditAlgorithm($(event.currentTarget));
 			} else {
-				const config = getConfiguration();
-				if (event.submitter.id === "save") {
-					saveAlgorithm(config);
-					// Handle text data
-				} else if (event.submitter.id === "save-copy") {
-					config.id = null;
-					saveAlgorithm(config, true);
-					// Handle text data
-				} else {
-					// If a page with rendered text, set those texts to be the passages.
-					var passageIds = null;
-					if (window.location.href.includes(constants.COMPARE_PAGE)) {
-						const referenceButtons =
-							document.querySelectorAll(".reference-button");
-						passageIds = Array.from(referenceButtons)
-							.map((button) => {
-								return $(button).attr("data-id");
-							})
-							.filter((id) => id != null);
-					} else {
-						let passageId = $(".psg").attr("data-id");
-						console.log(passageId);
-						console.log($(".psg"));
-						if (passageId) {
-							passageIds = [passageId];
-						}
-					}
-					if (!passageIds || passageIds.length === 0) {
-						alert("Please select a passage.");
-					}
-					const text = {
-						passage_ids: passageIds,
-					};
-					runAlgorithm(config, text);
-				}
-				currentConfiguration = {};
+				this.hide();
 			}
 		});
-}
 
-// ****************************************************************
-// FUNCTIONS TO TOGGLE THE FORM'S DISPLAY
-// ****************************************************************
+		// Submission of the form
+		// The JQuery .on() wasn't finding the submitter for some reason.
+		this.form[0].addEventListener("submit", (event) => {
+			this.submit(event);
+		});
+	}
 
-// Assuming you have more than one button, we add the event listener to each button
-function setupToggleFormButtons() {
-	let form = document.querySelector(".algorithm-form");
-	let buttons = document.querySelectorAll(".toggle-form-button");
-	// E.g., on the Algorithms screen.
-	if (buttons.length === 0) {
-		form.style.display = "inline-flex";
-		form.classList.remove("absolute");
-		form.querySelector(".dismiss-btn").style.display = "none";
-	} else {
-		buttons.forEach((button) => {
-			button.addEventListener("click", function (e) {
-				// To compensate for tailwind classes not affecting inline style.
-				let display = window.getComputedStyle(form).display;
-				if (display === "none") {
-					let rect = e.target.getBoundingClientRect();
-					form.style.top =
-						rect.top + window.scrollY + button.offsetHeight + "px";
-					form.style.left = rect.left + window.scrollX + "px";
-					form.style.display = "inline-flex";
-				} else {
-					form.style.display = "none";
-				}
+	hide() {
+		this.form.hide();
+	}
+
+	/**
+	 * Button clicked to open the algorithm
+	 *
+	 * @param {HTMLElement} [button]
+	 */
+	show(button) {
+		this.form.css("display", "inline-flex");
+		let rect = button.getBoundingClientRect();
+		this.form[0].style.top =
+			rect.top + window.scrollY + button.offsetHeight + "px";
+
+		// Calculate the horizontal center position of the button
+		let buttonCenter = rect.left + button.offsetWidth / 2;
+
+		// Calculate the width of the form
+		let formWidth = this.form[0].offsetWidth;
+
+		if (buttonCenter > (window.innerWidth + 20) / 2) {
+			// Button is more than halfway to the right of the screen
+			// Position form to the left of the button
+			this.form[0].style.left = rect.left - formWidth + "px";
+		} else {
+			// Button is less than halfway to the right of the screen
+			// Position form to the right of the button
+			this.form[0].style.left = rect.left + button.offsetWidth + "px";
+		}
+	}
+
+	getFormset(formTitle) {
+		return $(`.${formTitle}-formset`);
+	}
+
+	getFormsetItem(formTitle) {
+		return $(`.${formTitle}-form`);
+	}
+
+	getTotalFormsInput(formTitle) {
+		return $(`#id_${formTitle}-TOTAL_FORMS`);
+	}
+
+	// Function to update the names and IDs of form inputs to maintain proper indexing
+	updateFormIndices(formTitle) {
+		// Iterate over each form and update the index of each input
+		this.getFormsetItem(formTitle).each((i, form) => {
+			form.querySelectorAll("input, select").forEach((input) => {
+				// Replace the form index in the name attribute
+				const name = input.name.replace(/-\d+-/, `-${i}-`);
+				input.name = name;
+				input.id = `id_${name}`; // Update the ID to match the name
 			});
 		});
 	}
-}
 
-function dismissAlgorithmForm() {
-	document.querySelector(".algorithm-form").style.display = "none";
-}
+	// Function to set up event listeners for adding and removing forms
+	setupFormsetHandlers(formTitle) {
+		// Add new form to the formset when the add button is clicked
+		$(`#add-${formTitle}-form`).on("click", () => {
+			this.addFormsetItem(formTitle);
+		});
 
-// ****************************************************************
-// INITIALIZE FUNCTIONS
-// ****************************************************************
+		// Clone the initial form and store it with its listeners.
+		this.formsetClones[formTitle] = this.getFormsetItem(formTitle).clone(true);
 
-events.subscribe(constants.ALG_FORM_LOADED_EVENT, function () {
-	setupToggleFormButtons();
+		// Begin with no forms displayed, until added by the user.
+		this.removeFormsetItems(formTitle);
+	}
 
-	formsetNames.forEach(function (type) {
-		document
-			.querySelector(`#add-${type}-button`)
-			.addEventListener("click", function () {
-				addForm(type);
+	setDeleteFormsetItemListeners(formTitle) {
+		// Remove a form from the formset when the remove button is clicked
+		this.getFormsetItem(formTitle).each((i, item) => {
+			$(item)
+				.find(".remove-form-button")
+				.on("click", () => {
+					// Remove the form that contains the clicked remove button
+					item.remove();
+					// Update the total form count in the management form
+					this.getTotalFormsInput().val(this.getFormsetItem(formTitle).length);
+					// Update indices to reflect the form removal
+					this.updateFormIndices(formTitle);
+				});
+		});
+	}
+
+	addFormsetItem(formTitle) {
+		// Get the current form index
+		const formsetItemIndex = this.getTotalFormsInput(formTitle).last();
+		// Clone the form
+		const newFormsetItem = this.formsetClones[formTitle].clone(true)[0];
+		newFormsetItem.innerHTML = newFormsetItem.innerHTML.replace(
+			/__prefix__/g,
+			formsetItemIndex,
+		);
+		this.getFormset(formTitle).append(newFormsetItem);
+		// Increment the form count index.
+		this.getTotalFormsInput().val(parseInt(formsetItemIndex) + 1);
+		this.updateFormIndices(formTitle);
+
+		// Set listener to remover a form from the formset when the remove button is clicked
+		$(newFormsetItem)
+			.find(".remove-form-button")
+			.on("click", () => {
+				// Remove the form that contains the clicked remove button
+				newFormsetItem.remove();
+				// Update the total form count in the management form
+				this.getTotalFormsInput().val(this.getFormsetItem(formTitle).length);
+				// Update indices to reflect the form removal
+				this.updateFormIndices(formTitle);
 			});
 
-		// Update the 'remove' buttons at the start
-		updateRemoveButtons(type);
-	});
+		return newFormsetItem;
+	}
 
-	savedAlgorithms.forEach((dropdown) => {
-		dropdown.addEventListener("change", (event) => {
-			const selectedOption = event.target.selectedOptions[0];
-			const algorithmConfig = utils.contextToJson(
-				selectedOption.dataset.definition,
-			);
-			populateAlgorithmForm(algorithmConfig);
+	/**
+	 * Remove all the items from a formset
+	 * @param {string} [formTitle]
+	 */
+	removeFormsetItems(formTitle) {
+		// E.g., if 1, it will keep the first formset item.
+		const keepCount = 0;
+		this.getFormsetItem(formTitle).each((i, item) => {
+			if (i >= keepCount) {
+				item.remove();
+			}
 		});
-	});
+	}
 
-	setupFormSubmission();
+	// ****************************************************************
+	// FUNCTIONS TO POPULATE THE FORM WITH EXISTING ALGORITHM DATA
+	// ****************************************************************
+
+	/**
+	 * Find the matching object via its feature in a list of objects
+	 * @param {Object} [data]
+	 * @param {any} [feature]
+	 */
+	getValue(data, feature) {
+		const item = data.find((item) => item.feature === feature);
+		return item ? item.value : constants.FIELD_NULL_VALUE;
+	}
+
+	/**
+	 * Populate a formset with the provided data and populate method.
+	 * @param {string} [formTitle]
+	 * @param {array} [data]
+	 * @param {function} [populateForm]
+	 */
+	populateFormset(formTitle, data, populateForm) {
+		this.removeFormsetItems(formTitle);
+
+		if (!data || data.length === 0) {
+			console.log("No data for ", formTitle);
+			return null;
+		}
+
+		if (this.getFormsetItem(formTitle).length === 0) {
+			var firstForm = this.addFormsetItem(formTitle);
+		} else {
+			firstForm = this.getFormsetItem(formTitle).first();
+		}
+		populateForm(firstForm, data[0]);
+
+		for (let i = 1; i < data.length; i++) {
+			let newForm = this.addFormsetItem(formTitle);
+			populateForm(newForm, data[i]);
+		}
+
+		const totalFormsInput = this.getFormset(formTitle).find(
+			"input[name$=TOTAL_FORMS]",
+		);
+		totalFormsInput.val(data.length);
+	}
+
+	/**
+	 * @param {HTMLElement} [form]
+	 * @param {array} [data]
+	 */
+	populateFrequencyForm(form, data) {
+		const startField = form.querySelector("input[name$=start]");
+		const endField = form.querySelector("input[name$=end]");
+		const penaltyField = form.querySelector("input[name$=penalty]");
+
+		startField.value = data[0];
+		endField.value = data[1];
+		penaltyField.value = data[2];
+	}
+
+	/**
+	 * @param {HTMLElement} [form]
+	 * @param {array} [data]
+	 */
+	populateVerbForm(form, data) {
+		const verbTenseField = form.querySelector("select[name$=verb_tense]");
+		const verbStemField = form.querySelector("select[name$=verb_stem]");
+		const suffixField = form.querySelector("select[name$=suffix]");
+		const penaltyField = form.querySelector("input[name$=penalty]");
+
+		verbTenseField.value = this.getValue(data[0], constants.W_VERB_TENSE);
+		verbStemField.value = this.getValue(data[0], constants.W_VERB_STEM);
+		suffixField.value = this.getValue(data[0], constants.W_PRONOMINAL_SUFFIX);
+		penaltyField.value = data[1];
+	}
+
+	/**
+	 * @param {HTMLElement} [form]
+	 * @param {array} [data]
+	 */
+	populateConstructNounForm(form, data) {
+		const chainLengthField = form.querySelector("input[name$=chain_length]");
+		const penaltyField = form.querySelector("input[name$=penalty]");
+
+		chainLengthField.value = data[0];
+		penaltyField.value = data[1];
+	}
+
+	/**
+	 * @param {HTMLElement} [form]
+	 * @param {array} [data]
+	 */
+	populateClauseForm(form, data) {
+		const clauseTypeField = form.querySelector("select[name$=clause_type]");
+		const penaltyField = form.querySelector("input[name$=penalty]");
+
+		clauseTypeField.value = data[0];
+		penaltyField.value = data[1];
+	}
+
+	/**
+	 * @param {HTMLElement} [form]
+	 * @param {array} [data]
+	 */
+	populatePhraseForm(form, data) {
+		const phraseTypeField = form.querySelector("select[name$=phrase_function]");
+		const penaltyField = form.querySelector("input[name$=penalty]");
+
+		phraseTypeField.value = data[0];
+		penaltyField.value = data[1];
+	}
+
+	/**
+	 * @param {HTMLElement} [element]
+	 * @param {any} [value]
+	 */
+	update(element, value) {
+		if (value != null) {
+			if (element.type === "checkbox") {
+				element.checked = value;
+			} else {
+				element.value = value;
+			}
+		}
+	}
+
+	/**
+	 * Given an algorithm, populate the form with all of its data.
+	//  * @param {Algorithm} [_algorithm]
+	 */
+	populateAlgorithmForm(_algorithm = null) {
+		let algorithm = _algorithm || this.currentAlgorithm();
+		console.log(algorithm);
+		this.update(this.algorithmNameInput[0], algorithm.name);
+		this.update(this.algorithmIdInput[0], algorithm.id);
+		this.update(this.stopWordsCheckbox[0], algorithm.includeStopWords);
+		this.update(this.taperDiscountInput[0], algorithm.taperDiscount);
+		this.update(this.properNounInput[0], algorithm.properNounDivisor);
+		this.update(this.qereInput[0], algorithm.qerePenalty);
+		this.update(this.verbStemCheckbox[0], algorithm.penalizeByVerbStem);
+		this.update(this.penaltyDivisorSelect[0], algorithm.totalPenaltyDivisor);
+
+		this.populateFormset(
+			"frequency",
+			algorithm.frequencies,
+			this.populateFrequencyForm.bind(this),
+		);
+		this.populateFormset(
+			"verb",
+			algorithm.verbs,
+			this.populateVerbForm.bind(this),
+		);
+		this.populateFormset(
+			"noun",
+			algorithm.constructNouns,
+			this.populateConstructNounForm.bind(this),
+		);
+		this.populateFormset(
+			"clause",
+			algorithm.clauses,
+			this.populateClauseForm.bind(this),
+		);
+
+		this.populateFormset(
+			"phrase",
+			algorithm.phrases,
+			this.populatePhraseForm.bind(this),
+		);
+	}
+
+	// ****************************************************************
+	// FUNCTIONS TO SUBMIT THE FORM
+	// ****************************************************************
+
+	/**
+	 * Submit the form and call the relevant api.
+	 * @param {SubmitEvent} [event]
+	 */
+	submit(event) {
+		event.preventDefault(); // prevent the form from submitting
+		// let currentAlg = this.currentAlgorithm();
+		if (event.submitter.id === "algorithm-form-run") {
+			var x = 0;
+		} else if (event.submitter.id === "algorithm-form-save") {
+			this.save();
+		} else if (event.submitter.id === "algorithm-form-copy") {
+			this.save(true);
+		}
+	}
+
+	save(asCopy = false) {
+		let submitType = asCopy
+			? constants.ALGORITHM_TASKS.COPY
+			: constants.ALGORITHM_TASKS.SAVE;
+		this.submitType.val(submitType);
+
+		apis
+			.postAlgorithm(new FormData(this.form[0]))
+			.then((response) => {
+				let algorithm = new Algorithm(response.algorithm);
+				utils.updateAlgorithm(algorithm);
+				this.updateDropdown(algorithm);
+
+				events.publish(events.ALG_FORM_SUBMITTED_EVENT, {
+					action: submitType,
+					algorithm: algorithm,
+				});
+
+				let action = asCopy ? "copied" : "saved";
+				utils.showToast(
+					`Algorithm ${algorithm.name} ${action} successfully.`,
+					3000,
+				);
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+	}
+
+	updateDropdown(algorithm) {
+		// Check if the option already exists
+		let matchingItem = $(`#dropdown2 option[value='${algorithm.id}']`);
+
+		// If not, add the new option
+		if (matchingItem.length < 1) {
+			const option = new Option(algorithm.name, algorithm.id);
+			$("#dropdown2").append(option);
+		} else {
+			// If it exists (e.g., if the name changes)
+			matchingItem.text(algorithm.name);
+		}
+		// Set the new option as selected
+		$("#dropdown2").val(algorithm.id);
+
+		// Trigger the 'change' event to handle the selection
+		$("#dropdown2").trigger("change");
+	}
+
+	// runAlgorithm(config, text) {
+	// 	console.log("RUN ALG");
+	// 	apis
+	// 		.postAlgorithm(config, constants.TASKS.RUN_ALGORITHM, text)
+	// 		.then((response) => {
+	// 			const textResponse = response.text;
+	// 			const score = response.score;
+	// 			const penalties = response.penalties;
+	// 			const items = textResponse.sort(function (a, b) {
+	// 				return a.score - b.score;
+	// 			});
+
+	// 			let text = "";
+	// 			for (let item of items) {
+	// 				text =
+	// 					text +
+	// 					item.id +
+	// 					`<span class='text-red-500'> ${item.score}</span><br>`; // + JSON.stringify(item.penalties, undefined, 2) + '<br>';
+	// 			}
+	// 			$("#alg").html(text);
+	// 			console.log(response);
+	// 		})
+	// 		.catch((error) => {
+	// 			console.error(error);
+	// 		});
+	// }
+
+	setupFormSubmission() {
+		// TODO Will need a forAll here if multiple.
+		this.form.on("submit", (event) => {
+			if (event.submitter.id === "save") {
+			} else {
+				// If a page with rendered text, set those texts to be the passages.
+				var passageIds = null;
+				if (window.location.href.includes(constants.COMPARE_PAGE)) {
+					const referenceButtons =
+						document.querySelectorAll(".reference-button");
+					passageIds = Array.from(referenceButtons)
+						.map((button) => {
+							return $(button).attr("data-id");
+						})
+						.filter((id) => id != null);
+				} else {
+					let passageId = $(".passage-dropdown-btn").attr("data-id");
+					console.log(passageId);
+					console.log($(".psg"));
+					if (passageId) {
+						passageIds = [passageId];
+					}
+				}
+				if (!passageIds || passageIds.length === 0) {
+					alert("Please select a passage.");
+				}
+				const text = {
+					passage_ids: passageIds,
+				};
+				this.runAlgorithm(config, text);
+			}
+			// }
+		});
+	}
+
+	// ****************************************************************
+	// FUNCTIONS TO UPDATE THE FORM'S DISPLAY
+	// ****************************************************************
+
+	/**
+	 * Check if the button used to open the form is an edit button.
+	 * If so, then select the algorithm to edit from the dropdown.
+	 * @param {JQuery<HTMLElement>} [button]
+	 */
+	checkEditAlgorithm(button) {
+		if ($(button).hasClass("edit-algorithm")) {
+			// This selector will need changed based on the page.
+			// This is used on the algorithms page.
+			const algorithmConfig = button
+				.closest(".algorithm-definition")
+				.data("definition");
+
+			$("#dropdown2").val(algorithmConfig.id);
+
+			this.populateAlgorithmForm();
+		}
+	}
+
+	resetAlgorithmForm() {
+		formsetClasses.forEach(this.removeFormsetItems.bind(this));
+		// Reset the dropdown values.
+		this.savedAlgorithmSelectors.each(function () {
+			$(this).val(constants.FIELD_NULL_VALUE);
+		});
+
+		// Reset text inputs
+		this.algorithmNameInput.val(defaultValues.algorithmName);
+		this.algorithmIdInput.val(defaultValues.algorithmId);
+
+		// Reset checkboxes
+		this.stopWordsCheckbox.prop("checked", defaultValues.includeStopWords);
+		this.verbStemCheckbox.prop("checked", defaultValues.penalizeByVerbStem);
+
+		// Reset number inputs
+		this.taperDiscountInput.val(defaultValues.taperDiscount);
+		this.properNounInput.val(defaultValues.properNounDivisor);
+		this.qereInput.val(defaultValues.qerePenalty);
+
+		// Reset select/dropdown
+		this.penaltyDivisorSelect.val(defaultValues.totalPenaltyDivisor);
+	}
+}
+
+const algorithmFormManager = new AlgorithmFormManager();
+events.subscribe(events.ALG_FORM_LOADED_EVENT, function (event) {
+	algorithmFormManager.init();
 });
-
-window.populateAlgorithmForm = populateAlgorithmForm;
-window.dismissAlgorithmForm = dismissAlgorithmForm;

@@ -1,0 +1,36 @@
+{% load static %}
+
+{% load widget_tweaks %}
+{% load list_extras %}
+{% load json %}
+
+<div class="passage-container flex max-h-144 flex-col rounded bg-gray-50 p-4 shadow">
+    <!-- Header section -->
+    <div class="passage-header my-4 flex flex-row items-center justify-center space-x-4">
+        <div class="flex flex-col gap-2">
+            <!-- Remove button -->
+            <button class="remove-widget del-btn">-</button>
+            <!-- Hyperlinks -->
+            {% include 'widgets/hyperlinks.html' with book=passage.book chapter=passage.start_chapter %}
+        </div>
+
+        <!-- Passage selection dropdown -->
+        <div class="flex w-2/3 justify-center">
+            <button class="btn passage-dropdown-btn reference-button"
+                    data-id="{{ passage.id }}">
+                {{ passage.reference_abbr }}
+            </button>
+        </div>
+
+        <h3 class="passage-penalty">{{ passage.penalty }}</h3>
+    </div>
+
+    <div class="overflow-y-scroll">
+        {% if words %}
+            {% include 'widgets/hebrew_text.html' %}
+        {% else %}
+            <!-- Text section - USED by the API CALL -->
+            <div class="passage-text" data-id="{{ passage.id }}"></div>
+        {% endif %}
+    </div>
+</div>

@@ -15,92 +15,98 @@
     --font-title: 'Cormorant Garamond', serif;
     --font-body: 'Cardo', serif;
 } */
- :root {
-     --main-color: saddlebrown;
-     --secondary-color: sienna;
-     --bg-color: antiquewhite;
-     --bg-secondary-color: burlywood;
-     --font-title: 'Cormorant Garamond', serif;
-     --font-body: 'Cardo', serif;
- }
+:root {
+	--main-color: saddlebrown;
+	--secondary-color: sienna;
+	--bg-color: antiquewhite;
+	--bg-secondary-color: burlywood;
+	--font-title: "Cormorant Garamond", serif;
+	--font-body: "Cardo", serif;
+}
 
- body {
-     background-color: var(--bg-color);
-     font-family: var(--font-body);
- }
- h1 {
-     font-size: xx-large;
-     font-weight: 700;
- }
- h1,
- h2 {
-     font-family: var(--font-title);
- }
- h2 {
-    font-size:x-large;
-    font-weight: 700;
- }
+body {
+	background-color: var(--bg-color);
+	font-family: var(--font-body);
+}
+h1 {
+	font-size: xx-large;
+	font-weight: 700;
+}
+h1,
+h2 {
+	font-family: var(--font-title);
+}
+h2 {
+	font-size: x-large;
+	font-weight: 700;
+}
 
- h3 {
-     font-size: large;
-     font-weight: 700;
- }
+h3 {
+	font-size: large;
+	font-weight: 700;
+}
+
+h4 {
+	font-size: medium;
+	font-weight: 700;
+	margin-bottom: 5px;
+}
 
 /* Rules for sizing the icon. */
 .material-icons.md-18 {
-    font-size: 18px;
+	font-size: 18px;
 }
 
 .material-icons.md-24 {
-    font-size: 24px;
+	font-size: 24px;
 }
 
 .material-icons.md-36 {
-    font-size: 36px;
+	font-size: 36px;
 }
 
 .material-icons.md-42 {
-    font-size: 42px;
+	font-size: 42px;
 }
 
 .material-icons.md-48 {
-    font-size: 48px;
+	font-size: 48px;
 }
 
 /* Rules for using icons as black on a light background. */
 .material-icons.md-dark {
-    color: rgba(0, 0, 0, 0.54);
+	color: rgba(0, 0, 0, 0.54);
 }
 
 .material-icons.md-dark.md-inactive {
-    color: rgba(0, 0, 0, 0.26);
+	color: rgba(0, 0, 0, 0.26);
 }
 
 /* Rules for using icons as white on a dark background. */
 .material-icons.md-light {
-    color: rgba(255, 255, 255, 1);
+	color: rgba(255, 255, 255, 1);
 }
 
 .material-icons.md-light.md-inactive {
-    color: rgba(255, 255, 255, 0.3);
+	color: rgba(255, 255, 255, 0.3);
 }
 
- a {
-     color: var(--main-color);
- }
+a {
+	color: var(--main-color);
+}
 
- a:hover {
-     color: var(--secondary-color);
- }
+a:hover {
+	color: var(--secondary-color);
+}
 
- i {
-     font-family: 'FontAwesome' !important;
- }
+i {
+	font-family: "FontAwesome" !important;
+}
 
- header,
- footer {
-     background-color: var(--bg-secondary-color);
- }
+header,
+footer {
+	background-color: var(--bg-secondary-color);
+}
 
 /* 
 FONTS
@@ -112,17 +118,16 @@ Frank Ruhl Libre', serif;
 */
 
 .toast {
-    position: fixed;
-    top: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #323232;
-    color: white;
-    padding: 10px;
-    border-radius: 25px;
-    max-width: 80%;
-    text-align: center;
-    z-index: 1000;
-    font-size: 1rem;
+	position: fixed;
+	top: 50px;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: #323232;
+	color: white;
+	padding: 10px;
+	border-radius: 25px;
+	max-width: 80%;
+	text-align: center;
+	z-index: 1000;
+	font-size: 1rem;
 }
-

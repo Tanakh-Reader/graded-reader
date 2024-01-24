@@ -1,0 +1,61 @@
+{% load static %}
+
+{% load widget_tweaks %}
+{% load list_extras %}
+{% load json %}
+
+<div class="flex items-center justify-center">
+    <div class="flex max-w-3xl flex-col items-center justify-center">
+        <div class="flex flex-row gap-10">
+            <h1 class="text-2xl font-bold">Choose Algorithms</h1>
+            <button class="toggle-form-button">
+                <span class="material-icons md-36">precision_manufacturing</span>
+            </button>
+        </div>
+        <form id="compare-algorithms-form"
+              class="my-6"
+              method="post">
+            <div class="flex flex-row justify-between gap-10 rounded-md border bg-white p-3 shadow">
+                <select name="algorithm1" class="rounded border px-2">
+                    <option disabled selected value="">ALGORITHM 1</option>
+                    {% for obj in algorithms %}
+                        {% comment %} index used for building display {% endcomment %}
+                        <option value="{{ obj.id }}" data-index="1">{{ obj.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="algorithm2" class="rounded border px-2">
+                    <option disabled selected value="">ALGORITHM 2</option>
+                    {% for obj in algorithms %}
+                        <option value="{{ obj.id }}" data-index="2">{{ obj.name }}</option>
+                    {% endfor %}
+                </select>
+                <div>
+                    Top
+                    <input type="number"
+                           name="count"
+                           value="5"
+                           min="0"
+                           class="w-14 rounded border px-1"
+                           id="passage-count">
+                    passages
+                </div>
+                <div>
+                    <button class="rounded bg-green-300 px-1" type="submit">Run</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Display algorithms -->
+
+        <div id="algorithm-definitions"
+             class="flex space-x-12">
+            {% for i in "12" %}
+                <div id="algorithm-{{ i }}"
+                     class="hidden w-96 flex-col gap-2 rounded border bg-white p-3 px-3 text-sm shadow">
+                    <div class="mb-2 font-bold">Algorithm {{ i }}</div>
+                    {% include 'widgets/algorithm_data.html' %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,35 @@
+{% load list_extras %}
+{% load json %}
+
+{% load static %}
+
+{% block styles %}
+    <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>
+
+{% endblock styles %}
+
+{% with item_classes="hidden flex-col rounded border border-slate-300 bg-slate-50 px-2" %}
+    <div class="data-summary flex flex-col gap-2 text-sm">
+        <div class="frequencies {{ item_classes }}"></div>
+        <div class="frequency-extras grid grid-cols-2 gap-2"></div>
+        <div class="verbs {{ item_classes }}"></div>
+        <div class="verb-extras"></div>
+        <div class="nouns {{ item_classes }}"></div>
+        <div class="clauses {{ item_classes }}"></div>
+        <div class="phrases {{ item_classes }}"></div>
+        <div class="config-extras"></div>
+    </div>
+{% endwith %}
+
+{% with item_classes="grid-item flex-col rounded border border-slate-300 bg-slate-50 px-2 mb-2 p-2" %}
+    <div class="data-summary-masonry hidden text-sm">
+        <div class="frequencies {{ item_classes }}"></div>
+        <div class="frequency-extras grid-item mb-2 grid grid-cols-2 gap-2"></div>
+        <div class="verbs {{ item_classes }}"></div>
+        <div class="verb-extras grid-item mb-2"></div>
+        <div class="nouns {{ item_classes }}"></div>
+        <div class="clauses {{ item_classes }}"></div>
+        <div class="phrases {{ item_classes }}"></div>
+        <div class="config-extras grid-item"></div>
+    </div>
+{% endwith %}

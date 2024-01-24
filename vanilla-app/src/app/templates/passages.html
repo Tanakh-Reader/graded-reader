@@ -1,94 +1,120 @@
 {% extends 'layout.html' %}
 {% load static %}
 {% load list_extras %}
+{% load json %}
 
 {% block title %}Passages Page{% endblock %}
 
 {% block styles %}
-<link rel="stylesheet" href="{% static 'css/passages.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'css/passages.css' %}">
 {% endblock %}
 
 {% block content %}
 
-<div class="container mx-auto px-4">
-  <h1 class="text-4xl font-bold my-8">Passages</h1>
-  <form id="filterForm" method="get" class="mb-8">
-    <!-- Filter Passages -->
-    <div class="flex items-center mb-4">
-      <label for="book" class="mr-4 font-bold">Book:</label>
-      <select name="book" id="book" class="border border-gray-400 rounded px-2 py-1">
-        <option value="ALL">ALL</option>
-        {% for book in books %}
-        <option value="{{ book.number }}">{{ book.name }}</option>
-        {% endfor %}
-      </select>
-      <button type="button" class="btn ml-4" onclick="filterPassages()">Search</button>
-    </div>
-    <!-- Sort Passages -->
-    <div class="flex items-center">
-      <label for="sort" class="mr-4 font-bold">Sort by:</label>
-      <select name="sort" id="sort" class="border border-gray-400 rounded px-2 py-1">
-        <option value="word_count">Word Count</option>
-        <option value="id">ID</option>
-        <option value="penalty">Penalty</option>
-      </select>
-      <label for="order" class="ml-4 mr-4 font-bold">Order:</label>
-      <select name="order" id="order" class="border border-gray-400 rounded px-2 py-1">
-        <option value="asc">Ascending</option>
-        <option value="desc">Descending</option>
-      </select>
-      <button type="button" class="btn ml-4" onclick="sortPassages()">Sort</button>
-    </div>
-  </form>
-  <!-- Search bar -->
-  <div class="my-4">
-    <input type="text" id="searchInput" oninput="searchPassages()" placeholder="Search for a passage..."
-      class="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none w-full">
-  </div>
+    <div class="container mx-auto px-4">
+        <h1 class="my-8 text-4xl font-bold">Passages</h1>
+        <form id="filterForm" method="get" class="mb-8">
+            <!-- Filter Passages -->
+            <div class="mb-4 flex items-center">
+                <label for="book" class="mr-4 font-bold">Book:</label>
+                <select name="book"
+                        id="book"
+                        class="rounded border border-gray-400 px-2 py-1">
+                    <option value="ALL">ALL</option>
+                    {% for book in books %}
+                        <option value="{{ book.number }}">{{ book.name }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn search-btn ml-4">Search</button>
+            </div>
+            <!-- Sort Passages -->
+            <div class="flex items-center">
+                <label for="sort" class="mr-4 font-bold">Sort by:</label>
+                <select name="sort"
+                        id="sort"
+                        class="rounded border border-gray-400 px-2 py-1">
+                    <option value="word_count">Word Count</option>
+                    <option value="id">ID</option>
+                    <option value="penalty">Penalty</option>
+                </select>
+                <label for="order" class="ml-4 mr-4 font-bold">Order:</label>
+                <select name="order"
+                        id="order"
+                        class="rounded border border-gray-400 px-2 py-1">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+                <button type="button" class="btn sort-btn ml-4">Sort</button>
+            </div>
+        </form>
+        <!-- Search bar -->
+        <div class="my-4">
+            <input type="text"
+                   id="search-input"
+                   placeholder="Search for a passage..."
+                   class="h-10 w-full rounded-lg border-2 border-gray-300 bg-white px-5 pr-16 text-sm focus:outline-none">
+        </div>
 
-  <!-- Submit passages -->
-  <div class="my-4">
-    <button type="button" class="btn" onclick="submitSelectedPassages()">Submit</button>
-  </div>
+        <!-- Submit passages -->
+        <div class="my-4">
+            <button type="button" class="btn submit-passages-btn">Submit</button>
+        </div>
 
-  <!-- Passage Cards -->
-  {% if passages_loaded %}
-  <div id="passages-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-    {% for passage in passages %}
-    <div class="passage-card bg-white rounded shadow-lg overflow-hidden relative" data-id="{{ passage.id }}"
-      data-book="{{ passage.book }}" data-word-count="{{ passage.word_count }}" data-penalty="{{ passage.penalty }}"
-      data-ref="{{ passage.reference }}">
-      <div class="absolute top-4 right-4">
-        <input type="checkbox" class="passage-select transform scale-150" onclick="selectPassage(event)">
-      </div>
-      <div class="p-4">
-        <h2 class="text-lg font-bold mb-2" onclick="submitPassage('{{ passage|escapejs }}')">{{ passage.reference_abbr }}
-        </h2>
-        <p class="text-gray-700 mb-2">Weight: {{ passage.penalty }}<br>Length: {{ passage.word_count }} words</p>
-        {% for tag in passage.tags %}
-        <p>{{ tag }}</p>
-        {% endfor %}
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  <!-- Data not loaded content -->
-  {% else %}
+        <!-- Passage Cards -->
+        {% if passages_loaded %}
+            <div id="passages-container"
+                 class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {% for passage in passages %}
+                    <div class="passage-card relative overflow-hidden rounded bg-white shadow-lg"
+                         data-id="{{ passage.id }}"
+                         data-book="{{ passage.book }}"
+                         data-word-count="{{ passage.word_count }}"
+                         data-penalty="{{ passage.penalty }}"
+                         data-ref="{{ passage.reference }}">
+                        <div class="absolute right-4 top-4">
+                            <input type="checkbox"
+                                   class="passage-select scale-150 transform">
+                        </div>
+                        <div class="p-4">
+                            <h2 class="open-passage mb-2 text-lg font-bold"
+                                data-definition="{{ passage|to_json }}">
+                                {{ passage.reference_abbr }}
+                            </h2>
+                            <p class="mb-2 text-gray-700">
+                                Weight: {{ passage.penalty }}
+                                <br>
+                                Length: {{ passage.word_count }} words
+                            </p>
+                            {% for tag in passage.tags %}<p>{{ tag }}</p>{% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <!-- Data not loaded content -->
+        {% else %}
 
-  <h1 class="text-2xl font-bold">Data not yet initialized... loading passages into database</h1><br />
-  <p>This page should reload in <b>2–3</b> minutes ⏳</p>
-  <p>Otherwise, please reload yourself.</p>
-  <div class="w-full h-full flex items-center justify-center mt-12 my-4">
-    <img src="{% static 'loading.gif' %}" alt="Loading" class="w-14 h-14">
-  </div>
+            <h1 class="text-2xl font-bold">
+                Data not yet initialized... loading passages into database
+            </h1>
+            <br />
+            <p>
+                This page should reload in <b>2–3</b> minutes ⏳
+            </p>
+            <p>Otherwise, please reload yourself.</p>
+            <div class="my-4 mt-12 flex h-full w-full items-center justify-center">
+                <img src="{% static 'loading.gif' %}"
+                     alt="Loading"
+                     class="h-14 w-14">
+            </div>
 
-  <script type="module">
-    import api from "{% static 'js/utils/api.js' %}";
-    api.checkDataReady('PASSAGES');
-  </script>
+            <script type="module">
+                import api from "{% static 'js/utils/api.js' %}";
+                api.checkDataReady('PASSAGES');
+            </script>
 
-  {% endif %}
+        {% endif %}
 
-  <script type ="module" src="{% static 'js/passages.js' %}"></script>
+        <script type="module" src="{% static 'js/passages.js' %}"></script>
 
-  {% endblock %}
+    {% endblock %}

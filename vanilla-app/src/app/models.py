@@ -1,3 +1,8 @@
+from __future__ import annotations
+
+from typing import SupportsFloat as Numeric
+from typing import Union
+
 from django.db import models
 from django.db.models.signals import post_init
 from django.dispatch import receiver
@@ -61,6 +66,7 @@ class Passage(models.Model):
     start_verse = models.PositiveSmallIntegerField(blank=True, null=True)
     end_verse = models.PositiveSmallIntegerField(blank=True, null=True)
     word_count = models.PositiveSmallIntegerField(db_index=True, blank=True, null=True)
+    # lexeme_count = models.PositiveSmallIntegerField(blank=True, null=True)
     penalty = models.DecimalField(db_index=True, max_digits=7, decimal_places=4)
     tags = models.TextField(blank=True, null=True)
 
@@ -69,6 +75,8 @@ class Passage(models.Model):
         self.verb_types_present = set()
         self.verb_stems_present = set()
         self.verses = []
+        from .algorithm.models import AlgorithmResult
+        self.penalty_data = AlgorithmResult()
 
     def to_dict(self):
         self.penalty = str(self.penalty)
@@ -77,6 +85,7 @@ class Passage(models.Model):
         passage_dict["reference"] = self.get_reference()
         passage_dict["reference_abbr"] = self.get_reference(abbreviation=True)
         passage_dict["id"] = self.id
+        passage_dict["penalty_data"] = self.penalty_data.as_json()
         return passage_dict
 
     def get_vs_words(self, verse):
@@ -114,3 +123,47 @@ class Passage(models.Model):
 def post_init_callback(sender, **kwargs):
     instance = kwargs["instance"]
     instance.__post_init__()
+
+
+# Choices for divided_by field
+DIVIDED_BY_CHOICES = (
+    ("WORDS", "All Words"),
+    ("LEXEMES", "Unique Words (Lexemes)"),
+    # Add more options as needed
+)
+
+
+class Algorithm(models.Model):
+    name = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    frequencies = models.JSONField(default=list)
+    verbs = models.JSONField(default=list)
+    construct_nouns = models.JSONField(default=list)
+    clauses = models.JSONField(default=list)
+    phrases = models.JSONField(default=list)
+    qere_penalty = models.FloatField(default=7)
+    penalize_by_verb_stem = models.BooleanField(default=True)
+    taper_discount = models.FloatField(default=1)
+    proper_noun_divisor = models.FloatField(default=2)
+    include_stop_words = models.BooleanField(default=False)
+    total_penalty_divisor = models.CharField(
+        max_length=50, choices=DIVIDED_BY_CHOICES, default="WORDS"
+    )
+
+    def __str__(self):
+        return self.name
+
+    def as_config(self, as_json=False):
+        from .algorithm.models import AlgorithmConfig
+        config = AlgorithmConfig(self)
+        if as_json:
+            return vars(config)
+        else:
+            config.set_definitions()
+        return config
+
+
+# ----------------------------------------------------------------
+# ----------------------------------------------------------------
+# Algorithm Condition Models
