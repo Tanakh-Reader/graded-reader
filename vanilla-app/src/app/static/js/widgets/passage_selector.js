@@ -9,18 +9,17 @@ class PassageSelectorDropdown {
 		this.passagesDropdownMenu = $(".passage-dropdown");
 		this.dropdownList = this.passagesDropdownMenu.find("ul");
 		this.passageItems = await this.buildPassageDropdown();
-		this.addListeners();
+		this.setListeners();
 	}
 
-	addButtonListener() {
+	setButtonListener() {
 		// Unbind any existing listeners
-		$(".passage-dropdown-btn").off();
-		$(".passage-dropdown-btn").on("click", this.showDropdown.bind(this));
+		$(".passage-dropdown-btn").off().on("click", this.showDropdown.bind(this));
 	}
 
-	addListeners() {
+	setListeners() {
 		// Dropdown buttons
-		this.addButtonListener();
+		this.setButtonListener();
 		// Click on passage dropdown items
 		this.passageItems.each((i, item) => {
 			this.colorPassageItem(item);
@@ -31,12 +30,12 @@ class PassageSelectorDropdown {
 		// Handle re-initialization for dropdown buttons
 		events.addListeners(
 			[
-				constants.PASSAGE_WIDGET_ADDED_EVENT,
-				constants.TEXT_FETCHED_COMPLETED_EVENT,
-				constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT
+				events.PASSAGE_WIDGET_ADDED_EVENT,
+				events.TEXT_FETCHED_COMPLETED_EVENT,
+				events.PASSAGE_LISTS_TEXT_COMPARISON_EVENT,
 			],
 			() => {
-				this.addButtonListener(); // Call the method directly
+				this.setButtonListener(); // Call the method directly
 			},
 		);
 	}
@@ -88,11 +87,11 @@ class PassageSelectorDropdown {
 	}
 
 	/**
-	 * @param {any} event
+	 * @param {MouseEvent} event
 	 */
 	showDropdown(event) {
 		// Get the button that triggered the event and its position.
-		let button = event.target;
+		let button = event.currentTarget;
 		let rect = button.getBoundingClientRect();
 		this.passagesDropdownMenu = $(".passage-dropdown");
 
@@ -153,8 +152,8 @@ class PassageSelectorDropdown {
 	selectPassage(event) {
 		let selectedBtn = $(".passage-dropdown-btn.selected");
 		// Publish an event that will be consumed and handled elsewhere.
-		events.publish(constants.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT, {
-			passageId: $(event.target).data("id"),
+		events.publish(events.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT, {
+			passageId: $(event.currentTarget).data("id"),
 			div: $(selectedBtn).closest(".passage-widget")[0],
 		});
 		this.passagesDropdownMenu.hide();

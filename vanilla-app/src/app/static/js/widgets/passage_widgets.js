@@ -12,7 +12,7 @@ const maxTextWidgets = 4;
 
 export class CompareWidgetsMode {
 	init() {
-		this.addListeners();
+		this.setListeners();
 		this.fetchTextWidgets();
 	}
 
@@ -31,44 +31,47 @@ export class CompareWidgetsMode {
 		});
 	}
 
-	addListeners() {
+	setListeners() {
 		this.setAddButtonListeners();
 		this.setDeleteButtonListeners();
 
-		events.subscribe(constants.PASSAGE_WIDGET_ADDED_EVENT, (event) => {
+		events.subscribe(events.PASSAGE_WIDGET_ADDED_EVENT, (event) => {
 			this.setDeleteButtonListeners();
 		});
 
-		events.subscribe(constants.TEXT_FETCHED_COMPLETED_EVENT, (event) => {
+		events.subscribe(events.TEXT_FETCHED_COMPLETED_EVENT, (event) => {
 			this.setDeleteButtonListeners();
 			this.sortPassages();
 		});
 	}
 
 	setAddButtonListeners() {
-		$(compareWidgetsDiv).find(".add-widget").off;
 		$(compareWidgetsDiv)
 			.find(".add-widget")
+			.off()
 			.on("click", (event) => {
 				this.addTextWidget();
-				events.publish(constants.PASSAGE_WIDGET_ADDED_EVENT);
+				events.publish(events.PASSAGE_WIDGET_ADDED_EVENT);
 			});
 	}
 
 	setDeleteButtonListeners() {
-		$(compareWidgetsDiv).find(".remove-widget").off();
 		$(compareWidgetsDiv)
 			.find(".remove-widget")
+			.off()
 			.on("click", (event) => {
 				// Only remove widget if there are more than 1
 				if (this.passageWidgets().length > minTextWidgets) {
-					event.target.closest(".passage-widget").remove();
+					event.currentTarget.closest(".passage-widget").remove();
 				} else {
 					utils.showToast(`Minimum of ${minTextWidgets} text widgets.`, 2000);
 				}
 			});
 		// Remove height constraint -- only used in list view.
 		$(compareWidgetsDiv).find(".passage-container").removeClass("max-h-144");
+		$(compareWidgetsDiv)
+			.find(".overflow-y-scroll")
+			.removeClass("overflow-y-scroll");
 	}
 
 	passageWidgets() {
@@ -112,7 +115,7 @@ export class CompareWidgetsMode {
 			.then((response) => {
 				$(textDiv).html(response);
 				// Dispatch a event for text updates.
-				events.publish(constants.TEXT_FETCHED_COMPLETED_EVENT, textDiv);
+				events.publish(events.TEXT_FETCHED_COMPLETED_EVENT, textDiv);
 			})
 			.catch((error) => {
 				console.error(error);

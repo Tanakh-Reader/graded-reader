@@ -194,6 +194,11 @@ export class Word {
 		// Update the HTML of the attributes div
 		$("#word-attributes").html(attributes);
 		$(selectedDivId).show();
+		$(`${selectedDivId} .dismiss-btn`)
+			.off()
+			.on("click", () => {
+				this.toggleSelected();
+			});
 	}
 
 	/**

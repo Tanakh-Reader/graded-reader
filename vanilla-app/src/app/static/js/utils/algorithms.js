@@ -3,6 +3,7 @@ import * as utils from "./utils.js";
 import apis from "./api.js";
 import { PenaltyData } from "../models/penalty.js";
 import { Algorithm } from "../models/algorithm.js";
+
 /**
  * @param {Algorithm} [algorithm]
  * @param {String} [id]
@@ -11,6 +12,7 @@ import { Algorithm } from "../models/algorithm.js";
 export function buildAlgorithmDisplay(algorithm, id, asMasonry = false) {
 	const pillClasses = "bg-yellow-50 rounded px-2 border border-yellow-300";
 
+	console.log(algorithm, id, asMasonry);
 	let containerSelector = `#algorithm-${id} .data-summary`;
 	if (asMasonry) {
 		$(containerSelector).hide();
@@ -176,7 +178,7 @@ export function buildAlgorithmDisplayButtons(penaltyData) {
 	// const clauses = document.querySelectorAll(`.clauses div`);
 	// const phrases = document.querySelectorAll(`.phrases div`);
 	let buttonClasses =
-		"hover:cursor-pointer hover:opacity-70 bg-green-100 border border-green-300 rounded";
+		"hover:cursor-pointer hover:opacity-70 !bg-green-100 border !border-green-300 rounded";
 	const conditions = document.querySelectorAll(`[data-condition]`);
 	conditions.forEach((conditionDiv) => {
 		let condition = conditionDiv.dataset.condition;

@@ -6,7 +6,7 @@
 
 {% block styles %}{% endblock %}
 <div id="algorithm-form-container">
-    <form class="algorithm-form absolute z-20 mt-1 hidden w-128 min-w-128 flex-col items-stretch space-y-3 rounded-md border border-slate-300 bg-slate-50 p-3 py-5 text-sm shadow"
+    <form class="algorithm-form absolute z-20 mt-1 hidden w-128 min-w-128 flex-col items-stretch space-y-2 rounded-md border border-slate-300 bg-slate-50 p-3 py-5 text-xs shadow"
           method="post">
 
         {% csrf_token %}
@@ -21,7 +21,8 @@
                         <option selected disabled value="na">TEMPLATES</option>
                         <!-- Default option -->
                         {% for obj in algorithm_templates %}
-                            <option value="{{ obj.id }}" data-definition="{{ obj }}">
+                            <option value="{{ obj.id }}"
+                                    data-definition="{{ obj|to_json }}">
                                 {{ obj.name }}
                             </option>
                         {% endfor %}
@@ -41,19 +42,19 @@
                 </div>
             </div>
             <div class="flex flex-row gap-2">
-                <button class="dismiss-btn"
-                        type="button"
-                        onclick="resetAlgorithmForm()">Reset</button>
-                <button class="dismiss-btn"
-                        type="button"
-                        onclick="dismissAlgorithmForm()">x</button>
+                <button id="algorithm-form-reset-btn"
+                        class="dismiss-btn"
+                        type="button">Reset</button>
+                <button id="algorithm-form-dismiss-btn"
+                        class="dismiss-btn"
+                        type="button">x</button>
             </div>
         </div>
 
         <!-- LEXICAL FREQUENCY PENALTIES -->
 
         <div class="frequency-formset">
-            <h3>Frequencies</h3>
+            <h4>Frequencies</h4>
             {{ frequency_formset.management_form }}
 
             {% for form in frequency_formset %}
@@ -94,7 +95,7 @@
         <!-- VERB MORPHOLOGY PENALTIES -->
 
         <div class="verb-formset">
-            <h3>Verbs</h3>
+            <h4>Verbs</h4>
             {{ verb_formset.management_form }}
             {% for form in verb_formset %}
                 <div class="verb-form flex flex-row items-start gap-2">
@@ -122,7 +123,7 @@
         <!-- CONSTRUCT NOUN PENALTIES -->
 
         <div class="noun-formset">
-            <h3>Construct Nouns</h3>
+            <h4>Construct Nouns</h4>
             {{ construct_noun_formset.management_form }}
             {% for form in construct_noun_formset %}
                 <div class="noun-form flex flex-row items-start gap-2">
@@ -143,7 +144,7 @@
 
         <div class="clause-formset">
             {{ clause_formset.management_form }}
-            <h3>Clause/Phrase Types</h3>
+            <h4>Clause/Phrase Types</h4>
             {% for form in clause_formset %}
                 <div class="clause-form flex flex-row items-start gap-2">
                     <div>{{ form.clause_type|add_class:"border px-2 rounded w-32" }}</div>
@@ -161,7 +162,7 @@
 
         <div class="phrase-formset">
             {{ phrase_formset.management_form }}
-            <h3>Phrase Functions</h3>
+            <h4>Phrase Functions</h4>
             {% for form in phrase_formset %}
                 <div class="phrase-form flex flex-row items-start gap-2">
                     <div>{{ form.phrase_function|add_class:"border px-2 rounded w-32" }}</div>
@@ -206,14 +207,14 @@
 
         <div class="flex flex-row space-x-6">
             {% if passages %}
-                <button id="run" type="submit">
+                <button id="algorithm-form-run" type="submit">
                     <span class="material-symbols-sharp">play_circle</span> Run
                 </button>
             {% endif %}
-            <button id="save" type="submit">
+            <button id="algorithm-form-save" type="submit">
                 <span class="material-symbols-sharp">save</span> Save
             </button>
-            <button id="save-copy" type="submit">
+            <button id="algorithm-form-copy" type="submit">
                 <span class="material-symbols-sharp">save</span> Save Copy
             </button>
 

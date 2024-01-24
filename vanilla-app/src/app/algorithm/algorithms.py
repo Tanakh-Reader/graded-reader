@@ -12,7 +12,7 @@ from ..data.verb_stems import VERB_STEMS
 from ..models import Passage
 from ..providers.hebrew_data_provider import hebrew_data_provider as hdp
 from ..utils.general import word_penalty
-from .models import AlgorithmConfig, FrequencyDefinition
+from .models import AlgorithmConfig, AlgorithmResult, FrequencyDefinition
 
 lex_rank_default = LexRanks()._7_ranks
 
@@ -201,6 +201,9 @@ def get_passage_weight_4(
 def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
     categories: list[Category] = init_categories(configuration, passage)
     lexemes = set()
+    passage.penalty_data = AlgorithmResult()
+    print(vars(configuration))
+    print(passage.penalty_data.as_json())
     # Loop over words from the database, where the word is not a stop word.
     for word in passage.words():
         penalty = 0
@@ -229,11 +232,12 @@ def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
     #     for k, v in category.penalties.items():
     #         print(k, v, "\n")
     # print(category.name, category.penalties)
-    total_penalty = sum(passage.penalty_data.penalties)
+    total_penalty = sum(passage.penalty_data.penalties.values())
     score = configuration.passage_penalty(passage, len(lexemes), total_penalty)
     passage.penalty_data.score = score
-    penalties = {category.name: category.get_penalty_data() for category in categories}
-    return score, penalties
+    print(passage.penalty_data.as_json())
+    # penalties = {category.name: category.get_penalty_data() for category in categories}
+    return score, passage.penalty_data.as_json()
 
 
 class Category(ABC):

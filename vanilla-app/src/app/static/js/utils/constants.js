@@ -7,7 +7,7 @@ export const COMPARE_PAGE = "/passages/compare";
 
 export const DATA_LOADED_API = "/api/check-data-ready";
 export const GET_HEBREW_TEXT_API = "/api/hebrew-text";
-export const GET_ALGORITHM_FORM_API = "/api/algorithm-form";
+export const ALGORITHM_FORM_API = "/api/algorithm-form";
 export const GET_BOOKS_API = "/api/get-books";
 export const GET_ALGORITHMS_API = "/api/get-algorithms";
 export const GET_PASSAGES_API = "/api/get-passages";
@@ -17,24 +17,15 @@ export const DELETE_PASSAGES_API = "/api/delete-passages";
 export const DELETE_ALGORITHM_API = "/api/delete-algorithm";
 export const COMPARE_ALGORITHMS_API = "/api/compare-algorithms";
 
-// PUBLISH & SUBSCRIBE EVENTS
-// ----------------------------------------------------------------
-
-export const TEXT_FETCHED_COMPLETED_EVENT = "textFetchedComplete";
-export const PASSAGE_WIDGET_ADDED_EVENT = "passageWidgetAdded";
-export const TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT = "textSubmittedByPassageSelector";
-export const ALG_FORM_LOADED_EVENT = "algorithmFormLoaded";
-export const PASSAGE_LISTS_TEXT_COMPARISON_EVENT = "passageListsTextComparison";
-export const PASSAGE_LISTS_PENALTY_COMPARISON_EVENT = "passageListsPenaltyComparison";
-
 // Feature matching rules
 export const EQUALS = "EQUALS";
 export const EXISTS = "EXISTS";
 
 // API Tasks
-export const TASKS = {
-	RUN_ALGORITHM: "RUN_ALGORITHM",
+export const ALGORITHM_TASKS = {
+	RUN: "RUN",
 	SAVE: "SAVE",
+	COPY: "COPY",
 };
 
 // Form values

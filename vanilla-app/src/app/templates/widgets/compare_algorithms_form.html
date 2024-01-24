@@ -16,27 +16,19 @@
               class="my-6"
               method="post">
             <div class="flex flex-row justify-between gap-10 rounded-md border bg-white p-3 shadow">
-                <!-- Saved algorithms -->
-                <div class="dropdown-container">
-                    <select name="algorithm1" class="rounded border px-2">
-                        <option disabled selected value="">ALGORITHM A</option>
-                        {% for obj in algorithms %}
-                            <option value="{{ obj.id }}"
-                                    data-definition="{{ obj|to_json }}"
-                                    data-index="1">{{ obj.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="dropdown-container">
-                    <select name="algorithm2" class="rounded border px-2">
-                        <option disabled selected value="">ALGORITHM B</option>
-                        {% for obj in algorithms %}
-                            <option value="{{ obj.id }}"
-                                    data-definition="{{ obj|to_json }}"
-                                    data-index="2">{{ obj.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+                <select name="algorithm1" class="rounded border px-2">
+                    <option disabled selected value="">ALGORITHM 1</option>
+                    {% for obj in algorithms %}
+                        {% comment %} index used for building display {% endcomment %}
+                        <option value="{{ obj.id }}" data-index="1">{{ obj.name }}</option>
+                    {% endfor %}
+                </select>
+                <select name="algorithm2" class="rounded border px-2">
+                    <option disabled selected value="">ALGORITHM 2</option>
+                    {% for obj in algorithms %}
+                        <option value="{{ obj.id }}" data-index="2">{{ obj.name }}</option>
+                    {% endfor %}
+                </select>
                 <div>
                     Top
                     <input type="number"

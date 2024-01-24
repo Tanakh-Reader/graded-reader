@@ -59,20 +59,26 @@ export async function getAlgorithms(asArray = true) {
 			cachedAlgorithms[algorithm.id.toString()] = algorithm;
 		});
 	}
-	if (asArray) {
-		return Object.values(cachedAlgorithms);
-	}
-	return cachedAlgorithms;
+	return asArray ? Object.values(cachedAlgorithms) : cachedAlgorithms;
 }
 
 /**
- * get all .word spans in <div> and return as <Word> objects
+ * get algorithm object by id
  *
  * @param {any} [id]
  * @returns {Algorithm}
  */
 export function getAlgorithmById(id) {
-	return getAlgorithms(false)[id.toString()];
+	return cachedAlgorithms[id.toString()]
+}
+
+/**
+ * Update algorithm cache
+ * 
+ * @param {Algorithm} [algorithm]
+ */
+export function updateAlgorithm(algorithm) {
+	cachedAlgorithms[algorithm.id.toString()] = algorithm
 }
 
 // GET PASSAGES
@@ -93,14 +99,11 @@ export async function getPassages(asArray = true) {
 			cachedPassages[passage.id.toString()] = passage;
 		});
 	}
-	if (asArray) {
-		return Object.values(cachedPassages);
-	}
-	return cachedPassages;
+	return asArray ? Object.values(cachedPassages) : cachedPassages;
 }
 
 /**
- * get all .word spans in <div> and return as <Word> objects
+ * get passage by id
  *
  * @param {any} [id]
  * @returns {Passage}
@@ -130,10 +133,7 @@ export function getWords(div = null, asArray = true) {
 			cachedWords[word.id.toString()] = word;
 		});
 	}
-	if (asArray) {
-		return Object.values(cachedWords);
-	}
-	return cachedWords;
+	return asArray ? Object.values(cachedWords) : cachedWords;
 }
 
 /**

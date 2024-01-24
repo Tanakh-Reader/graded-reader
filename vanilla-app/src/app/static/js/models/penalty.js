@@ -37,9 +37,10 @@ import { HIGHLIGHT_COLORS } from "../utils/theme.js";
 
 export class PenaltyData {
 	constructor(data) {
-        this.penalties = data.penalties;
+		this.penalties = data.penalties;
 		this.currentCondition = null; // Track the current active condition
 		this.frequencies = {};
+		console.log(data);
 		for (const [condition, value] of Object.entries(data.frequencies)) {
 			this.frequencies[condition] = new Category(value);
 		}
@@ -58,23 +59,24 @@ export class PenaltyData {
 		for (const [condition, value] of Object.entries(data.constants)) {
 			this.frequencies[condition] = new Category(value);
 		}
+		console.log(this.frequencies);
 	}
 
-    /**
-     * @param {String} [condition]
-     * @param {JQuery<HTMLElement>} [btn]
-     */
+	/**
+	 * @param {String} [condition]
+	 * @param {JQuery<HTMLElement>} [btn]
+	 */
 	apply(condition, btn) {
 		const btnColor = "bg-orange-300";
 		if (this.currentCondition === condition) {
 			// If the same condition is clicked again, unhighlight all
-			btn.removeClass(btnColor);
+			btn.removeClass("!" + btnColor);
 			this.unhighlightAll();
 			this.currentCondition = null;
 		} else {
 			// Unhighlight current, highlight new condition's words, and update current condition
-            $("." + btnColor).removeClass(btnColor);
-			btn.addClass(btnColor);
+			$("." + btnColor).removeClass("!" + btnColor);
+			btn.addClass("!" + btnColor);
 			this.unhighlightAll();
 			this.frequencies[condition].highlightWordMatches();
 			this.currentCondition = condition;
@@ -82,7 +84,8 @@ export class PenaltyData {
 	}
 
 	check(condition) {
-		return this.frequencies[condition];
+		let match = this.frequencies[condition];
+		return match && match.words.length > 0;
 	}
 
 	unhighlightAll() {
@@ -95,29 +98,29 @@ export class PenaltyData {
 
 export class Category {
 	constructor(category) {
-		this.words = category.words || [];
+		this.words = category.words || category // for constants;
 		this.penalties = category.penalties || [];
 
-        // this.words = this.words.map((w) => utils.getWordById(w))
+		// this.words = this.words.map((w) => utils.getWordById(w))
 	}
 
 	highlightWordMatches() {
 		this.words.forEach((word, i) => {
 			word = utils.getWordById(word);
-            if (word) {
-                word.setConditionHighlight(HIGHLIGHT_COLORS.PALE_GREEN);
-            }
+			if (word) {
+				word.setConditionHighlight(HIGHLIGHT_COLORS.PALE_GREEN);
+			}
 		});
 	}
 
-    unhighlightWordMatches() {
-        this.words.forEach((word, i) => {
+	unhighlightWordMatches() {
+		this.words.forEach((word, i) => {
 			word = utils.getWordById(word);
-            if (word) {
-                word.setConditionHighlight("");
-            }
+			if (word) {
+				word.setConditionHighlight("");
+			}
 		});
-    }
+	}
 
 	wordColors() {
 		this.words.forEach((wordId, i) => {

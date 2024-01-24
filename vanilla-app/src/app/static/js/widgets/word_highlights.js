@@ -142,7 +142,7 @@ $(window).on("load", () => {
 	refreshDropdown();
 });
 
-events.subscribe(constants.TEXT_FETCHED_COMPLETED_EVENT, () => {
+events.subscribe(events.TEXT_FETCHED_COMPLETED_EVENT, () => {
 	// Give time for the words to be fetched.
 	setTimeout(() => {
 		refreshDropdown();

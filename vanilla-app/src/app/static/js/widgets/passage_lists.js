@@ -255,9 +255,10 @@ export class PassageListsComparison {
 				Object.entries(this.passageObjects).forEach(
 					([passageId, passageObj], index) => {
 						if (passageObj && passageObj.matchingDiv) {
-						this.drawLine(passageObj);
-					}
-				});
+							this.drawLine(passageObj);
+						}
+					},
+				);
 			}, 150);
 		}
 	}
@@ -269,10 +270,9 @@ export class PassageListsComparison {
 					line.remove();
 				},
 			);
-			this.lineReferences = {}
+			this.lineReferences = {};
 		}
 	}
-
 
 	buildDiffSummaryDiv() {
 		// Sort the entries in reverse order by the absolute difference
@@ -367,6 +367,7 @@ export class PassageListsComparison {
 
 export class CompareListsMode {
 	init() {
+		this.algorithmDropdowns = compareAlgorithmsForm.find("select");
 		this.listComparison = new PassageListsComparison();
 		this.setUpComparisonForm();
 		this.setListeners();
@@ -386,43 +387,70 @@ export class CompareListsMode {
 
 	setListeners() {
 		// form submitted
-		events.subscribe(
-			constants.PASSAGE_LISTS_PENALTY_COMPARISON_EVENT,
-			(event) => {
-				this.listComparison.init();
-				this.listComparison.show();
-				this.listComparison.loadMatchingIndexTexts();
-			},
-		);
+		events.subscribe(events.PASSAGE_LISTS_PENALTY_COMPARISON_EVENT, (event) => {
+			this.listComparison.init();
+			this.listComparison.show();
+			this.listComparison.loadMatchingIndexTexts();
+		});
 
 		// text fetched
-		events.subscribe(constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, (event) => {
+		events.subscribe(events.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, (event) => {
 			widgetsContainer.scrollIntoView();
 			this.listComparison.drawLines();
 		});
 
 		// text fetched via selector
-		events.subscribe(constants.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT, (event) => {
-			setTimeout(() => {
-				this.listComparison.drawLines();
-				// Remove del buttons for passage list case
-				$(compareListsDiv).find(".remove-widget.del-btn").remove();
-			}, 300);
+		events.subscribe(
+			events.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT,
+			(event) => {
+				setTimeout(() => {
+					this.listComparison.drawLines();
+					// Remove del buttons for passage list case
+					$(compareListsDiv).find(".remove-widget.del-btn").remove();
+				}, 300);
+			},
+		);
+
+		// Algorithm edited or created.
+		events.subscribe(events.ALG_FORM_SUBMITTED_EVENT, (event) => {
+			this.updateDropdownsAndDisplay(event.detail.algorithm);
+		});
+	}
+
+	/**
+	 * Update algorithm and display
+	 * @param {Algorithm} [algorithm]
+	 */
+	updateDropdownsAndDisplay(algorithm) {
+		console.log(algorithm);
+		this.algorithmDropdowns.each((i, dropdown) => {
+			let matchingItem = $(dropdown).find(`option[value='${algorithm.id}']`);
+			console.log(matchingItem);
+			// If not, add the new option
+			if (matchingItem.length < 1) {
+				const option = new Option(algorithm.name, algorithm.id);
+				$(option).data("index", i + 1);
+				$(dropdown).append(option);
+			} // A currently display algorithm has been updated.
+			else {
+				matchingItem.text(algorithm.name);
+			}
+			// Trigger change if the item is selected.
+			if (algorithm.id.toString() === $(dropdown).val()) {
+				$(dropdown).trigger("change");
+			}
 		});
 	}
 
 	setUpComparisonForm() {
-		const algorithmDropdowns = compareAlgorithmsForm.find("select");
-
-		algorithmDropdowns.each((i, dropdown) => {
-			dropdown.addEventListener("change", async (event) => {
-				const selectedOption = event.target.selectedOptions[0];
-				let algorithm = new Algorithm(
-					utils.contextToJson(selectedOption.dataset.definition),
-				);
+		// Listeners for selecting an algorithm and displaying it below.
+		this.algorithmDropdowns.each((i, dropdown) => {
+			$(dropdown).on("change", (event) => {
+				const selectedOption = $(event.target).find(":selected");
+				let algorithm = utils.getAlgorithmById(selectedOption.val());
 				alg.buildAlgorithmDisplay(
 					algorithm,
-					selectedOption.dataset.index,
+					$(selectedOption).data("index"),
 					true,
 				);
 			});
@@ -441,13 +469,13 @@ export class CompareListsMode {
 			};
 			const invalidValues = ["0", "", null, undefined];
 			if (
-				invalidValues.includes(formData.count)
-				|| invalidValues.includes(formData.alg1)
-				|| invalidValues.includes(formData.alg2)
-				|| formData.alg1 === formData.alg2
+				invalidValues.includes(formData.count) ||
+				invalidValues.includes(formData.alg1) ||
+				invalidValues.includes(formData.alg2) ||
+				formData.alg1 === formData.alg2
 			) {
 				const message = "Choose: {count > 0} and {2 unique algorithms}";
-				utils.showToast(message, 2500);
+				window.alert(message);
 				return false;
 			} else {
 				apis.compareAlgorithms(formData);
@@ -465,24 +493,22 @@ function getPassageText(passageDiv, textDiv, publishEvent = true) {
 	apis
 		.getHebrewText(passageDiv.dataset.id, true)
 		.then((response) => {
-			
 			$(textDiv).html(response);
 			// Remove del buttons for passage list case
 			$(compareListsDiv).find(".remove-widget.del-btn").remove();
 			let passage = new Passage(
 				utils.contextToJson(passageDiv.dataset.definition),
 			);
-			let data = new PenaltyData(passage.penaltyData);
+			let data = new PenaltyData(
+				utils.contextToJson(passageDiv.dataset.penalties),
+			);
 			alg.buildAlgorithmDisplayButtons(data);
 			// Dispatch an event for text updates.
 			if (publishEvent) {
-				events.publish(
-					constants.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, 
-					{
-						div: textDiv,
-						penalties: passage.penaltyData.penalties
-					}
-				);
+				events.publish(events.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, {
+					div: textDiv,
+					penalties: passage.penaltyData.penalties,
+				});
 				console.log("Comparison passage", passage);
 			}
 		})

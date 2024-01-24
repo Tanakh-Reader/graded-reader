@@ -10,13 +10,12 @@ const MODE = {
 	WIDGETS: "Widgets",
 };
 
-const defaultMode = MODE.LISTS;
 const compareModeBtn = document.querySelector("#compare-mode-btn");
 const compareModeTitle = document.querySelector("#compare-mode-title");
 
 class ComparePassages {
 	constructor() {
-		this.currentMode = defaultMode;
+		this.currentMode = MODE.LISTS;
 		this.compareListsContent = new CompareListsMode();
 		this.compareWidgetsContent = new CompareWidgetsMode();
 	}
@@ -24,16 +23,18 @@ class ComparePassages {
 	init() {
 		this.compareListsContent.init();
 		this.compareWidgetsContent.init();
-		this.updateButtonAndHeader();
 
-		if (
-			this.currentMode === MODE.LISTS &&
-			this.compareWidgetsContent.passageWidgets().length < 2
-		) {
-			this.compareListsContent.show();
+		if (this.currentMode === MODE.LISTS) {
+			if (this.compareWidgetsContent.passageWidgets().length < 2) {
+				this.compareListsContent.show();
+			} else {
+				this.updateCompareMode();
+			}
 		} else {
 			this.compareWidgetsContent.show();
 		}
+
+		this.updateButtonAndHeader();
 
 		$(compareModeBtn).on("click", this.updateCompareMode.bind(this));
 	}
@@ -70,7 +71,7 @@ $(window).on("load", (event) => {
 });
 
 events.subscribe(
-	constants.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT,
+	events.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT,
 	(event) => {
 		comparePassages.compareWidgetsContent.fetchText(
 			event.detail.passageId,

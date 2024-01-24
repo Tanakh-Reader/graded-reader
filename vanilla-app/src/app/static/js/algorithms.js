@@ -4,8 +4,8 @@ import apis from "./utils/api.js";
 import * as alg from "./utils/algorithms.js";
 import { Algorithm } from "./models/algorithm.js";
 
-const algorithmDivs = $(document).find(".algorithm-definition").toArray();
-algorithmDivs.forEach((div) => {
+const algorithmDivs = $(".algorithm-definition");
+algorithmDivs.each((i, div) => {
 	const algoirthm = new Algorithm(utils.contextToJson(div.dataset.definition));
 	alg.buildAlgorithmDisplay(algoirthm, algoirthm.id);
 });
@@ -14,7 +14,11 @@ $(window).on("load", () => {
 	$(".delete-btn").on("click", function (e) {
 		e.preventDefault();
 		var algorithmId = $(this).data("id");
-		apis.deleteAlgorithm(algorithmId);
+		if (
+			window.confirm("Would you like to permanently delete this algorithm?")
+		) {
+			apis.deleteAlgorithm(algorithmId);
+		}
 	});
 
 	var masonryGrid = document.querySelector(".masonry-grid");

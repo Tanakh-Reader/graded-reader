@@ -90,7 +90,7 @@ def passages_compare(request: HttpRequest) -> HttpResponse:
         passage_ids = default_ids
     passages = passage_provider.get_passages_by_ids(passage_ids, as_json=True)
     algorithms = algorithm_provider.get_configs(as_json=True)
-    context ={
+    context = {
         "passages": passages,
         "algorithms": algorithms,
         "saved_algorithms": algorithms,
@@ -203,6 +203,7 @@ def algorithm_form(request: HttpRequest) -> JsonResponse:
         if form.is_valid():
             try:
                 action = request.POST.get("submit-action")
+
                 algorithm_id = request.POST.get("algorithm-id")
                 # If SAVE, fetch the algorithm to update if one exists.
                 if action == "SAVE" and algorithm_id:
@@ -210,7 +211,6 @@ def algorithm_form(request: HttpRequest) -> JsonResponse:
                         pk=algorithm_id
                     )
                     form.update_base_form(algorithm)
-
                 if form.base_form.is_valid():
                     algorithm = form.update_algorithm()
 
@@ -222,9 +222,8 @@ def algorithm_form(request: HttpRequest) -> JsonResponse:
                         algorithm.save()
                     return JsonResponse(
                         {
-                            "alg": algorithm.as_config(True),
+                            "algorithm": algorithm.as_config(True),
                             "status": "success",
-                            "message": "Yah Baby",
                         }
                     )
                 else:
