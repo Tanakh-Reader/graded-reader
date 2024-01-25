@@ -1,0 +1,227 @@
+{% load static %}
+
+{% load widget_tweaks %}
+{% load list_extras %}
+{% load json %}
+
+{% block styles %}{% endblock %}
+<div id="algorithm-form-container">
+    <form class="algorithm-form absolute z-20 mt-1 hidden w-128 min-w-128 flex-col items-stretch space-y-2 rounded-md border border-slate-300 bg-slate-50 p-3 py-5 text-xs shadow"
+          method="post">
+
+        {% csrf_token %}
+
+        <!-- ALGORITHM CONFIG DROPDOWNS -->
+
+        <div class="saved-algorithms flex flex-row justify-between">
+            <!-- Saved algorithms -->
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div class="dropdown-container">
+                    <select id="dropdown1" class="rounded border px-2">
+                        <option selected disabled value="na">TEMPLATES</option>
+                        <!-- Default option -->
+                        {% for obj in algorithm_templates %}
+                            <option value="{{ obj.id }}"
+                                    data-algorithm-object="{{ obj|to_json }}">
+                                {{ obj.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="dropdown-container">
+                    <select id="dropdown2" class="rounded border px-2">
+                        <option selected disabled value="na">CUSTOM</option>
+                        <!-- Default option -->
+                        {% for obj in saved_algorithms %}
+                            <option value="{{ obj.id }}"
+                                    data-algorithm-object="{{ obj|to_json }}">
+                                {{ obj.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="flex flex-row gap-2">
+                <button id="algorithm-form-reset-btn"
+                        class="dismiss-btn"
+                        type="button">Reset</button>
+                <button id="algorithm-form-dismiss-btn"
+                        class="dismiss-btn"
+                        type="button">x</button>
+            </div>
+        </div>
+
+        <!-- LEXICAL FREQUENCY PENALTIES -->
+
+        <div class="frequency-formset">
+            <h4>Frequencies</h4>
+            {{ frequency_formset.management_form }}
+
+            {% for form in frequency_formset %}
+                <div class="frequency-form flex flex-row items-start gap-2">
+                    {% for field in form %}
+                        <div>
+                            {{ field|add_class:"border px-2 rounded w-20" }} <!-- max-w-xs limits the width -->
+                        </div>
+                    {% endfor %}
+                    <div class="flex items-center">
+                        <!-- vertically centers the button -->
+                        <button class="remove-form-button del-btn" type="button">-</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="add-btn w-24"
+                type="button"
+                id="add-frequency-form">+</button>
+        <!-- Extra options -->
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Penalize stop words ("את", "ב", "ל", "ה", "ו")?</div>
+            {{ algorithm_form.include_stop_words|add_class:"" }}
+        </div>
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Penalty discount per occurrence:</div>
+            {{ algorithm_form.taper_discount|add_class:"border px-2  rounded w-20" }}
+        </div>
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Proper noun penalty divisor:</div>
+            {{ algorithm_form.proper_noun_divisor|add_class:"border px-2  rounded w-20" }}
+        </div>
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Qere/Ketiv penalty:</div>
+            {{ algorithm_form.qere_penalty|add_class:"border px-2  rounded w-20" }}
+        </div>
+
+        <!-- VERB MORPHOLOGY PENALTIES -->
+
+        <div class="verb-formset">
+            <h4>Verbs</h4>
+            {{ verb_formset.management_form }}
+            {% for form in verb_formset %}
+                <div class="verb-form flex flex-row items-start gap-2">
+                    {% for field in form %}
+                        <div>
+                            {{ field|add_class:"border px-2 rounded w-24" }} <!-- max-w-xs limits the width -->
+                        </div>
+                    {% endfor %}
+                    <div class="flex items-center">
+                        <!-- vertically centers the button -->
+                        <button class="remove-form-button del-btn" type="button">-</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="add-btn w-24"
+                type="button"
+                id="add-verb-form">+</button>
+        <!-- Extra options -->
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Penalize by verb stem frequncy?</div>
+            {{ algorithm_form.penalize_by_verb_stem|add_class:"" }}
+        </div>
+
+        <!-- CONSTRUCT NOUN PENALTIES -->
+
+        <div class="noun-formset">
+            <h4>Construct Nouns</h4>
+            {{ construct_noun_formset.management_form }}
+            {% for form in construct_noun_formset %}
+                <div class="noun-form flex flex-row items-start gap-2">
+                    <div>{{ form.chain_length|add_class:"border px-2 rounded w-32" }}</div>
+                    <div>{{ form.penalty|add_class:"border px-2 rounded w-20" }}</div>
+                    <div class="flex items-center">
+                        <!-- vertically centers the button -->
+                        <button class="remove-form-button del-btn" type="button">-</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="add-btn w-24"
+                type="button"
+                id="add-noun-form">+</button>
+
+        <!-- CLAUSE-TYPE PENALTIES -->
+
+        <div class="clause-formset">
+            {{ clause_formset.management_form }}
+            <h4>Clause/Phrase Types</h4>
+            {% for form in clause_formset %}
+                <div class="clause-form flex flex-row items-start gap-2">
+                    <div>{{ form.clause_type|add_class:"border px-2 rounded w-32" }}</div>
+                    <div>{{ form.penalty|add_class:"border px-2 rounded w-20" }}</div>
+                    <div class="flex items-center">
+                        <!-- vertically centers the button -->
+                        <button class="remove-form-button del-btn" type="button">-</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="add-btn w-24"
+                type="button"
+                id="add-clause-form">+</button>
+
+        <div class="phrase-formset">
+            {{ phrase_formset.management_form }}
+            <h4>Phrase Functions</h4>
+            {% for form in phrase_formset %}
+                <div class="phrase-form flex flex-row items-start gap-2">
+                    <div>{{ form.phrase_function|add_class:"border px-2 rounded w-32" }}</div>
+                    <div>{{ form.penalty|add_class:"border px-2 rounded w-20" }}</div>
+                    <div class="flex items-center">
+                        <!-- vertically centers the button -->
+                        <button class="remove-form-button del-btn" type="button">-</button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="add-btn w-24"
+                type="button"
+                id="add-phrase-form">+</button>
+
+        <!-- CONFIGURATION -->
+
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Total penalty divisor:</div>
+            {{ algorithm_form.total_penalty_divisor|add_class:"border px-2 rounded w-32" }}
+        </div>
+
+        <div class="flex flex-row gap-2">
+            <div class="font-bold">Algorithm name:</div>
+            {{ algorithm_form.name|add_class:"w-64 px-2 rounded border" }}
+        </div>
+
+        <!-- Passage selection dropdown -->
+        {% if passages %}
+            {{ passages }}
+            <div>
+                <button class="passage-dropdown-btn rounded border bg-white px-2"
+                        type="button">Passage</button>
+            </div>
+        {% endif %}
+
+        <!-- SUBMISSION TYPE & BUTTONS -->
+
+        <input type="hidden" name="submit-action" value="">
+
+        <input type="hidden" name="algorithm-id" value="">
+
+        <div class="flex flex-row space-x-6">
+            {% if passages %}
+                <button id="algorithm-form-run" type="submit">
+                    <span class="material-symbols-sharp">play_circle</span> Run
+                </button>
+            {% endif %}
+            <button id="algorithm-form-save" type="submit">
+                <span class="material-symbols-sharp">save</span> Save
+            </button>
+            <button id="algorithm-form-copy" type="submit">
+                <span class="material-symbols-sharp">save</span> Save Copy
+            </button>
+
+        </div>
+
+    </form>
+</div>
+
+<script type="module"
+        src="{% static 'js/widgets/algorithm_form.js' %}"></script>

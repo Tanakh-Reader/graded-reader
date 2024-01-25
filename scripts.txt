@@ -1,2 +1,0 @@
-TAILWIND:
-npm run watch from vanilla-app

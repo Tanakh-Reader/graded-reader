@@ -1,0 +1,10 @@
+{% load static %}
+
+<div class="loading flex flex-col items-center justify-center gap-10 p-40">
+    {% comment %} <div class="flex flex-col gap-8"> {% endcomment %}
+    <h2>{{ title }}</h2>
+    <img src="{% static 'loading.gif' %}"
+         alt="Loading"
+         class="h-14 w-14">
+    {% comment %} </div> {% endcomment %}
+</div>

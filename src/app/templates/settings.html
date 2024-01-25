@@ -1,0 +1,63 @@
+{% extends 'layout.html' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+
+    <div class="mt-8 flex min-h-96 min-w-128 flex-col items-center gap-4">
+        <h1 class="mb-4 text-4xl font-bold">Settings</h1>
+        <form class=""
+              method="post"
+              action="{% url 'delete_words' %}"
+              id="deleteWordsForm">
+            {% csrf_token %}
+            <button class="btn"
+                    type="button"
+                    onclick="confirmDeleteWords()">Delete All Words</button>
+        </form>
+        <form method="post"
+              action="{% url 'delete_passages' %}"
+              id="deletePassagesForm">
+            {% csrf_token %}
+            <button class="btn"
+                    type="button"
+                    onclick="confirmDeletePassages()">
+                Delete All Passages
+            </button>
+        </form>
+        <form method="post"
+              action="{% url 'delete_algorithms' %}"
+              id="deleteAlgorithmsForm">
+            {% csrf_token %}
+            <button class="btn"
+                    type="button"
+                    onclick="confirmDeleteAlgorithms()">
+                Delete All Algorithms
+            </button>
+        </form>
+    </div>
+
+    <script>
+        function confirmDeleteWords() {
+            var isConfirmed = confirm("Are you sure you want to delete all words from the database?");
+            if (isConfirmed) {
+                document.getElementById("deleteWordsForm").submit();
+            }
+        }
+
+        function confirmDeletePassages() {
+            var isConfirmed = confirm("Are you sure you want to delete all passages from the database?");
+            if (isConfirmed) {
+                document.getElementById("deletePassagesForm").submit();
+            }
+        }
+
+        function confirmDeleteAlgorithms() {
+            var isConfirmed = confirm("Are you sure you want to delete all algorithms from the database?");
+            if (isConfirmed) {
+                document.getElementById("deleteAlgorithmsForm").submit();
+            }
+        }
+    </script>
+
+{% endblock %}

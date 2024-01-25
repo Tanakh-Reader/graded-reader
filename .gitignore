@@ -1,8 +1,5 @@
 .mypy_cache/
 .vscode/
-svelte-app/node_modules/
-vanilla-app/node_modules/
-vanilla-app/gradedhebrew/staticfiles/
 
 # node modules
 *node_modules/

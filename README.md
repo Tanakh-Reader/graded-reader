@@ -83,27 +83,14 @@ To get a local copy up and running, follow these steps:
    ```sh
    git clone https://github.com/Tanakh-Reader/graded-reader.git
    ```
-2. Navigate to the working directory
+2. Install required packages
    ```sh
-   cd vanilla-app
+   npm run sync
    ```
-3. Install required npm packages
+5. Run the app
    ```sh
-   npm install
+   npm run start
    ```
-* Note: if you plan to make changes to app/static/css/tailwind.css, run:
-  ```sh
-  npm run watch
-  ```
-4. Install required Python packages
-   ```sh
-   poetry install --no-root
-   ```
-5. Run the app with poetry 
-   ```sh
-   poetry run python3 manage.py runserver
-   ```
-
 
 ## Usage
 
@@ -112,8 +99,8 @@ Run the app and head to http://127.0.0.1:8000/ to utilize the features.
 ## Roadmap
 
 - [x] Develop initial metrics for assessing Hebrew passage difficulty
-- [ ] Improve and refine metrics
-- [ ] Implement a user-friendly interface
+- [x] Improve and refine metrics
+- [x] Implement a user-friendly interface
 - [ ] Optimize performance and efficiency
 
 ## Contributing
