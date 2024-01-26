@@ -195,7 +195,6 @@ def algorithm_form(request: HttpRequest) -> JsonResponse:
     exception = None
 
     if request.method == "POST":
-        print(vars(form), "CLAUSE\n", form.clause_formset.data)
         if form.is_valid():
             try:
                 action = request.POST.get("submit-action")

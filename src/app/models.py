@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import SupportsFloat as Numeric
 from typing import Union
 
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import post_init
 from django.dispatch import receiver
@@ -76,6 +77,7 @@ class Passage(models.Model):
         self.verb_stems_present = set()
         self.verses = []
         from .algorithm.models import AlgorithmResult
+
         self.penalty_data = AlgorithmResult()
 
     def to_dict(self):
@@ -142,10 +144,16 @@ class Algorithm(models.Model):
     construct_nouns = models.JSONField(default=list)
     clauses = models.JSONField(default=list)
     phrases = models.JSONField(default=list)
-    qere_penalty = models.FloatField(default=7)
+    qere_penalty = models.FloatField(
+        default=7, validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
     penalize_by_verb_stem = models.BooleanField(default=True)
-    taper_discount = models.FloatField(default=1)
-    proper_noun_divisor = models.FloatField(default=2)
+    taper_discount = models.FloatField(
+        default=1, validators=[MinValueValidator(0), MaxValueValidator(10)]
+    )
+    proper_noun_divisor = models.FloatField(
+        default=2, validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
     include_stop_words = models.BooleanField(default=False)
     total_penalty_divisor = models.CharField(
         max_length=50, choices=DIVIDED_BY_CHOICES, default="WORDS"
@@ -156,6 +164,7 @@ class Algorithm(models.Model):
 
     def as_config(self, as_json=False):
         from .algorithm.models import AlgorithmConfig
+
         config = AlgorithmConfig(self)
         if as_json:
             return vars(config)

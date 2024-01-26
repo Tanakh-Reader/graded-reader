@@ -86,6 +86,7 @@ class VerbForm(forms.Form):
 class ConstructNounForm(forms.Form):
     chain_length = forms.IntegerField(
         min_value=1,
+        max_value=10,
         required=True,
         widget=forms.NumberInput(
             attrs={"required": True, "placeholder": "Chain length"}

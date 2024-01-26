@@ -1,6 +1,7 @@
 from __future__ import annotations
-import traceback
+
 import math
+import traceback
 from abc import ABC, abstractmethod
 from typing import Any
 from typing import SupportsFloat as Numeric
@@ -202,8 +203,8 @@ def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
     categories: list[Category] = init_categories(configuration, passage)
     lexemes = set()
     passage.penalty_data = AlgorithmResult()
-    print(vars(configuration))
-    print(passage.penalty_data.as_json())
+    # print(vars(configuration))
+    # print(passage.penalty_data.as_json())
     # Loop over words from the database, where the word is not a stop word.
     for word in passage.words():
         penalty = 0
@@ -235,7 +236,6 @@ def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
     total_penalty = sum(passage.penalty_data.penalties.values())
     score = configuration.passage_penalty(passage, len(lexemes), total_penalty)
     passage.penalty_data.score = score
-    print(passage.penalty_data.as_json())
     # penalties = {category.name: category.get_penalty_data() for category in categories}
     return score, passage.penalty_data.as_json()
 
@@ -348,11 +348,13 @@ class Frequency(Category):
                         penalty = self.find_occ_range_stem(stem_freq) / 2
                 self.instances[hdp.id(word)] = "vs_" + verb_stem
                 self.add_penalty("vs_" + verb_stem, hdp.id(word), penalty)
-                self.passage.penalty_data.constants.add_value(
-                    "stems",
-                    word,
-                    penalty,
-                )
+                # TODO : remove this condition and chat with Jesse.
+                if stem_freq < UNCOMMON_WORD_FREQUENCY:
+                    self.passage.penalty_data.constants.add_value(
+                        "stems",
+                        word,
+                        penalty,
+                    )
                 return penalty
             except AttributeError:
                 pass
@@ -476,24 +478,29 @@ class ConstructNoun(Category):
         # Sort in reverse to check chain-length condition and exit properly.
         self.config.construct_nouns.sort(key=lambda x: x.chain_length, reverse=True)
         self.current_chain_length: int = 0
+        self.current_words = []
 
     def check_condition(self, word) -> None:
         if hdp.state(word) == "c":
             self.current_chain_length += 1
+            self.current_words.append(word)
         else:
             # If true, end of chain is reached.
             if self.current_chain_length > 0:
                 for _def in self.config.construct_nouns:
                     if _def.check_condition(self.current_chain_length):
-                        self.instances[hdp.id(word)] = _def.definition_obj()
-                        self.add_penalty(_def.name(), hdp.id(word), _def.penalty)
+                        _word = self.current_words[0]
+                        self.instances[hdp.id(_word)] = _def.definition_obj()
+                        self.add_penalty(_def.name(), hdp.id(_word) - 1, _def.penalty)
                         self.passage.penalty_data.nouns.add_value(
                             _def.name(),
-                            word,
+                            _word,
                             _def.penalty,
                         )
+                        self.current_words = []
+                        self.current_chain_length = 0
                         return _def.penalty
-                        break
+                self.current_words = []
                 self.current_chain_length = 0
         return 0
 
@@ -501,7 +508,7 @@ class ConstructNoun(Category):
 class SyntaxUnit(Category):
     def __init__(self, name, config, passage):
         super().__init__(name, config, passage)  # calling the parent's __init__ method
-        self.current_unit: int = 0
+        self.current_unit_id: int = 0
 
     def check_condition(self, word):
         unit_id, definitions = None, None
@@ -511,8 +518,7 @@ class SyntaxUnit(Category):
         else:
             unit_id = hdp.phrase_id(word)
             definitions = self.config.phrases
-
-        if unit_id != self.current_unit:
+        if unit_id != self.current_unit_id:
             for _def in definitions:
                 if _def.check_condition(word):
                     self.instances[hdp.id(word)] = _def.definition_obj()
@@ -530,8 +536,9 @@ class SyntaxUnit(Category):
                             word,
                             _def.penalty,
                         )
+                    self.current_unit_id = unit_id
                     return _def.penalty
-        self.current_unit = unit_id
+        self.current_unit_id = unit_id
         return 0
 
 

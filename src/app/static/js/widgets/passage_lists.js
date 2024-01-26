@@ -489,7 +489,7 @@ function getPassageText(passageDiv, textDiv, publishEvent = true) {
 			if (publishEvent) {
 				events.publish(events.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, {
 					div: textDiv,
-					penalties: passage.penaltyData.penalties,
+					penalties: data.penalties,
 				});
 				console.log("Comparison passage", passage);
 			}

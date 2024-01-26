@@ -240,9 +240,7 @@ class HebrewDataProvider:
 
     # TODO : phrase or phrase_atom ??
     def phrase_id(self, word: Union[Word, int]):
-        word_id = word
-        if type(word) is Word:
-            word_id = word.id
+        word_id = self.id(word)
         return L.u(word_id, otype="phrase")[0]
 
     def phrase_type(self, word: Union[Word, int]):
@@ -254,9 +252,7 @@ class HebrewDataProvider:
         return replace(F.function.v(phrase_id))
 
     def clause_id(self, word: Union[Word, int]):
-        word_id = word
-        if type(word) is Word:
-            word_id = word.id
+        word_id = self.id(word)
         return L.u(word_id, otype="clause")[0]
 
     def clause_type(self, word: Union[Word, int]):

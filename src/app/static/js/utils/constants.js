@@ -2,7 +2,6 @@ export const READ_PAGE = "/read";
 export const PASSAGES_PAGE = "/passages";
 export const COMPARE_PAGE = "/passages/compare";
 
-
 // DATA
 export const minTextWidgets = 1;
 export const maxTextWidgets = 4;
@@ -37,13 +36,11 @@ export const ALGORITHM_TASKS = {
 export const FIELD_NULL_VALUE = "na";
 export const FIELD_NULL_NAME = "N/A";
 
-
 //----------------------------------------------------------------
 // DATA
 // MODEL
 // ATTRIBUTES
 //----------------------------------------------------------------
-
 
 // PASSAGE ATTRIBUTES
 //----------------------------------------------------------------
@@ -121,7 +118,6 @@ export const A_PROPER_NOUN_DIVISOR = "proper_noun_divisor";
 export const A_INCLUDE_STOP_WORDS = "include_stop_words";
 export const A_TOTAL_PENALTY_DIVISOR = "total_penalty_divisor";
 
-
 // ----------------------------------------------------------------
 // HYPERLINK
 // DATA
@@ -151,7 +147,7 @@ export const HYPERLINKS = {
 	BIBLE_OL: {
 		// e.g., https://bibleol.3bmoodle.dk/text/show_text/ETCBC4/Genesis/1
 		// shebanq book format
-		URI: "https://bibleol.3bmoodle.dk/text/show_text/ETCBC4",
+		URI: "https://learner.bible/text/show_text/ETCBC4",
 		BOOK: "/",
 		CHAPTER: "/",
 		VERSE: null,

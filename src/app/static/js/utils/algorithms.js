@@ -106,7 +106,9 @@ export function buildAlgorithmDisplay(algorithm, id, asMasonry = false) {
 			const penalty = noun[1];
 			const nounDiv = $("<div>").attr(sel.DATA.penaltyCondition, chainLength)
 				.html(`
-            <span class="font-bold text-red-500">${penalty}</span>: ${chainLength}-noun chain
+            <span class="font-bold text-red-500">${penalty}</span>: ${
+							chainLength + 1
+						}-noun chain
             `);
 			nounsDiv.append(nounDiv);
 		});
