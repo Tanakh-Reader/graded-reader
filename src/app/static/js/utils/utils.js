@@ -127,11 +127,15 @@ export function getWords(div = null, asArray = true) {
 		console.log("FETCHING - WORDS");
 		let _div = div || document;
 		let wordSpans = $(_div).find(".word");
+		let returnObj = {};
 		// Map wordDivs' data into <Word> objects
 		wordSpans.each(function () {
 			let word = new Word(this);
 			cachedWords[word.id.toString()] = word;
+			returnObj[word.id.toString()] = word;
 		});
+		// E.g., for use in color words
+		return asArray ? Object.values(returnObj) : returnObj;
 	}
 	return asArray ? Object.values(cachedWords) : cachedWords;
 }

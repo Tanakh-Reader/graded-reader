@@ -103,7 +103,8 @@ export class Word {
 	 * @param {Number} [penalty]
 	 */
 	setDefaultTextColor(markProperNouns = true, penalty = null) {
-		penalty = penalty || this.penalty;
+		// account for penalty being 0.
+		penalty = penalty !== null ? penalty : this.penalty;
 		let attr = "color";
 		if (markProperNouns && this.isProperNoun()) {
 			this.setColor(attr, COLORS.PROPER_NOUN);

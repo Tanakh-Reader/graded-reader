@@ -1,10 +1,10 @@
 import * as utils from "../utils/utils.js";
 import * as constants from "../utils/constants.js";
 import * as events from "../utils/events.js";
-import { selectedDivId } from "../models/word.js";
+import { Word, selectedDivId } from "../models/word.js";
 
 export function colorWords(div = null, penalties = null) {
-	utils.getWords(div).forEach((word) => {
+	utils.getWords(div).forEach((/** @type {Word} */ word) => {
 		const penalty = penalties ? penalties[word.id] : word.penalty;
 		word.setDefaultTextColor(true, penalty);
 	});

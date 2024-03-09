@@ -4,6 +4,7 @@ import * as events from "./utils/events.js";
 import apis from "./utils/api.js";
 import { CompareListsMode } from "./widgets/passage_lists.js";
 import { CompareWidgetsMode } from "./widgets/passage_widgets.js";
+import { colorWords } from "./widgets/hebrew_text.js";
 
 const MODE = {
 	LISTS: "Lists",
@@ -58,6 +59,8 @@ class ComparePassages {
 			compareModeTitle.textContent =
 				"Compare Algorithms: Passage Penalty Lists";
 		} else {
+			// color words when switching to widget view.
+			colorWords();
 			compareModeBtn.textContent = `Switch to Lists`;
 			compareModeTitle.textContent = "Compare Features: Passage Text Widgets";
 		}
@@ -70,12 +73,9 @@ $(window).on("load", (event) => {
 	comparePassages.init();
 });
 
-events.subscribe(
-	events.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT,
-	(event) => {
-		comparePassages.compareWidgetsContent.fetchText(
-			event.detail.passageId,
-			event.detail.div,
-		);
-	},
-);
+events.subscribe(events.TEXT_SUBMITTED_BY_PASSAGE_SELECTOR_EVENT, (event) => {
+	comparePassages.compareWidgetsContent.fetchText(
+		event.detail.passageId,
+		event.detail.div,
+	);
+});
