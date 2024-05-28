@@ -140,14 +140,12 @@ MEDIA_URL = "media/"
 MEDIA_ROOT = BASE_DIR.parent / "local-cdn" / "media"
 PROTECTED_MEDIA_ROOT = BASE_DIR.parent / "local-cdn" / "protected"
 
-# Check if we're in production or not
-PRODUCTION = os.getenv("DJANGO_PRODUCTION") == "ON"
 
 # Only use whitenoise in production
-if PRODUCTION:
+if _VERSION == "PROD":
     STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
     MIDDLEWARE += ["whitenoise.middleware.WhiteNoiseMiddleware"]
-    DEBUG = False
+    # INSTALLED_APPS += "whitenoise.runserver_nostatic"
 
 
 # Default primary key field type
