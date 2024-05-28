@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 import os
 from pathlib import Path
 
+from django.core.management.utils import get_random_secret_key
+
+from .env import env
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,13 +25,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-i!1fts)u1(6)aspydawx8udgg&&va6=d@77h#y1rpwoc1b6c&d"
+SECRET_KEY = env("DJANGO_SECRET_KEY", default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+_VERSION = env("VERSION", default="DEV")
+DEBUG = env("DEBUG", default=False)
 
-ALLOWED_HOSTS = ["hebrew-sethbam9.pythonanywhere.com", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = env("DJANGO_ALLOWED_HOSTS", default="127.0.0.1,localhost").split(",")
+if DEBUG:
+    ALLOWED_HOSTS += ["*"]
 
+CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]
+
+# For Google analytics
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -50,6 +62,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Google logging
+    "google.cloud.logging_v2.handlers.middleware.RequestMiddleware",
 ]
 
 ROOT_URLCONF = "gradedhebrew.urls"
@@ -80,12 +94,10 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {
-            "timeout": 100,
-        },
     }
 }
 
+from .db import *  # noqa
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -143,40 +155,6 @@ if PRODUCTION:
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Debugging / Logging
 
-logging_level = (
-    "INFO" if "LOGGING_LEVEL" not in os.environ else os.environ["LOGGING_LEVEL"]
-)
-
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "console": {
-            "format": "[%(asctime)s][%(levelname)8s][%(name)16.16s]@[%(lineno)5s]$ %(message)s"
-        },
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "formatter": "console",
-        },
-    },
-    "root": {
-        "handlers": ["console"],
-        "level": "WARNING",
-        "propagate": False,
-    },
-    "loggers": {
-        "django.server": {
-            "level": "WARNING",
-            "handlers": ["console"],
-            "propagate": False,
-        },
-        "myapp": {
-            "level": logging_level,
-            "handlers": ["console"],
-            "propagate": False,
-        },
-    },
-}
+from .log import LOGGING

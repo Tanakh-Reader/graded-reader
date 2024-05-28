@@ -1,0 +1,14 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint-staged
+npx lint-staged &&
+
+# Compile tailwind CSS file
+npm run tw &&
+
+# Build requirements.txt for deployment
+(cd src && poetry export --without-hashes --format=requirements.txt > requirements.txt) &&
+
+# Wait for a moment to ensure the file system syncs
+sleep 1
