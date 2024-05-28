@@ -9,5 +9,5 @@ services:
     plan: free
     name: mysite
     runtime: python
-    buildCommand: "./build.sh"
-    startCommand: "python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker"
+    buildCommand: "cd scr && ./build.sh"
+    startCommand: "cd src && python -m gunicorn gradedhebrew.asgi:application -k uvicorn.workers.UvicornWorker"
