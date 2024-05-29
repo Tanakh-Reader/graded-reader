@@ -1,56 +1,60 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
+@tailwind base;
+@tailwind components;
 
 /* 
 BUTTONS
 */
-.btn {
-	@apply rounded bg-yellow-600 px-4 py-2 font-bold text-white hover:bg-yellow-700;
-}
+@layer base {
+	.btn {
+		@apply rounded bg-yellow-600 px-4 py-2 font-bold text-white hover:bg-yellow-700;
+	}
 
-.add-btn {
-	@apply bg-green-700 hover:bg-green-600;
-}
+	.add-btn {
+		@apply bg-green-700 hover:bg-green-600;
+	}
 
-.del-btn {
-	@apply bg-red-700 hover:bg-red-600;
-}
+	.del-btn {
+		@apply bg-red-700 hover:bg-red-600;
+	}
 
-.add-btn,
-.del-btn {
-	@apply z-10 rounded-lg px-2 font-bold text-white;
-}
+	.add-btn,
+	.del-btn {
+		@apply z-10 rounded-lg px-2 font-bold text-white;
+	}
 
-.dismiss-btn {
-	@apply float-right cursor-pointer rounded border border-gray-400 bg-white px-2 font-semibold text-red-600 shadow hover:bg-gray-100;
+	.dismiss-btn {
+		@apply float-right cursor-pointer rounded border border-gray-400 bg-white px-2 font-semibold text-red-600 shadow hover:bg-gray-100;
+	}
 }
 
 /* 
 WIDGETS
 */
-.passage-dropdown {
-	@apply absolute z-30 mt-1 hidden w-48 rounded-sm border border-gray-400;
-	margin-left: 0px !important;
-}
 
-.passage-list-item {
-	@apply flex w-60 overflow-hidden rounded-md border border-black;
-}
+@layer components {
+	.passage-dropdown {
+		@apply absolute z-30 mt-1 hidden w-48 rounded-sm border border-gray-400;
+		margin-left: 0px !important;
+	}
 
-.passage-diff {
-	@apply font-bold text-red-500;
-}
+	.passage-list-item {
+		@apply flex w-60 overflow-hidden rounded-md border border-black;
+	}
 
-.penalty-condition-pill,
-.pill {
-	@apply rounded border border-yellow-300 bg-yellow-50 px-2;
-}
+	.passage-diff {
+		@apply font-bold text-red-500;
+	}
 
-.penalty-condition-pill.selectable {
-	@apply rounded border !border-green-300 !bg-green-100 hover:cursor-pointer hover:opacity-70;
-}
+	.penalty-condition-pill,
+	.pill {
+		@apply rounded border border-yellow-300 bg-yellow-50 px-2;
+	}
 
-.penalty-condition-pill.selected {
-	@apply !bg-orange-300;
+	.penalty-condition-pill.selectable {
+		@apply rounded border !border-green-300 !bg-green-100 hover:cursor-pointer hover:opacity-70;
+	}
+
+	.penalty-condition-pill.selected {
+		@apply !bg-orange-300;
+	}
 }
