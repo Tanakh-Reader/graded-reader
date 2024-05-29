@@ -1,6 +1,7 @@
 export const READ_PAGE = "/read";
 export const PASSAGES_PAGE = "/passages";
 export const COMPARE_PAGE = "/passages/compare";
+export const ALGORITHMS_PAGE = "/algorithms";
 
 // DATA
 export const minTextWidgets = 1;

@@ -445,6 +445,12 @@ class AlgorithmFormManager {
 					`Algorithm ${algorithm.name} ${action} successfully.`,
 					3000,
 				);
+				// Refresh page if on the algorithms page.
+				if (window.location.href.includes(constants.ALGORITHMS_PAGE)) {
+					setTimeout(() => {
+						window.location.reload();
+					}, 700);
+				}
 			})
 			.catch((error) => {
 				console.error(error);

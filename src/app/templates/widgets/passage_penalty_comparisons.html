@@ -34,6 +34,7 @@
                             {{ forloop.counter }}
                         </div>
                         <div class="col-1 passage-list-item"
+                             data-passage-penalty="{{ item.1 }}"
                              data-passage-penalties="{{ item.2|to_json }}"
                              data-passage-id="{{ item.0.id }}"
                              data-passage-index="{{ forloop.counter }}">
@@ -53,6 +54,7 @@
                 {% for item in listB %}
                     <div class="flex flex-row gap-4">
                         <div class="col-2 passage-list-item"
+                             data-passage-penalty="{{ item.1 }}"
                              data-passage-penalties="{{ item.2|to_json }}"
                              data-passage-id="{{ item.0.id }}"
                              data-passage-index="{{ forloop.counter }}">

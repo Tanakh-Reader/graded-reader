@@ -7,6 +7,8 @@ from typing import Any
 from typing import SupportsFloat as Numeric
 from typing import Union
 
+from app.utils.custom_logging import CustomLogging
+
 from ..data.constants import *
 from ..data.ranks import Classify, LexRanks, MorphRank, Rank
 from ..data.verb_stems import VERB_STEMS
@@ -14,6 +16,8 @@ from ..models import Passage
 from ..providers.hebrew_data_provider import hebrew_data_provider as hdp
 from ..utils.general import word_penalty
 from .models import AlgorithmConfig, AlgorithmResult, FrequencyDefinition
+
+logger = CustomLogging(__name__)
 
 lex_rank_default = LexRanks()._7_ranks
 
@@ -226,6 +230,15 @@ def get_passage_weight_x(configuration: AlgorithmConfig, passage: Passage):
                 )
 
         except Exception as e:
+            logger.error(
+                f"Failed to get passage weight {e}",
+                extra={
+                    "passage": passage.to_dict(),
+                    "word": word.to_dict(),
+                    "configuration": vars(configuration),
+                },
+                exc_info=True,
+            )
             traceback.print_exc()
 
         passage.penalty_data.add_penalty(word, penalty)
@@ -323,7 +336,7 @@ class Frequency(Category):
         lex_id = hdp.lex_id(word)
 
         if hdp.ketiv_qere(word) and self.config.qere_penalty != 0:
-            # TODO : have impliment logic such that:
+            # TODO : impliment logic such that:
             # return max(qere_penalty, occ_penalty, stem_penalty)
             penalty = self.config.qere_penalty
             self.instances[hdp.id(word)] = "Qere"

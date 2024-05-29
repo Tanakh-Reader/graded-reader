@@ -28,6 +28,9 @@
                     class="text-center text-3xl"></h1>
             </div>
         </div>
+
+        {% comment %} Compare passage widgets {% endcomment %}
+
         <div class="hidden" id="compare-widgets-mode">
             <div class="comparisons-header mb-6 ml-4 space-y-3">
                 {% include 'widgets/word_highlights_dropdown.html' %}
@@ -46,6 +49,8 @@
                 </div>
             </div>
         </div>
+
+        {% comment %} Compare passage lists {% endcomment %}
 
         <div class="hidden" id="compare-lists-mode">
             {% include 'widgets/compare_algorithms_form.html' %}

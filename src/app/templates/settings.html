@@ -35,28 +35,38 @@
                 Delete All Algorithms
             </button>
         </form>
+        {% if success %}<h2>Status: {{ success }}</h2>{% endif %}
     </div>
 
     <script>
-        function confirmDeleteWords() {
-            var isConfirmed = confirm("Are you sure you want to delete all words from the database?");
+        function confirmAction(formId, message) {
+            var isConfirmed = confirm(message);
             if (isConfirmed) {
-                document.getElementById("deleteWordsForm").submit();
+                var enteredPassword = prompt("Enter the secret password:");
+                if (enteredPassword) {
+                    var form = document.getElementById(formId);
+                    var input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = "password";
+                    input.value = enteredPassword;
+                    form.appendChild(input);
+                    form.submit();
+                } else {
+                    alert("Password is required. Action canceled.");
+                }
             }
+        }
+
+        function confirmDeleteWords() {
+            confirmAction("deleteWordsForm", "Are you sure you want to delete all words from the database?");
         }
 
         function confirmDeletePassages() {
-            var isConfirmed = confirm("Are you sure you want to delete all passages from the database?");
-            if (isConfirmed) {
-                document.getElementById("deletePassagesForm").submit();
-            }
+            confirmAction("deletePassagesForm", "Are you sure you want to delete all passages from the database?");
         }
 
         function confirmDeleteAlgorithms() {
-            var isConfirmed = confirm("Are you sure you want to delete all algorithms from the database?");
-            if (isConfirmed) {
-                document.getElementById("deleteAlgorithmsForm").submit();
-            }
+            confirmAction("deleteAlgorithmsForm", "Are you sure you want to delete all algorithms from the database?");
         }
     </script>
 

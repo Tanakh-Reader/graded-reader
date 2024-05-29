@@ -41,6 +41,11 @@ CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+GOOGLE_ANALYTICS_KEY = env("GOOGLE_ANALYTICS_KEY", default=None)
+
+# For use in certain user tasks
+SECRET_PASSWORD = env("SECRET_PASSWORD", default="s_ecr_etSaUcE")
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -75,6 +80,7 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "app.context_processors.site_data",
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",

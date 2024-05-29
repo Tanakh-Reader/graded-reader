@@ -4,14 +4,14 @@ from . import views
 
 urlpatterns = [
     # path("", views.read, name="index"),
-    path("", views.search, name="index"),
-    path("read", views.read, name="read"),
-    path("search", views.search, name="search"),
-    path("passages", views.passages, name="passages"),
-    path("passages/compare", views.passages_compare, name="compare"),
-    path("algorithms", views.algorithms, name="algorithms"),
-    path("features", views.features, name="features"),
-    path("settings", views.settings, name="settings"),
+    path("", views.search_page, name="index"),
+    path("read", views.read_page, name="read"),
+    path("search", views.search_page, name="search"),
+    path("passages", views.passages_page, name="passages"),
+    path("passages/compare", views.passages_compare_page, name="compare"),
+    path("algorithms", views.algorithms_page, name="algorithms"),
+    path("features", views.features_page, name="features"),
+    path("settings", views.settings_page, name="settings"),
     # REST ENDPOINTS
     # GET
     path("api/hebrew-text", views.get_hebrew_text, name="get_hebrew_text"),

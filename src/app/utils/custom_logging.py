@@ -65,6 +65,8 @@ class CustomLogging:
             getattr(self.logger, level)(message, extra=self.extra, exc_info=exc_info)
         else:
             getattr(self.logger, level)(message, extra=self.extra)
+        # TODO : for now.
+        self.set_extra(extra={})
 
     def debug(self, message, request=None, extra=None):
         self.log("debug", message, request, extra)

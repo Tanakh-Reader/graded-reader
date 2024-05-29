@@ -472,24 +472,29 @@ export class CompareListsMode {
  * @param {Boolean} [publishEvent]
  */
 function getPassageText(passageDiv, textDiv, publishEvent = true) {
-	let i = $(passageDiv).hasClass("col-1") ? 0 : 1;
+	let listIndex = $(passageDiv).hasClass("col-1") ? 0 : 1;
 	let passageId = $(passageDiv).attr(sel.DATA.passageId);
 	apis
-		.getHebrewText($(passageDiv).attr(sel.DATA.passageId), true)
+		.getHebrewText(passageId, true)
 		.then((response) => {
 			$(textDiv).html(response);
 			// Remove del buttons for passage list case
 			$(compareListsDiv).find(".remove-widget.del-btn").remove();
 			let passage = utils.getPassageById(passageId);
-			let data = new PenaltyData(
+			// Update the penalty of the widget with the penalty from this algorithm (rather than the DB value).
+			let newPenalty = $(passageDiv).attr(sel.DATA.passagePenalty);
+			$(textDiv).find(".passage-penalty").text(newPenalty);
+			// Use the penalty data from the passage to set up the algorithm buttons
+			// for toggling words in the passage.
+			let penaltyData = new PenaltyData(
 				utils.toJson($(passageDiv).attr(sel.DATA.passagePenalties)),
 			);
-			alg.buildAlgorithmDisplayButtons(data, parseInt(i));
+			alg.buildAlgorithmDisplayButtons(penaltyData, listIndex);
 			// Dispatch an event for text updates.
 			if (publishEvent) {
 				events.publish(events.PASSAGE_LISTS_TEXT_COMPARISON_EVENT, {
 					div: textDiv,
-					penalties: data.penalties,
+					penalties: penaltyData.penalties,
 				});
 				console.log("Comparison passage", passage);
 			}

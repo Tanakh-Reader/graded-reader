@@ -27,7 +27,7 @@ function setListeners() {
 
 events.addListeners(
 	[
-		"load",
+		"DOMContentLoaded",
 		events.PASSAGE_WIDGET_ADDED_EVENT,
 		events.TEXT_FETCHED_COMPLETED_EVENT,
 		events.PASSAGE_LISTS_TEXT_COMPARISON_EVENT,

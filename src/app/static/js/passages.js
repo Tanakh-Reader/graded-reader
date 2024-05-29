@@ -9,6 +9,7 @@ class PassageCards {
 	}
 
 	init() {
+		utils.getPassages();
 		this.passageCards = $(sel.CLASS.passageCard);
 		this.applyBackgroundColorToPassages();
 		this.setListeners();
@@ -88,7 +89,8 @@ class PassageCards {
 	}
 
 	submitPassage(event) {
-		let passageId = $(event.target).attr(sel.DATA.passageId);
+		const passageCard = event.target.closest(sel.CLASS.passageCard);
+		const passageId = $(passageCard).attr(sel.DATA.passageId);
 		const passage = utils.getPassageById(passageId);
 		utils.submitPasssageSelection(passage);
 	}
